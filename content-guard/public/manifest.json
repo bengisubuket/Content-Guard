@@ -1,0 +1,14 @@
+{
+    "name": "My apps",
+    "description": "Open your go to tabs in one click",
+    "version": "1.0",
+    "manifest_version": 3,
+    "action": {
+        "default_title": "My apps",
+        "default_popup": "index.html",
+        "default_icon": {
+            "16": "guardian.png",
+            "128": "guardian.png"
+        }
+    }
+}
