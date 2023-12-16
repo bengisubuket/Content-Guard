@@ -4,13 +4,20 @@ import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Image from 'react-bootstrap/Image';
 import Row from 'react-bootstrap/Row';
+import { useNavigate } from 'react-router-dom';
 
 const data = [{
   name: "web pages",
   url: ["https://burakozturk01.github.io/contentguard.github.io/"]
 }];
 
-function ExtensionFrame() {
+function ExtensionFrame () {
+  const navigate = useNavigate();
+
+  const navigateToBlockers = () => {
+    navigate('/blockers');
+  };
+
   const [lists, setList] = useState(data);
 
   const openTabs = (url) => {
@@ -31,7 +38,7 @@ function ExtensionFrame() {
                 <Image src="guardian.png" roundedCircle/>
               </Row>
               <Row className='mb-3'>
-                <Button>Blockers</Button>
+                <Button onClick={navigateToBlockers}>Blockers</Button>
               </Row>
               <Row className='mb-3'>
               <Button className='button' onClick={() => openTabs(item.url)}>
