@@ -1,5 +1,5 @@
+import React from 'react';
 import { useState } from 'react';
-import './ExtensionFrame.css';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Image from 'react-bootstrap/Image';
@@ -11,15 +11,11 @@ const data = [{
   url: ["https://burakozturk01.github.io/contentguard.github.io/"]
 }];
 
-function ExtensionFrame () {
+function Login () {
   const navigate = useNavigate();
 
-  const navigateToBlockers = () => {
-    navigate('/blockers');
-  };
-
-  const navigateToReports = () => {
-    navigate('/reports');
+  const navigateToExtension = () => {
+    navigate('/');
   };
 
   const [lists, setList] = useState(data);
@@ -33,24 +29,25 @@ function ExtensionFrame () {
   return (
     <div className='App'>
       <h2>ContentGuard</h2>
-      <h3>Welcome</h3>
+      <h3>Reports</h3>
       <div className='lists'>
         {lists &&
           lists.map((item, index) => (
             <Container key={index}>
               <Row className='mb-3'>
-                <Image src="guardian.png" roundedCircle/>
+                <text>Report5</text>
               </Row>
               <Row className='mb-3'>
-                <Button onClick={navigateToBlockers}>Blockers</Button>
+                <text>Report4</text>
               </Row>
               <Row className='mb-3'>
-                <Button onClick={navigateToReports}>Reports</Button>
+                <text>Report3</text>
               </Row>
               <Row className='mb-3'>
-                <Button className='button' onClick={() => openTabs(item.url)}>
-                  ContentGuard Home
-                </Button>
+                <text>Report2</text>
+              </Row>
+              <Row className='mb-3'>
+                <text>Report1</text>
               </Row>
             </Container>
           ))}
@@ -59,4 +56,4 @@ function ExtensionFrame () {
   );
 }
 
-export default ExtensionFrame;
+export default Login;
