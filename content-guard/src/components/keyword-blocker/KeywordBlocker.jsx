@@ -2,6 +2,7 @@ import React from 'react';
 
 function KeywordBlockerComponent() {
 
+    console.log("hi");
 
     return (
         <div>

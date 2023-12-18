@@ -34,20 +34,21 @@ function Login () {
         {lists &&
           lists.map((item, index) => (
             <Container key={index}>
+              {console.log("hi")}
               <Row className='mb-3'>
-                <text>Report5</text>
+                Report5
               </Row>
               <Row className='mb-3'>
-                <text>Report4</text>
+                Report4
               </Row>
               <Row className='mb-3'>
-                <text>Report3</text>
+                Report3
               </Row>
               <Row className='mb-3'>
-                <text>Report2</text>
+                Report2
               </Row>
               <Row className='mb-3'>
-                <text>Report1</text>
+                Report1
               </Row>
             </Container>
           ))}

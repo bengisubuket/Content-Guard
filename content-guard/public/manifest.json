@@ -1,14 +1,19 @@
 {
-    "name": "My apps",
-    "description": "Open your go to tabs in one click",
+    "name": "ContentGuard",
+    "description": "Optimize your Twitter experience with personalized content control",
     "version": "1.0",
     "manifest_version": 3,
     "action": {
-        "default_title": "My apps",
+        "default_title": "ContentGuard",
         "default_popup": "index.html",
         "default_icon": {
             "16": "guardian.png",
             "128": "guardian.png"
         }
+    }, 
+    "permissions": ["storage", "tabs", "activeTab", "scripting"],
+    "host_permissions": ["https://*.twitter.com/home"],
+    "icons": {
+        "32":"guardian.png"
     }
 }

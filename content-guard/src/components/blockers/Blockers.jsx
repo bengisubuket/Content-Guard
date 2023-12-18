@@ -4,6 +4,7 @@ import Container from 'react-bootstrap/Container';
 import Image from 'react-bootstrap/Image';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { Navbar } from 'react-bootstrap';
 import { ArrowLeft } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,15 +17,15 @@ function BlockersComponent() {
     };
 
     const navigateToKeywordBlocker = () => {
-        navigate('/keyword-blocker');
+        navigate('/blockers/keyword-blocker');
     };
 
     const navigateToCategoryBlocker = () => {
-        navigate('/category-blocker');
+        navigate('/blockers/category-blocker');
     };
 
     const navigateTimer = () => {
-        navigate('/timer');
+        navigate('/blockers/timer');
     };
 
     return (
