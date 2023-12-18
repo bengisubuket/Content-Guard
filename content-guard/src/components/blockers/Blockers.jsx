@@ -4,7 +4,6 @@ import Container from 'react-bootstrap/Container';
 import Image from 'react-bootstrap/Image';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { Navbar } from 'react-bootstrap';
 import { ArrowLeft } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 
@@ -49,18 +48,18 @@ function BlockersComponent() {
                     <Button onClick={navigateTimer}>Timer</Button>
                 </Row>
                 <Row>
-                <Button
-                    onClick={navigateBack}
-                    variant="primary"
-                    style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    padding: 2,
-                    width: 'auto',
-                    }}
-                >
-                    <ArrowLeft style={{ fontSize: '24px', color: 'blue' }} />
-                </Button>
+                    <Button
+                        onClick={navigateBack}
+                        variant="primary"
+                        style={{
+                        backgroundColor: 'transparent',
+                        border: 'none',
+                        padding: 2,
+                        width: 'auto',
+                        }}
+                    >
+                        <ArrowLeft style={{ fontSize: '24px', color: 'blue' }} />
+                    </Button>
                 </Row>
             </Container>
         </div>

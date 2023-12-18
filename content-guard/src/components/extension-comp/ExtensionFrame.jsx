@@ -18,10 +18,6 @@ function ExtensionFrame () {
     navigate('/blockers');
   };
 
-  const navigateToReports = () => {
-    navigate('/reports');
-  };
-
   const [lists, setList] = useState(data);
 
   const openTabs = (url) => {
@@ -31,7 +27,7 @@ function ExtensionFrame () {
   };
 
   return (
-    <div className='App'>
+    <div className='App' style={{ width: '100%', textAlign: 'center' }}>
       <h2>ContentGuard</h2>
       <h3>Welcome</h3>
       <div className='lists'>
@@ -43,9 +39,6 @@ function ExtensionFrame () {
               </Row>
               <Row className='mb-3'>
                 <Button onClick={navigateToBlockers}>Blockers</Button>
-              </Row>
-              <Row className='mb-3'>
-                <Button onClick={navigateToReports}>Reports</Button>
               </Row>
               <Row className='mb-3'>
                 <Button className='button' onClick={() => openTabs(item.url)}>

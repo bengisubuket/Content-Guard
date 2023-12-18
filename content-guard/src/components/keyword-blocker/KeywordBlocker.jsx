@@ -1,70 +1,63 @@
-import React, { useState } from 'react';
-import { Button, Table, Container, Row, Col } from 'react-bootstrap';
+import React from 'react';
+import { Button, Container, Row, Col, Form, Dropdown, Image } from 'react-bootstrap';
+import { PlusCircleFill } from 'react-bootstrap-icons';
+import { ArrowLeft } from 'react-bootstrap-icons';
+import { useNavigate } from 'react-router-dom';
 
 function KeywordBlockerComponent() {
-  const [keywordBlockers, setKeywordBlockers] = useState([
-    { id: 1, name: 'Blocker 1', keyword: 'example1', active: true },
-    { id: 2, name: 'Blocker 2', keyword: 'example2', active: false },
-    // Add more Keyword Blockers as needed
-  ]);
+  const navigate = useNavigate();
 
-  const handleToggleActivation = (id) => {
-    setKeywordBlockers((prevBlockers) =>
-      prevBlockers.map((blocker) =>
-        blocker.id === id ? { ...blocker, active: !blocker.active } : blocker
-      )
-    );
-  };
-
-  const handleDelete = (id) => {
-    setKeywordBlockers((prevBlockers) => prevBlockers.filter((blocker) => blocker.id !== id));
-  };
-
-  const handleDoubleClick = (id) => {
-    // You can implement the logic for editing the name here
-    console.log(`Double-clicked on Keyword Blocker with ID ${id}`);
+  const navigateBack = () => {
+      navigate('/blockers');
   };
 
   return (
     <Container>
-      <h2>Keyword Blocker</h2>
-      <Row className="justify-content-end mb-3">
-        <Col xs="auto">
-          <Button variant="primary" onClick={() => console.log('Adding Keyword Blocker')}>
-            Add Keyword Blocker
-          </Button>
-        </Col>
+      <Row className='mb-3'>
+          <Col>
+              <Image src="guardian.png" roundedCircle style={{ width: '100px', height: '100px', margin: '0 auto' }} />
+          </Col>
+          <Col style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ fontSize: '24px' }}>Keyword Blocker</div>
+          </Col>
       </Row>
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Keyword</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {keywordBlockers.map((blocker) => (
-            <tr key={blocker.id}>
-              <td>{blocker.id}</td>
-              <td onDoubleClick={() => handleDoubleClick(blocker.id)}>{blocker.name}</td>
-              <td>{blocker.keyword}</td>
-              <td>
-                <Button
-                  variant={blocker.active ? 'warning' : 'success'}
-                  onClick={() => handleToggleActivation(blocker.id)}
-                >
-                  {blocker.active ? 'Deactivate' : 'Activate'}
-                </Button>
-                <Button variant="danger" onClick={() => handleDelete(blocker.id)}>
-                  Delete
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      <Row className='mb-3'>
+          <Col xs={9}>
+              <Form.Control type="text" placeholder="Enter keyword"/>
+          </Col>
+          <Col className="text-end">
+              <Button>
+                  <PlusCircleFill style={{ fontSize: '24px', color: 'blue' }} />
+              </Button>
+          </Col>
+      </Row>
+      <Row className='mb-3'>
+          <Dropdown>
+              <Dropdown.Toggle id="dropdown-basic" style={{ width: '100%' }}>
+                  Keywords
+              </Dropdown.Toggle>
+
+              <Dropdown.Menu style={{ width: '100%' }}>
+                  <Dropdown.Item>keyword0</Dropdown.Item>
+                  <Dropdown.Item>keyword1</Dropdown.Item>
+                  <Dropdown.Item>keyword2</Dropdown.Item>
+              </Dropdown.Menu>
+          </Dropdown>
+      </Row>
+      <Row>
+        <Button
+            onClick={navigateBack}
+            variant="primary"
+            style={{
+            backgroundColor: 'transparent',
+            border: 'none',
+            padding: 2,
+            width: 'auto',
+            }}
+        >
+            <ArrowLeft style={{ fontSize: '24px', color: 'blue' }} />
+        </Button>
+    </Row>
     </Container>
   );
 }
