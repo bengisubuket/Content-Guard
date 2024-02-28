@@ -1,0 +1,26 @@
+{
+    "name": "cs 492 skeletor",
+    "version": "0.0.1",
+    "description": "31",
+    "permissions": ["storage", "tabs", "scripting"],
+    "host_permissions": ["https://*.twitter.com/*"],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://*.twitter.com/*"],
+            "js": ["contentScript.js"]
+        }
+    ],
+    "action": {
+        "default_icon": {
+            "16": "guardian.png",
+            "24": "guardian.png",
+            "32": "guardian.png"
+        },
+        "default_title": "trying something",
+        "default_popup": "popup.html"
+    },
+    "manifest_version": 3
+}
