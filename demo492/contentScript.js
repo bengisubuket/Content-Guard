@@ -1,6 +1,11 @@
 var nodes = [];
 var targetNode = null;
 var observer = null;
+var kw_blocker_obj = {
+    keyword: "verstappen"
+  };
+var kw_filters = [];
+kw_filters.push(kw_blocker_obj);
 
 // Function to recursively search for nodes with data-testid="tweetText" attribute
 function findTweetTextNode(node) {
@@ -36,6 +41,30 @@ function handleNewTweets(mutationsList) {
                     // Access the tweet text
                     nodes.push(tweetTextNode);
                     console.log(nodes);
+
+                    const tweetTextElement = tweetTextNode.querySelector('[data-testid="tweetText"]');
+
+                    if (tweetTextElement) {
+                        // Retrieve the text content of the element
+                        const tweetText = tweetTextElement.textContent;
+                        //console.log(tweetText);
+
+                        // keyword block demo
+                        // tweetText is object, create a string from tweetText
+                        let str = tweetText.toString();
+                        //console.log(str);
+                        //console.log(typeof str);
+
+                        // if it has verstappen in the tweet, print versoblock to the console
+                        if(typeof str === "string" && str.indexOf("verstappen") != -1){
+                            console.log("versoblock");
+                        }
+                    } else {
+                        console.log("Tweet text element not found.");
+                    }
+                    chrome.storage.local.set({"filters": kw_filters}).then(() => {
+                        console.log("Filter list is set");
+                    });
                     //console.log(tweetTextNode);// Log tweet text
                 }
             });
