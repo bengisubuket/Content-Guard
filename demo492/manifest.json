@@ -2,7 +2,7 @@
     "name": "cs 492 skeletor",
     "version": "0.0.1",
     "description": "31",
-    "permissions": ["storage", "tabs", "scripting"],
+    "permissions": ["storage", "unlimitedStorage", "tabs", "scripting"],
     "host_permissions": ["https://*.twitter.com/*"],
     "background": {
         "service_worker": "background.js"
