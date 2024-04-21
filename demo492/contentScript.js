@@ -58,6 +58,9 @@ function handleNewTweets(mutationsList) {
                         // if it has verstappen in the tweet, print versoblock to the console
                         if(typeof str === "string" && str.indexOf("verstappen") != -1){
                             console.log("versoblock");
+                            // If keyword is found, mute the tweet by hiding it
+                            node.style.display = 'none';
+                            console.log("Tweet containing 'verstappen' is muted.");
                         }
                     } else {
                         console.log("Tweet text element not found.");
