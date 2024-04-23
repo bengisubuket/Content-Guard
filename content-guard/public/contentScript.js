@@ -158,3 +158,19 @@ chrome.runtime.onMessage.addListener((obj, sender, response) => {
         newTabLoaded();
     }
 });
+
+// Listen for messages from the background script
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+    if (message.type === "NEW" && message.keywords) {
+        console.log("Received keywordsList in content script:", message.keywords);
+        // Do something with the keywords list here
+        // For example, you might want to store it, manipulate it, or display it on the page
+        // add message.keywords to kw_filters, give me under this line as a code, join the lists
+        kw_filters = kw_filters.concat(message.keywords);
+
+    }
+
+    // Optionally send a response back to the background script
+    sendResponse({status: "Keywords received by content script"});
+    return true; // Keep the messaging channel open if you are doing asynchronous processing
+});
