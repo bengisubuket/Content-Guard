@@ -1,19 +1,32 @@
 {
     "name": "ContentGuard",
-    "description": "Optimize your Twitter experience with personalized content control",
-    "version": "1.0",
-    "manifest_version": 3,
+    "version": "0.0.1",
+    "description": "31",
+    "permissions": ["storage", "unlimitedStorage", "tabs", "scripting"],
+    "host_permissions": ["https://*.twitter.com/*"],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://*.twitter.com/*"],
+            "js": ["contentScript.js"]
+        }
+    ],
     "action": {
-        "default_title": "ContentGuard",
-        "default_popup": "index.html",
         "default_icon": {
             "16": "guardian.png",
-            "128": "guardian.png"
+            "24": "guardian.png",
+            "32": "guardian.png"
+        },
+        "default_title": "trying something",
+        "default_popup": "../index.html"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": ["userSettings.json"],
+            "matches": ["<all_urls>"]
         }
-    }, 
-    "permissions": ["storage", "tabs", "activeTab", "scripting"],
-    "host_permissions": ["https://*.twitter.com/home"],
-    "icons": {
-        "32":"guardian.png"
-    }
+    ],
+    "manifest_version": 3
 }
