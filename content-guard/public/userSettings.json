@@ -1,5 +1,52 @@
 {
     "username": "bengisubuket",
     "userId": 492,
-    "keywords": []
+    "keywords": [
+        {
+            "keyword": "erdogan",
+            "timers": {
+                "block": {
+                    "duration": 3600000,
+                    "remainingTime": null,
+                    "enabled": false
+                },
+                "allow": {
+                    "duration": 7200000,
+                    "remainingTime": null,
+                    "enabled": false
+                },
+                "schedule": {
+                    "schedule": {
+                        "days": [1, 2, 3, 4, 5],
+                        "startTime": 13,
+                        "endTime": 15
+                    },
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "keyword": "dogs",
+            "timers": {
+                "block": {
+                    "duration": 3600000,
+                    "remainingTime": null,
+                    "enabled": false
+                },
+                "allow": {
+                    "duration": 7200000,
+                    "remainingTime": null,
+                    "enabled": false
+                },
+                "schedule": {
+                    "schedule": {
+                        "days": [1, 2, 3, 4, 5],
+                        "startTime": 13,
+                        "endTime": 15
+                    },
+                    "enabled": false
+                }
+            }
+        }
+    ]
 }

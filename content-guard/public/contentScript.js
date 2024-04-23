@@ -9,7 +9,27 @@ function handleSettings(settings) {
     console.log(settings);
     var kw_blocker_obj = settings.keywords;
     for (let i = 0; i < kw_blocker_obj.length; i++) {
-        kw_filters.push(kw_blocker_obj[i].keyword);
+        var keyword = kw_blocker_obj[i].keyword;
+        var timers = kw_blocker_obj[i].timers;
+        if (timers["block"].enabled === true) {
+            kw_filters.push({
+                "keyword": keyword,
+                ""// burdan devam et
+            })
+            
+        } else if (timers["allow"].enabled === true) {
+            var now = new Date();
+            var currentDay = now.getDay();
+            var currentTime = now.getHours();
+            var startTime = timer.schedule.startTime;
+            var endTime = timer.schedule.endTime;
+            var days = timer.schedule.days;
+            if (days.includes(currentDay) && currentTime >= startTime && currentTime < endTime) {
+                kw_filters.push(keyword);
+            }
+        } else if(timers["schedule"].enabled == true) {
+
+        }
     }
 }
 
