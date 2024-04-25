@@ -33,10 +33,6 @@ import borders from "assets/theme/base/borders";
 // Images
 import colors from "assets/theme/base/colors";
 
-// Vision UI Dashboard component exemples
-import Mastercard from "examples/Icons/Mastercard";
-import Visa from "examples/Icons/Visa";
-
 function PaymentMethod() {
   const { grey } = colors;
 
@@ -62,7 +58,7 @@ function PaymentMethod() {
               alignItems="center"
               p="22px 20px"
             >
-              <Mastercard width="21px" />
+              
               <VuiTypography pl={2} variant="button" color="white" fontWeight="medium">
                 7812 2139 0823 XXXX
               </VuiTypography>
@@ -85,7 +81,6 @@ function PaymentMethod() {
               alignItems="center"
               p="22px 20px"
             >
-              <Visa width="25px" />
               <VuiTypography pl={2} variant="button" color="white" fontWeight="medium">
                 7812 2139 0823 XXXX
               </VuiTypography>

@@ -195,8 +195,6 @@ vision-dashboard-react-free/
     │   ├── Cards
     │   │   ├── InfoCards
     │   │   │   └── index.js
-    │   │   ├── MasterCard
-    │   │   │   └── index.js
     │   │   ├── ProjectCards
     │   │   │   └── index.js
     │   │   └── StatisticsCards

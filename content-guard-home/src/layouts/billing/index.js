@@ -22,8 +22,6 @@ import Grid from "@mui/material/Grid";
 // Vision UI Dashboard React components
 import VuiBox from "components/VuiBox";
 
-// Vision UI Dashboard React components
-import MasterCard from "examples/Cards/MasterCard";
 // Vision UI Dashboard React example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
@@ -46,7 +44,6 @@ function Billing() {
             <Grid item xs={12} lg={7} xl={8}>
               <Grid container spacing={3}>
                 <Grid item xs={12} xl={6}>
-                  <MasterCard number={7812213908237916} valid="05/24" cvv="09X" />
                 </Grid>
                 <Grid item xs={12} md={12} xl={6}>
                   <CreditBalance />

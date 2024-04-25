@@ -23,7 +23,6 @@ import { Card, Stack } from "@mui/material";
 
 // Vision UI Dashboard assets
 import balance from "assets/images/billing-background-balance.png";
-import Graph from "assets/images/shapes/graph-billing.svg";
 
 import palette from "assets/theme/base/colors";
 
@@ -56,7 +55,6 @@ const CreditBalance = () => {
             <VuiTypography variant="h2" color="white" fontWeight="bold" mr="auto">
               $25,215
             </VuiTypography>
-            <VuiBox component="img" src={Graph} sx={{ width: "58px", height: "20px" }} />
           </VuiBox>
         </VuiBox>
         <VuiTypography color="text" variant="xxs" fontWeight="medium" mb="8px">
