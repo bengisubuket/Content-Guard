@@ -10,6 +10,8 @@ import Dropdown from 'react-bootstrap/Dropdown';
 
 function CategoryBlockerComponent() {
 
+    const categories = ["Technology", "Fashion", "Travel", "Music", "Movies", "Food", "Sports", "Science", "Health", "Politics", "Business", "Gaming", "Books", "Art", "Photography", "Fitness", "Education", "Environment", "Celebrities", "News", "Weather", "Humor", "SelfCare", "Relationships", "Pets", "Parenting", "TechnologyTrends", "Space", "Motivation", "SocialJustice"];
+
     const navigate = useNavigate();
 
     const navigateBack = () => {
@@ -37,9 +39,9 @@ function CategoryBlockerComponent() {
                         </Dropdown.Toggle>
 
                         <Dropdown.Menu style={{ width: '100%' }}>
-                            <Dropdown.Item>category0</Dropdown.Item>
-                            <Dropdown.Item>category1</Dropdown.Item>
-                            <Dropdown.Item>category2</Dropdown.Item>
+                            {categories.map((category, index) => (
+                                <Dropdown.Item key={index}>{category}</Dropdown.Item>
+                            ))}
                         </Dropdown.Menu>
                     </Dropdown>
                 </Row>
