@@ -1,48 +1,20 @@
 var nodes = [];
 var targetNode = null;
 var observer = null;
+
+var filters_obj = null;
 var kw_filters = [];
 
-// Function to handle the fetched settings
-function handleSettings(settings) {
-    console.log("Settings:");
-    console.log(settings);
-    var kw_blocker_obj = settings.keywords;
-    for (let i = 0; i < kw_blocker_obj.length; i++) {
-        var keyword = kw_blocker_obj[i].keyword;
-        var timers = kw_blocker_obj[i].timers;
-        if (timers["block"].enabled === true) {
-            kw_filters.push({
-                "keyword": keyword,
-                ""// burdan devam et
-            })
-            
-        } else if (timers["allow"].enabled === true) {
-            var now = new Date();
-            var currentDay = now.getDay();
-            var currentTime = now.getHours();
-            var startTime = timer.schedule.startTime;
-            var endTime = timer.schedule.endTime;
-            var days = timer.schedule.days;
-            if (days.includes(currentDay) && currentTime >= startTime && currentTime < endTime) {
-                kw_filters.push(keyword);
-            }
-        } else if(timers["schedule"].enabled == true) {
-
-        }
-    }
-}
-
-function fetchSettings(attempt = 1) {
-    if (attempt > 1000) {
+function fetchSettings(attempt) {
+    if (attempt === 50) {
         console.error('Failed to load settings after 1000 attempts');
-        return; // Stop retrying after 1000 attempts
+        return; // Stop retrying after 50 attempts
     }
 
     fetch(chrome.runtime.getURL('userSettings.json'))
         .then((response) => response.json())
         .then((settings) => {
-            handleSettings(settings);
+            saveSettings(settings);
         })
         .catch((error) => {
             console.error(`Error loading settings on attempt ${attempt}:`, error);
@@ -50,19 +22,26 @@ function fetchSettings(attempt = 1) {
         });
 }
 
-fetchSettings();  // Initial call to fetch settings
+// Function to handle the fetched settings
+function saveSettings(settings) {return settings.keywords; }
 
+function handleSettings() {
+    // Start handling tasks asynchronously
+    setInterval(() => {
+        nodes = nodes.slice(-100);
+        for (let kw in filters_obj) {
+            if (filters_obj[kw].blockTimer.enabled) {
 
-// Fetch the settings.json at runtime
-fetch(chrome.runtime.getURL('userSettings.json'))
-  .then((response) => response.json())
-  .then((settings) => {
-    handleSettings(settings);
-  })
-  .catch((error) => {
-    console.error('Error loading settings:', error)
-  });
-  
+            }
+            else if (filters_obj[kw].allowTimer.enabled) {
+                // Some stuff
+            }
+            else if (filters_obj[kw].scheduler.enabled) {
+                // Some stuff
+            }
+        }
+    }, 1000);
+}
 
 // Function to recursively search for nodes with data-testid="tweetText" attribute
 function findTweetTextNode(node) {
@@ -127,7 +106,6 @@ function handleNewTweets(mutationsList) {
     });
 }
 
-
 function printDataTestIds(node, hierarchy = 'root') {
     // Check if the node exists and has attributes
     if (node && node.nodeType === Node.ELEMENT_NODE && node.attributes) {
@@ -169,19 +147,16 @@ const newTabLoaded = () => {
         observer.observe(targetNode, observerConfig);
 };
 
-console.log("auuuuuuu");
 chrome.runtime.onMessage.addListener((obj, sender, response) => {
-    console.log("contentScript.js listener");
     const { type } = obj;
     if (type === "NEW") {
-        console.log("NEW!!!! YIPPIE");
         newTabLoaded();
     }
 });
 
 // Listen for messages from the background script
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-    if (message.type === "NEW" && message.keywords) {
+    if (message.type === "KW" && message.keywords) {
         console.log("Received keywordsList in content script:", message.keywords);
         // Do something with the keywords list here
         // For example, you might want to store it, manipulate it, or display it on the page
@@ -194,3 +169,6 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     sendResponse({status: "Keywords received by content script"});
     return true; // Keep the messaging channel open if you are doing asynchronous processing
 });
+
+filters_obj = fetchSettings(0);  // Initial call to fetch settings
+handleSettings();

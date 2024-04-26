@@ -1,52 +1,42 @@
 {
     "username": "bengisubuket",
     "userId": 492,
-    "keywords": [
-        {
-            "keyword": "erdogan",
-            "timers": {
-                "block": {
-                    "duration": 3600000,
-                    "remainingTime": null,
-                    "enabled": false
-                },
-                "allow": {
-                    "duration": 7200000,
-                    "remainingTime": null,
-                    "enabled": false
-                },
-                "schedule": {
-                    "schedule": {
-                        "days": [1, 2, 3, 4, 5],
-                        "startTime": 13,
-                        "endTime": 15
-                    },
-                    "enabled": false
-                }
+    "keywords": {
+        "erdogan": {
+            "blockTimer": {
+                "duration": 3600000,
+                "remainingTime": null,
+                "enabled": true
+            },
+            "allowTimer": {
+                "duration": 7200000,
+                "remainingTime": null,
+                "enabled": false
+            },
+            "scheduler": {
+                "days": [1, 2, 3, 4, 5],
+                "startTime": 13,
+                "endTime": 15,
+                "enabled": false
             }
         },
-        {
-            "keyword": "dogs",
-            "timers": {
-                "block": {
-                    "duration": 3600000,
-                    "remainingTime": null,
-                    "enabled": false
-                },
-                "allow": {
-                    "duration": 7200000,
-                    "remainingTime": null,
-                    "enabled": false
-                },
-                "schedule": {
-                    "schedule": {
-                        "days": [1, 2, 3, 4, 5],
-                        "startTime": 13,
-                        "endTime": 15
-                    },
-                    "enabled": false
-                }
+        "tayyip": {
+            "blockTimer": {
+                "duration": 3600000,
+                "remainingTime": null,
+                "enabled": false
+            },
+            "allowTimer": {
+                "duration": 7200000,
+                "remainingTime": null,
+                "enabled": true
+            },
+            "scheduler": {
+                "days": [3,4,5],
+                "startTime": 12,
+                "endTime": 15,
+                "enabled": true
             }
         }
-    ]
+    }
 }
