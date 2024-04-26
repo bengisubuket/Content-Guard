@@ -2,8 +2,30 @@ var nodes = [];
 var targetNode = null;
 var observer = null;
 
-var filters_obj = null;
-var kw_filters = [];
+filters_obj = null;
+kw_filters = [];
+
+function getDate() {
+    const currentDate = new Date();
+
+    // Get the day of the week (0-6)
+    const dayOfWeek = currentDate.getDay();
+
+    // Convert Sunday to 7 to match the desired output
+    const adjustedDayOfWeek = (dayOfWeek === 0) ? 7 : dayOfWeek;
+
+    // Get the hour of the day (0-23)
+    const hourOfDay = currentDate.getHours();
+
+    return {
+        day: adjustedDayOfWeek,
+        hour: hourOfDay
+    };
+}
+
+function triS(a, b, c) {
+    return a <= b && b <= c;
+}
 
 function fetchSettings(attempt) {
     if (attempt === 50) {
@@ -14,7 +36,17 @@ function fetchSettings(attempt) {
     fetch(chrome.runtime.getURL('userSettings.json'))
         .then((response) => response.json())
         .then((settings) => {
-            saveSettings(settings);
+            filters_obj = settings.keywords;
+
+            for (let kw in filters_obj)
+                if (filters_obj[kw].blockTimer.enabled && filters_obj[kw].blockTimer.remainingTime > 0)
+                    kw_filters.push(kw);
+                else if (filters_obj[kw].scheduler.enabled) {
+                    let sch = filters_obj[kw].scheduler;
+                    let date = getDate();
+                    if (!sch.days.includes(date.day) || !triS(sch.startTime, date.hour, sch.endTime))
+                        kw_filters.push(kw);
+                }
         })
         .catch((error) => {
             console.error(`Error loading settings on attempt ${attempt}:`, error);
@@ -22,24 +54,35 @@ function fetchSettings(attempt) {
         });
 }
 
-// Function to handle the fetched settings
-function saveSettings(settings) {return settings.keywords; }
-
 function handleSettings() {
     // Start handling tasks asynchronously
     setInterval(() => {
-        nodes = nodes.slice(-100);
-        for (let kw in filters_obj) {
-            if (filters_obj[kw].blockTimer.enabled) {
-
+        if (filters_obj)
+            for (let kw in filters_obj) {
+                if (filters_obj[kw].blockTimer.enabled) {
+                    let timer = filters_obj[kw].blockTimer;
+                    if (timer.remainingTime > 0)
+                        timer.remainingTime -= 1000;
+                    else {
+                        if (kw_filters.includes(kw))
+                            kw_filters.splice(kw_filters.indexOf(kw), 1);
+                        filters_obj[kw].blockTimer.enabled = false;
+                    }
+                }
+                else if (filters_obj[kw].allowTimer.enabled) {
+                    let timer = filters_obj[kw].allowTimer;
+                    if (timer.remainingTime > 0)
+                        timer.remainingTime -= 1000;
+                    else {
+                        if (!kw_filters.includes(kw))
+                            kw_filters.push(kw);
+                        filters_obj[kw].blockTimer.enabled = false;
+                    }
+                }
+                else if (filters_obj[kw].scheduler.enabled) {
+                    // WTF
+                }
             }
-            else if (filters_obj[kw].allowTimer.enabled) {
-                // Some stuff
-            }
-            else if (filters_obj[kw].scheduler.enabled) {
-                // Some stuff
-            }
-        }
     }, 1000);
 }
 
@@ -106,6 +149,12 @@ function handleNewTweets(mutationsList) {
     });
 }
 
+function trimNodes() {
+    setInterval(() => {
+        nodes = nodes.slice(-100);
+    }, 1000);
+}
+
 function printDataTestIds(node, hierarchy = 'root') {
     // Check if the node exists and has attributes
     if (node && node.nodeType === Node.ELEMENT_NODE && node.attributes) {
@@ -170,5 +219,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     return true; // Keep the messaging channel open if you are doing asynchronous processing
 });
 
-filters_obj = fetchSettings(0);  // Initial call to fetch settings
+trimNodes();
+
+fetchSettings(0);  // Initial call to fetch settings
 handleSettings();
