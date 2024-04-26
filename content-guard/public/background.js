@@ -13,28 +13,28 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     }
 });
 
-// userSettings update
+// keywordList update
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     console.log('Message received in background:', request);
     if (request.keywordsList) {
-        // Optionally send a response back
-        keywordsList = request.keywordsList; // Update the global keywordsList
-        broadcastKeywords(); // Broadcast keywordsList to all tabs
-        sendResponse({ status: 'keywords received' });
-        console.log("Updated keywordsList in background: ", keywordsList);
+      keywordsList = request.keywordsList;
+      broadcastKeywords();
+      sendResponse({ status: 'keywords updated' });
+    } else if (request.request === "getKeywords") {
+      sendResponse({ keywordsList: keywordsList });
     }
-    return true; // Keep the message channel open for the sendResponse callback
-  });
+    return true;
+});
   
 // Function to broadcast keywordsList to all tabs
 function broadcastKeywords() {
-    chrome.tabs.query({}, function(tabs) { // Get all tabs
+    chrome.tabs.query({}, function(tabs) {
         for (let tab of tabs) {
             if (tab.url && tab.url.includes("twitter.com")) {
-                chrome.tabs.sendMessage(tab.id, {
-                    type: "NEW",
-                    keywords: keywordsList
-                });
+            chrome.tabs.sendMessage(tab.id, {
+                type: "NEW",
+                keywords: keywordsList
+            });
             }
         }
     });

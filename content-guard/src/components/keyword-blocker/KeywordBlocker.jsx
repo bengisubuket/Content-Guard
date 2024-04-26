@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Container, Row, Col, Form, Dropdown, Image } from 'react-bootstrap';
 import { PlusCircleFill, ArrowLeft } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
@@ -6,25 +6,42 @@ import { useNavigate } from 'react-router-dom';
 function KeywordBlockerComponent() {
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
-  const [keywordsList, setKeywordsList] = useState([]);
+  const [keywordsList, setKeywordsList] = useState();
 
   const navigateBack = () => {
     navigate('/blockers');
   };
 
-  const sendKeywordsToBackground = () => {
-    chrome.runtime.sendMessage({ keywordsList }, (response) => {
-      if (chrome.runtime.lastError) {
-        // Handle error: for example, by retrying or logging
-        console.error(chrome.runtime.lastError.message);
-      } else {
-        // Handle the response
-        console.log('Response from background:', response);
+  useEffect(() => {
+    const fetchKeywords = () => {
+      chrome.runtime.sendMessage({ request: "getKeywords" }, function(response) {
+        if (response && response.keywordsList) {
+          setKeywordsList(response.keywordsList);
+        } else {
+          setKeywordsList([]);  // Ensure it's always an array
+        }
+      });
+    };
+  
+    fetchKeywords();
+  
+    const listener = function(request, sender, sendResponse) {
+      if (request.keywordsList) {
+        setKeywordsList(request.keywordsList);
+        sendResponse({ status: 'keywords received' });
       }
-    });
-    
-  };
-
+      return true;
+    };
+  
+    chrome.runtime.onMessage.addListener(listener);
+  
+    return () => {
+      chrome.runtime.onMessage.removeListener(listener);
+    };
+  }, []);
+  
+  
+  
 
   const handleAddKeyword = () => {
     if (keyword.trim() !== '') {
@@ -71,9 +88,13 @@ function KeywordBlockerComponent() {
           </Dropdown.Toggle>
 
           <Dropdown.Menu style={{ width: '100%' }}>
-            {keywordsList.map((kw, index) => (
-              <Dropdown.Item key={index}>{kw}</Dropdown.Item>
-            ))}
+            {keywordsList && keywordsList.length > 0 ? (
+              keywordsList.map((kw, index) => (
+                <Dropdown.Item key={index}>{kw}</Dropdown.Item>
+              ))
+            ) : (
+              <Dropdown.Item>No keywords added</Dropdown.Item>
+            )}
           </Dropdown.Menu>
         </Dropdown>
       </Row>
