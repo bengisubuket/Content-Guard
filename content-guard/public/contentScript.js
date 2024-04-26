@@ -66,41 +66,50 @@ function findTweetTextNode(node) {
 }
 
 // Function to handle new tweets
+var tweetCount = 0; // Initialize a counter for the number of tweets processed
+
 function handleNewTweets(mutationsList) {
     mutationsList.forEach(mutation => {
         if (mutation.type === 'childList') {
-            // Check if the mutation added new tweets
             const newTweets = mutation.addedNodes;
             newTweets.forEach(node => {
-                // Recursively search for the tweet text node
-                const tweetTextNode = findTweetTextNode(node);
-                if (tweetTextNode) {
-                    // Access the tweet text
-                    nodes.push(tweetTextNode);
-                    console.log(nodes);
+                if (tweetCount < 5) { // Check if less than 5 tweets have been processed
+                    const tweetTextNode = findTweetTextNode(node);
+                    if (tweetTextNode) {
+                        const tweetTextElement = tweetTextNode.querySelector('[data-testid="tweetText"]');
+                        if (tweetTextElement) {
+                            const tweetText = tweetTextElement.textContent.toLowerCase();
+                            let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));
+                            if (isBlocked) {
+                                console.log("Blocked");
+                                node.style.display = 'none';
+                            }
 
-                    const tweetTextElement = tweetTextNode.querySelector('[data-testid="tweetText"]');
-
-                    if (tweetTextElement) {
-                        // Retrieve the text content of the element
-                        const tweetText = tweetTextElement.textContent.toLowerCase();  // Convert text to lower case here
-                        //console.log(tweetText);
-
-                        // Check each keyword in kw_filters
-                        let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
-
-                        if (isBlocked) {
-                            console.log("Blocked");
-                            // If any keyword is found, mute the tweet by hiding it
-                            node.style.display = 'none';
+                            // Only proceed if the tweet hasn't been blocked
+                            if (!isBlocked) {
+                                tweetCount++; // Increment the counter since this tweet will be sent
+                                const userId = 492;
+                                const tabId = 79782103;
+                                fetch('http://localhost:8000/api/tweet/', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        userId: userId,
+                                        tabId: tabId,
+                                        tweetText: tweetText,
+                                    }),
+                                }).then(response => {
+                                    console.log("Data sent to backend");
+                                }).catch(error => {
+                                    console.error("Failed to send data:", error);
+                                });
+                            }
+                        } else {
+                            console.log("Tweet text element not found.");
                         }
-                    } else {
-                        console.log("Tweet text element not found.");
                     }
-                    chrome.storage.local.set({"filters": kw_filters}).then(() => {
-                        console.log("Filter list is set");
-                    });
-                    //console.log(tweetTextNode); // Log tweet text
                 }
             });
         }
