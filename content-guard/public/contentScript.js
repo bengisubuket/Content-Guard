@@ -2,6 +2,7 @@ var nodes = [];
 var targetNode = null;
 var observer = null;
 var kw_filters = [];
+var category_filters = [];
 
 // Function to handle the fetched settings
 function handleSettings(settings) {
@@ -10,6 +11,10 @@ function handleSettings(settings) {
     var kw_blocker_obj = settings.keywords;
     for (let i = 0; i < kw_blocker_obj.length; i++) {
         kw_filters.push(kw_blocker_obj[i].keyword);
+    }
+    var category_blocker_obj = settings.categories;
+    for (let i = 0; i < category_blocker_obj.length; i++) {
+        category_filters.push(category_blocker_obj[i].category);
     }
 }
 
@@ -99,9 +104,17 @@ function handleNewTweets(mutationsList) {
                                     tabId: tabId,
                                     tweetText: tweetText,
                                 }),
-                            }).then(response => {
-                                console.log("Data sent to backend");
-                            }).catch(error => {
+                            }).then(response => response.json()) // parse the JSON from the response
+                            .then(data => {
+                                console.log("Tweet Text:", tweetText, "Category received:", data.category);
+                                // check if the caategory is in the category_filters
+                                if (category_filters.includes(data.category)) {
+                                    console.log("BLOCKED");
+                                    node.style.display = 'none'; // This assumes 'node' is the element containing the tweet
+                                }
+                                // You can also add logic to handle other categories as needed
+                            })
+                            .catch(error => {
                                 console.error("Failed to send data:", error);
                             });
                         }

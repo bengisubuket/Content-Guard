@@ -24,7 +24,7 @@ class TweetView(View):
                 try:
                     response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
-                        messages=[{"role": "user", "content": "Categorize following tweet in one of (Technology, Fashion, Travel, Music, Movies, Food, Sports, Science, Health, Politics, Business, Gaming, Books, Art, Photography, Fitness, Education, Environment, Celebrities, News, Weather, Humor, SelfCare, Relationships, Pets, Parenting, TechnologyTrends, Space, Motivation, SocialJustice) and give it as one word answer, don't give any further information: {tweet}".format(tweet=tweet_text)}],
+                        messages=[{"role": "user", "content": "Categorize the following tweet into one of the following categories: [Technology, Fashion, Travel, Music, Movies, Food, Sports, Science, Health, Politics, Business, Gaming, Books, Art, Photography, Fitness, Education, Environment, Celebrities, News, Weather, Humor, SelfCare, Relationships, Pets, Parenting, TechnologyTrends, Space, Motivation, SocialJustice] and give it as a one-word answer, do not give any further information: {tweet}".format(tweet=tweet_text)}],
                     )
                     category = response.choices[0].message.content
                     break  # Exit loop if successful
@@ -36,7 +36,8 @@ class TweetView(View):
             tweet = Tweet(user_id=data['userId'], tab_id=data['tabId'], category=category)
             tweet.save()
 
-            return JsonResponse({'status': 'success', 'message': 'Tweet data saved.'}, status=201)
+            # Include the category in the response
+            return JsonResponse({'status': 'success', 'message': 'Tweet data saved.', 'category': category}, status=201)
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
