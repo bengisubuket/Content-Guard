@@ -2,11 +2,18 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+import asyncio
+from asyncio import WindowsSelectorEventLoopPolicy
+
 
 
 def main():
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "content_guard_server.settings")
+
+    asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
+
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

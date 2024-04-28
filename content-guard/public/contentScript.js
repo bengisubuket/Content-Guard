@@ -73,42 +73,40 @@ function handleNewTweets(mutationsList) {
         if (mutation.type === 'childList') {
             const newTweets = mutation.addedNodes;
             newTweets.forEach(node => {
-                if (tweetCount < 5) { // Check if less than 5 tweets have been processed
-                    const tweetTextNode = findTweetTextNode(node);
-                    if (tweetTextNode) {
-                        const tweetTextElement = tweetTextNode.querySelector('[data-testid="tweetText"]');
-                        if (tweetTextElement) {
-                            const tweetText = tweetTextElement.textContent.toLowerCase();
-                            let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));
-                            if (isBlocked) {
-                                console.log("Blocked");
-                                node.style.display = 'none';
-                            }
-
-                            // Only proceed if the tweet hasn't been blocked
-                            if (!isBlocked) {
-                                tweetCount++; // Increment the counter since this tweet will be sent
-                                const userId = 492;
-                                const tabId = 79782103;
-                                fetch('http://localhost:8000/api/tweet/', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                        userId: userId,
-                                        tabId: tabId,
-                                        tweetText: tweetText,
-                                    }),
-                                }).then(response => {
-                                    console.log("Data sent to backend");
-                                }).catch(error => {
-                                    console.error("Failed to send data:", error);
-                                });
-                            }
-                        } else {
-                            console.log("Tweet text element not found.");
+                const tweetTextNode = findTweetTextNode(node);
+                if (tweetTextNode) {
+                    const tweetTextElement = tweetTextNode.querySelector('[data-testid="tweetText"]');
+                    if (tweetTextElement) {
+                        const tweetText = tweetTextElement.textContent.toLowerCase();
+                        let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));
+                        if (isBlocked) {
+                            console.log("Blocked");
+                            node.style.display = 'none';
                         }
+
+                        // Only proceed if the tweet hasn't been blocked
+                        if (!isBlocked) {
+                            tweetCount++; // Increment the counter since this tweet will be sent
+                            const userId = 492;
+                            const tabId = 79782103;
+                            fetch('http://localhost:8000/api/tweet/', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    userId: userId,
+                                    tabId: tabId,
+                                    tweetText: tweetText,
+                                }),
+                            }).then(response => {
+                                console.log("Data sent to backend");
+                            }).catch(error => {
+                                console.error("Failed to send data:", error);
+                            });
+                        }
+                    } else {
+                        console.log("Tweet text element not found.");
                     }
                 }
             });
