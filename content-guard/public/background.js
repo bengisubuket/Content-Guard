@@ -32,7 +32,7 @@ function broadcastKeywords() {
         for (let tab of tabs) {
             if (tab.url && tab.url.includes("twitter.com")) {
                 chrome.tabs.sendMessage(tab.id, {
-                    type: "NEW",
+                    type: "KW",
                     keywords: keywordsList
                 });
             }
