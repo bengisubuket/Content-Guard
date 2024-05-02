@@ -1,11 +1,48 @@
 var nodes = [];
 var targetNode = null;
 var observer = null;
-var kw_blocker_obj = {
-    keyword: "verstappen"
-  };
 var kw_filters = [];
-kw_filters.push(kw_blocker_obj);
+
+// Function to handle the fetched settings
+function handleSettings(settings) {
+    console.log("Settings:");
+    console.log(settings);
+    var kw_blocker_obj = settings.keywords;
+    for (let i = 0; i < kw_blocker_obj.length; i++) {
+        kw_filters.push(kw_blocker_obj[i].keyword);
+    }
+}
+
+function fetchSettings(attempt = 1) {
+    if (attempt > 1000) {
+        console.error('Failed to load settings after 1000 attempts');
+        return; // Stop retrying after 1000 attempts
+    }
+
+    fetch(chrome.runtime.getURL('userSettings.json'))
+        .then((response) => response.json())
+        .then((settings) => {
+            handleSettings(settings);
+        })
+        .catch((error) => {
+            console.error(`Error loading settings on attempt ${attempt}:`, error);
+            fetchSettings(attempt + 1); // Increment attempt count and retry
+        });
+}
+
+fetchSettings();  // Initial call to fetch settings
+
+
+// Fetch the settings.json at runtime
+fetch(chrome.runtime.getURL('userSettings.json'))
+  .then((response) => response.json())
+  .then((settings) => {
+    handleSettings(settings);
+  })
+  .catch((error) => {
+    console.error('Error loading settings:', error)
+  });
+  
 
 // Function to recursively search for nodes with data-testid="tweetText" attribute
 function findTweetTextNode(node) {
@@ -46,18 +83,16 @@ function handleNewTweets(mutationsList) {
 
                     if (tweetTextElement) {
                         // Retrieve the text content of the element
-                        const tweetText = tweetTextElement.textContent;
+                        const tweetText = tweetTextElement.textContent.toLowerCase();  // Convert text to lower case here
                         //console.log(tweetText);
 
-                        // keyword block demo
-                        // tweetText is object, create a string from tweetText
-                        let str = tweetText.toString();
-                        //console.log(str);
-                        //console.log(typeof str);
+                        // Check each keyword in kw_filters
+                        let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
 
-                        // if it has verstappen in the tweet, print versoblock to the console
-                        if(typeof str === "string" && str.indexOf("verstappen") != -1){
-                            console.log("versoblock");
+                        if (isBlocked) {
+                            console.log("Blocked");
+                            // If any keyword is found, mute the tweet by hiding it
+                            node.style.display = 'none';
                         }
                     } else {
                         console.log("Tweet text element not found.");
@@ -65,12 +100,13 @@ function handleNewTweets(mutationsList) {
                     chrome.storage.local.set({"filters": kw_filters}).then(() => {
                         console.log("Filter list is set");
                     });
-                    //console.log(tweetTextNode);// Log tweet text
+                    //console.log(tweetTextNode); // Log tweet text
                 }
             });
         }
     });
 }
+
 
 function printDataTestIds(node, hierarchy = 'root') {
     // Check if the node exists and has attributes

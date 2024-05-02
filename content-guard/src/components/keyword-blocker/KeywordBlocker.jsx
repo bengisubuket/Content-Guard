@@ -12,12 +12,32 @@ function KeywordBlockerComponent() {
     navigate('/blockers');
   };
 
+  const sendKeywordsToBackground = () => {
+    chrome.runtime.sendMessage({ keywordsList }, (response) => {
+      if (chrome.runtime.lastError) {
+        // Handle error: for example, by retrying or logging
+        console.error(chrome.runtime.lastError.message);
+      } else {
+        // Handle the response
+        console.log('Response from background:', response);
+      }
+    });
+    
+  };
+
+
   const handleAddKeyword = () => {
     if (keyword.trim() !== '') {
-      setKeywordsList([...keywordsList, keyword]);
+      const updatedKeywords = [...keywordsList, keyword];
+      setKeywordsList(updatedKeywords);
+      // Send the updated keywords directly
+      chrome.runtime.sendMessage({ keywordsList: updatedKeywords }, function(response) {
+        console.log('Response from background:', response);
+      });
       setKeyword('');
     }
   };
+  
 
   return (
     <Container>
