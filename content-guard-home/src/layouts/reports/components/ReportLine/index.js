@@ -23,8 +23,11 @@ import PropTypes from "prop-types";
 import VuiBox from "components/VuiBox";
 import VuiTypography from "components/VuiTypography";
 import { IoDocumentText } from "react-icons/io5";
-
-function Invoice({ date, id, price }) {
+import Icon from "@mui/material/Icon";
+import VuiButton from "components/VuiButton";
+import linearGradient from "assets/theme/functions/linearGradient";
+import colors from "assets/theme/base/colors";
+function ReportLine({ date, id}) {
   return (
     <VuiBox
       component="li"
@@ -42,13 +45,15 @@ function Invoice({ date, id, price }) {
         </VuiTypography>
       </VuiBox>
       <VuiBox display="flex" alignItems="center">
-        <VuiTypography variant="button" fontWeight="regular" color="text">
-          {price}
-        </VuiTypography>
-        <VuiBox display="flex" alignItems="center" lineHeight={0} ml={3} sx={{ cursor: "poiner" }}>
+            <VuiBox mr={1}>
+              <VuiButton variant="text" color="error">
+                <Icon sx={{ mr: "4px" }}>delete</Icon>&nbsp;DELETE
+              </VuiButton>
+            </VuiBox>
+        <VuiBox display="flex" alignItems="center" lineHeight={0} ml={3} sx={{ cursor: "pointer" }}>
           <IoDocumentText color="#fff" size="15px" />
           <VuiTypography variant="button" fontWeight="medium" color="text">
-            &nbsp;PDF
+            &nbsp;REPORT
           </VuiTypography>
         </VuiBox>
       </VuiBox>
@@ -56,17 +61,16 @@ function Invoice({ date, id, price }) {
   );
 }
 
-// Setting default values for the props of Invoice
-Invoice.defaultProps = {
+// Setting default values for the props of ReportLine (old Invoice)
+ReportLine.defaultProps = {
   noGutter: false,
 };
 
-// Typechecking props for the Invoice
-Invoice.propTypes = {
+// Typechecking props for the ReportLine (old Invoice)
+ReportLine.propTypes = {
   date: PropTypes.string.isRequired,
   id: PropTypes.string.isRequired,
-  price: PropTypes.string.isRequired,
   noGutter: PropTypes.bool,
 };
 
-export default Invoice;
+export default ReportLine;

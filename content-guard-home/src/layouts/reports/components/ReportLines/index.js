@@ -22,43 +22,34 @@ import Card from "@mui/material/Card";
 // Vision UI Dashboard React components
 import VuiBox from "components/VuiBox";
 import VuiTypography from "components/VuiTypography";
+import VuiButton from "components/VuiButton";
 
-// Billing page components
-import Bill from "layouts/billing/components/Bill";
+// old Billing page components
+//new Report Page
+import ReportLine from "layouts/reports/components/ReportLine";
 
-function BillingInformation() {
+function ReportLines() {
   return (
-    <Card id="delete-account">
-      <VuiBox>
-        <VuiTypography variant="lg" color="white" fontWeight="bold">
-          Billing Information
+    <Card id="delete-account" sx={{ height: "100%" }}>
+      <VuiBox mb="28px" display="flex" justifyContent="space-between" alignItems="center">
+        <VuiTypography variant="h6" fontWeight="medium" color="white">
+          Reports
         </VuiTypography>
+        <VuiButton variant="contained" color="info" size="small">
+          CREATE REPORT
+        </VuiButton>
       </VuiBox>
       <VuiBox>
         <VuiBox component="ul" display="flex" flexDirection="column" p={0} m={0}>
-          <Bill
-            name="oliver liam"
-            company="viking burrito"
-            email="oliver@burrito.com"
-            vat="FRB1235476"
-          />
-          <Bill
-            name="lucas harper"
-            company="stone tech zone"
-            email="lucas@stone-tech.com"
-            vat="FRB1235476"
-          />
-          <Bill
-            name="ethan james"
-            company="fiber notion"
-            email="ethan@fiber.com"
-            vat="FRB1235476"
-            noGutter
-          />
+          <ReportLine date="March, 01, 2024" id="#MS-415646" />
+          <ReportLine date="February, 10, 2024" id="#RV-126749"/>
+          <ReportLine date="April, 05, 2023" id="#QW-103578" />
+          <ReportLine date="June, 25, 2022" id="#MS-415646" />
+          <ReportLine date="March, 01, 2022" id="#AR-803481"noGutter />
         </VuiBox>
       </VuiBox>
     </Card>
   );
 }
 
-export default BillingInformation;
+export default ReportLines;

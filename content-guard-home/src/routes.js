@@ -41,7 +41,7 @@
 // Vision UI Dashboard React layouts
 import Dashboard from "layouts/dashboard";
 import Tables from "layouts/tables";
-import Billing from "layouts/billing";
+import Reports from "layouts/reports";
 import RTL from "layouts/rtl";
 import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
@@ -55,6 +55,7 @@ import { IoBuild } from "react-icons/io5";
 import { BsCreditCardFill } from "react-icons/bs";
 import { IoStatsChart } from "react-icons/io5";
 import { IoHome } from "react-icons/io5";
+import { BiSolidReport } from "react-icons/bi";
 
 const routes = [
   {
@@ -77,11 +78,11 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "Billing",
-    key: "billing",
-    route: "/billing",
-    icon: <BsCreditCardFill size="15px" color="inherit" />,
-    component: Billing,
+    name: "Reports",
+    key: "reports",
+    route: "/reports",
+    icon: <BiSolidReport size="15px" color="inherit" />,
+    component: Reports,
     noCollapse: true,
   },
   {

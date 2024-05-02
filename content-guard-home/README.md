@@ -271,7 +271,7 @@ vision-dashboard-react-free/
     │   │   │   └── index.js
     │   │   └── sign-up
     │   │       └── index.js
-    │   ├── billing
+    │   ├── reports
     │   │   ├── components
     │   │   │   ├── Bill
     │   │   │   │   └── index.js
@@ -279,7 +279,9 @@ vision-dashboard-react-free/
     │   │   │   │   └── index.js
     │   │   │   ├── CreditBalance
     │   │   │   │   └── index.js
-    │   │   │   ├── Invoice
+    │   │   │   ├── ReportLine
+    │   │   │   │   └── index.js
+    |   |   |   ├── ReportLines
     │   │   │   │   └── index.js
     │   │   │   ├── PaymentMethod
     │   │   │   │   └── index.js
