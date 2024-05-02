@@ -257,9 +257,5 @@ function getDate() {
     };
 }
 
-function triS(a, b, c) {
-    return a <= b && b <= c;
-}
-
 
 */

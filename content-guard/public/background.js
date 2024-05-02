@@ -1,6 +1,4 @@
-let keywordsList = []; // Global variable to store the keywordsList
-
-console.log("background.js keywordsList: ", keywordsList);
+var userSettings; // Global variable to store the keywordsList
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     console.log(tab);
@@ -31,10 +29,10 @@ function broadcastKeywords() {
     chrome.tabs.query({}, function(tabs) {
         for (let tab of tabs) {
             if (tab.url && tab.url.includes("twitter.com")) {
-            chrome.tabs.sendMessage(tab.id, {
-                type: "KWs",
-                keywords: keywordsList
-            });
+                chrome.tabs.sendMessage(tab.id, {
+                    type: "KWs",
+                    keywords: keywordsList
+                });
             }
         }
     });
