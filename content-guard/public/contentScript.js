@@ -107,42 +107,10 @@ function findTweetTextNode(node) {
     return null;
 }
 
-function handleTweets(tweets) {
-    tweets.forEach(node => {
-        // Recursively search for the tweet text node
-        const tweetTextNode = findTweetTextNode(node);
-        if (tweetTextNode) {
-            // Access the tweet text
-            nodes.push(tweetTextNode);
-
-            const tweetTextElement = tweetTextNode.querySelector('[data-testid="tweetText"]');
-
-            if (tweetTextElement) {
-                // Retrieve the text content of the element
-                const tweetText = tweetTextElement.textContent.toLowerCase();  // Convert text to lower case here
-                //console.log(tweetText);
-
-                // Check each keyword in kw_filters
-                let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
-
-                if (isBlocked) {
-                    console.log("Blocked");
-                    // If any keyword is found, mute the tweet by hiding it
-                    node.style.display = 'none';
-                }
-            } else {
-                console.log("Tweet text element not found.");
-            }
-            chrome.storage.local.set({"filters": kw_filters}).then(() => {
-                console.log("Filter list is set");
-            });
-            //console.log(tweetTextNode); // Log tweet text
-        }
-    });
-}
-
-function handleNodes() {
-    nodes.forEach(node => {
+function handleNode(node, push) {
+    if (node) {
+        if (push)
+            nodes.push(node);
         const tweetTextElement = node.querySelector('[data-testid="tweetText"]');
 
         if (tweetTextElement) {
@@ -158,6 +126,8 @@ function handleNodes() {
                 // If any keyword is found, mute the tweet by hiding it
                 node.style.display = 'none';
             }
+            else
+                node.style.display = 'true';
         } else {
             console.log("Tweet text element not found.");
         }
@@ -165,6 +135,23 @@ function handleNodes() {
             console.log("Filter list is set");
         });
         //console.log(tweetTextNode); // Log tweet text
+    }
+}
+
+function handleNodes() {
+    nodes.forEach(node => {
+        handleNode(node, false);
+    });
+}
+
+function handleTweet(tweet) {
+    const tweet = findTweetTextNode(tweet);
+    handleNode(tweet, true);
+}
+
+function handleTweets(tweets) {
+    tweets.forEach(tweet => {
+        handleTweet(tweet);
     });
 }
 
@@ -208,7 +195,7 @@ function printDataTestIds(node, hierarchy = 'root') {
     }
 }
 
-const newTabLoaded = () => {
+function newTabLoaded() {
     // Options for the MutationObserver
     const observerConfig = {
         childList: true, // Observe changes to the children of the target node
@@ -224,13 +211,12 @@ const newTabLoaded = () => {
     if (targetNode && observer )
     // Start observing the target node for mutations
         observer.observe(targetNode, observerConfig);
-};
+}
 
 chrome.runtime.onMessage.addListener((obj, sender, response) => {
     const { type } = obj;
-    if (type === "NEW") {
+    if (type === "NEW")
         newTabLoaded();
-    }
 });
 
 // Listen for messages from the background script
