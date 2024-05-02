@@ -3,7 +3,10 @@ var targetNode = null;
 var observer = null;
 
 var userSettings;
-var kw_filters = [];
+var kw_filters = ["akp"];
+var category_filters = ["Politics"];
+var count_blocked_kw = 0;
+var count_blocked_category = 0;
 
 // ================================ Settings ================================================================================
 
@@ -69,16 +72,51 @@ function handleNode(node) {
         const tweetText = tweetTextElement.textContent.toLowerCase();  // Convert text to lower case here
         //console.log(tweetText);
 
+        // ================================ Keyword block ================================================================================
         // Check each keyword in kw_filters
         const isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
-
         if (isBlocked) {
-            console.log("Blocked");
+            console.log("BLOCKED_kw");
             // If any keyword is found, mute the tweet by hiding it
             node.style.display = 'none';
+            count_blocked_kw++;
         }
         else
             node.style.display = 'true';
+
+        // ================================ Category block ================================================================================
+        // Check each category in category_filters
+        const isBlockedCategory = category_filters.some(category => tweetText.includes(category.toLowerCase()));  // Use includes() and convert category to lower case
+        if (isBlockedCategory) {
+            const userId = 492;
+            const tabId = 79782103;
+            fetch('http://localhost:8000/api/tweet/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: userId,
+                    tabId: tabId,
+                    tweetText: tweetText,
+                }),
+            }).then(response => response.json()) // parse the JSON from the response
+            .then(data => {
+                // console.log("Tweet Text:", tweetText, "Category received:", data.category);
+                // check if the caategory is in the category_filters
+                if (category_filters.includes(data.category)) {
+                    console.log("BLOCKED_cgtry");
+                    node.style.display = 'none'; // This assumes 'node' is the element containing the tweet
+                    count_blocked_category++;
+                }
+            })
+            .catch(error => {
+                console.error("Failed to send data:", error);
+            });
+        }
+        else
+            node.style.display = 'true';
+
     } else {
         console.log("Tweet text element not found.");
     }
@@ -217,10 +255,6 @@ function getDate() {
         day: adjustedDayOfWeek,
         hour: hourOfDay
     };
-}
-
-function triS(a, b, c) {
-    return a <= b && b <= c;
 }
 
 

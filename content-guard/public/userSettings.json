@@ -1,5 +1,15 @@
 {
     "username": "bengisubuket",
     "userId": 492,
-    "keywords": []
+    "keywords": [
+        {
+            "keyword": "akp"
+        }
+    ],
+    "categories": [
+        {
+            "category": "Politics"
+        }
+
+    ]
 }
