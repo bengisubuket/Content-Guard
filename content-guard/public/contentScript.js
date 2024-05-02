@@ -107,44 +107,74 @@ function findTweetTextNode(node) {
     return null;
 }
 
+function handleTweets(tweets) {
+    tweets.forEach(node => {
+        // Recursively search for the tweet text node
+        const tweetTextNode = findTweetTextNode(node);
+        if (tweetTextNode) {
+            // Access the tweet text
+            nodes.push(tweetTextNode);
+
+            const tweetTextElement = tweetTextNode.querySelector('[data-testid="tweetText"]');
+
+            if (tweetTextElement) {
+                // Retrieve the text content of the element
+                const tweetText = tweetTextElement.textContent.toLowerCase();  // Convert text to lower case here
+                //console.log(tweetText);
+
+                // Check each keyword in kw_filters
+                let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
+
+                if (isBlocked) {
+                    console.log("Blocked");
+                    // If any keyword is found, mute the tweet by hiding it
+                    node.style.display = 'none';
+                }
+            } else {
+                console.log("Tweet text element not found.");
+            }
+            chrome.storage.local.set({"filters": kw_filters}).then(() => {
+                console.log("Filter list is set");
+            });
+            //console.log(tweetTextNode); // Log tweet text
+        }
+    });
+}
+
+function handleNodes() {
+    nodes.forEach(node => {
+        const tweetTextElement = node.querySelector('[data-testid="tweetText"]');
+
+        if (tweetTextElement) {
+            // Retrieve the text content of the element
+            const tweetText = tweetTextElement.textContent.toLowerCase();  // Convert text to lower case here
+            //console.log(tweetText);
+
+            // Check each keyword in kw_filters
+            let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
+
+            if (isBlocked) {
+                console.log("Blocked");
+                // If any keyword is found, mute the tweet by hiding it
+                node.style.display = 'none';
+            }
+        } else {
+            console.log("Tweet text element not found.");
+        }
+        chrome.storage.local.set({"filters": kw_filters}).then(() => {
+            console.log("Filter list is set");
+        });
+        //console.log(tweetTextNode); // Log tweet text
+    });
+}
+
 // Function to handle new tweets
 function handleNewTweets(mutationsList) {
     mutationsList.forEach(mutation => {
         if (mutation.type === 'childList') {
             // Check if the mutation added new tweets
             const newTweets = mutation.addedNodes;
-            newTweets.forEach(node => {
-                // Recursively search for the tweet text node
-                const tweetTextNode = findTweetTextNode(node);
-                if (tweetTextNode) {
-                    // Access the tweet text
-                    nodes.push(tweetTextNode);
-                    console.log(nodes);
-
-                    const tweetTextElement = tweetTextNode.querySelector('[data-testid="tweetText"]');
-
-                    if (tweetTextElement) {
-                        // Retrieve the text content of the element
-                        const tweetText = tweetTextElement.textContent.toLowerCase();  // Convert text to lower case here
-                        //console.log(tweetText);
-
-                        // Check each keyword in kw_filters
-                        let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
-
-                        if (isBlocked) {
-                            console.log("Blocked");
-                            // If any keyword is found, mute the tweet by hiding it
-                            node.style.display = 'none';
-                        }
-                    } else {
-                        console.log("Tweet text element not found.");
-                    }
-                    chrome.storage.local.set({"filters": kw_filters}).then(() => {
-                        console.log("Filter list is set");
-                    });
-                    //console.log(tweetTextNode); // Log tweet text
-                }
-            });
+            handleTweets(newTweets);
         }
     });
 }
@@ -211,7 +241,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         // For example, you might want to store it, manipulate it, or display it on the page
         // add message.keywords to kw_filters, give me under this line as a code, join the lists
         kw_filters = kw_filters.concat(message.keywords);
-
+        handleNodes();
     }
 
     // Optionally send a response back to the background script
