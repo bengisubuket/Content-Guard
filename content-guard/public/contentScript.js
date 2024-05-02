@@ -5,27 +5,7 @@ var observer = null;
 filters_obj = null;
 kw_filters = [];
 
-function getDate() {
-    const currentDate = new Date();
-
-    // Get the day of the week (0-6)
-    const dayOfWeek = currentDate.getDay();
-
-    // Convert Sunday to 7 to match the desired output
-    const adjustedDayOfWeek = (dayOfWeek === 0) ? 7 : dayOfWeek;
-
-    // Get the hour of the day (0-23)
-    const hourOfDay = currentDate.getHours();
-
-    return {
-        day: adjustedDayOfWeek,
-        hour: hourOfDay
-    };
-}
-
-function triS(a, b, c) {
-    return a <= b && b <= c;
-}
+// ================================ Settings ================================================================================
 
 function fetchSettings(attempt) {
     if (attempt === 50) {
@@ -86,6 +66,8 @@ function handleSettings() {
     }, 1000);
 }
 
+// ================================ Tweet handlings ================================================================================
+
 // Function to recursively search for nodes with data-testid="tweetText" attribute
 function findTweetTextNode(node) {
     // Check if the node has the data-testid attribute set to "tweetText"
@@ -107,55 +89,58 @@ function findTweetTextNode(node) {
     return null;
 }
 
-function handleNode(node, push) {
-    if (node) {
-        if (push)
-            nodes.push(node);
-        const tweetTextElement = node.querySelector('[data-testid="tweetText"]');
+// Finds text element from node and changes visibility.
+function handleNode(node) {
+    const tweetTextElement = node.querySelector('[data-testid="tweetText"]');
 
-        if (tweetTextElement) {
-            // Retrieve the text content of the element
-            const tweetText = tweetTextElement.textContent.toLowerCase();  // Convert text to lower case here
-            //console.log(tweetText);
+    if (tweetTextElement) {
+        // Retrieve the text content of the element
+        const tweetText = tweetTextElement.textContent.toLowerCase();  // Convert text to lower case here
+        //console.log(tweetText);
 
-            // Check each keyword in kw_filters
-            let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
+        // Check each keyword in kw_filters
+        let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
 
-            if (isBlocked) {
-                console.log("Blocked");
-                // If any keyword is found, mute the tweet by hiding it
-                node.style.display = 'none';
-            }
-            else
-                node.style.display = 'true';
-        } else {
-            console.log("Tweet text element not found.");
+        if (isBlocked) {
+            console.log("Blocked");
+            // If any keyword is found, mute the tweet by hiding it
+            node.style.display = 'none';
         }
-        chrome.storage.local.set({"filters": kw_filters}).then(() => {
-            console.log("Filter list is set");
-        });
-        //console.log(tweetTextNode); // Log tweet text
+        else
+            node.style.display = 'true';
+    } else {
+        console.log("Tweet text element not found.");
     }
+    chrome.storage.local.set({"filters": kw_filters}).then(() => {
+        console.log("Filter list is set");
+    });
+    //console.log(tweetTextNode); // Log tweet text
 }
 
+// Re-evaluates all nodes according to up-to-date keywords.
 function handleNodes() {
     nodes.forEach(node => {
-        handleNode(node, false);
+        handleNode(node);
     });
 }
 
+// Finds the node from tweet and handle that new tweet.
 function handleTweet(tweet) {
-    const tweet = findTweetTextNode(tweet);
-    handleNode(tweet, true);
+    const node = findTweetTextNode(tweet);
+    if (node) {
+        nodes.push(node);
+        handleNode(tweet);
+    }
 }
 
+// Handles given tweets.
 function handleTweets(tweets) {
     tweets.forEach(tweet => {
         handleTweet(tweet);
     });
 }
 
-// Function to handle new tweets
+// Extracts new tweets from DOM.
 function handleNewTweets(mutationsList) {
     mutationsList.forEach(mutation => {
         if (mutation.type === 'childList') {
@@ -166,12 +151,14 @@ function handleNewTweets(mutationsList) {
     });
 }
 
+// Keeps last 100 loaded tweets.
 function trimNodes() {
     setInterval(() => {
         nodes = nodes.slice(-100);
     }, 1000);
 }
 
+// WTF is this
 function printDataTestIds(node, hierarchy = 'root') {
     // Check if the node exists and has attributes
     if (node && node.nodeType === Node.ELEMENT_NODE && node.attributes) {
@@ -195,6 +182,9 @@ function printDataTestIds(node, hierarchy = 'root') {
     }
 }
 
+// ================================ Main ================================================================================
+
+// Starts everything when the tab loads.
 function newTabLoaded() {
     // Options for the MutationObserver
     const observerConfig = {
@@ -213,13 +203,14 @@ function newTabLoaded() {
         observer.observe(targetNode, observerConfig);
 }
 
+// Listens for new tab loading.
 chrome.runtime.onMessage.addListener((obj, sender, response) => {
     const { type } = obj;
     if (type === "NEW")
         newTabLoaded();
 });
 
-// Listen for messages from the background script
+// Listens for new keyword message from the background script
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.type === "KW" && message.keywords) {
         console.log("Received keywordsList in content script:", message.keywords);
@@ -239,3 +230,30 @@ trimNodes();
 
 fetchSettings(0);  // Initial call to fetch settings
 handleSettings();
+
+/* ================================ Graveyard ================================================================================================
+
+function getDate() {
+    const currentDate = new Date();
+
+    // Get the day of the week (0-6)
+    const dayOfWeek = currentDate.getDay();
+
+    // Convert Sunday to 7 to match the desired output
+    const adjustedDayOfWeek = (dayOfWeek === 0) ? 7 : dayOfWeek;
+
+    // Get the hour of the day (0-23)
+    const hourOfDay = currentDate.getHours();
+
+    return {
+        day: adjustedDayOfWeek,
+        hour: hourOfDay
+    };
+}
+
+function triS(a, b, c) {
+    return a <= b && b <= c;
+}
+
+
+*/
