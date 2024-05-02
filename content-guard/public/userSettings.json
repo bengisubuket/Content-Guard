@@ -1,42 +1,15 @@
 {
     "username": "bengisubuket",
     "userId": 492,
-    "keywords": {
-        "erdogan": {
-            "blockTimer": {
-                "duration": 3600000,
-                "remainingTime": 3600000,
-                "enabled": true
-            },
-            "allowTimer": {
-                "duration": 7200000,
-                "remainingTime": 7200000,
-                "enabled": false
-            },
-            "scheduler": {
-                "days": [1, 2, 3, 4, 5],
-                "startTime": 13,
-                "endTime": 15,
-                "enabled": false
-            }
-        },
-        "tayyip": {
-            "blockTimer": {
-                "duration": 3600000,
-                "remainingTime": 3600000,
-                "enabled": false
-            },
-            "allowTimer": {
-                "duration": 7200000,
-                "remainingTime": 7200000,
-                "enabled": true
-            },
-            "scheduler": {
-                "days": [3,4,5],
-                "startTime": 12,
-                "endTime": 15,
-                "enabled": false
-            }
+    "keywords": [
+        {
+            "keyword": "akp"
         }
-    }
+    ],
+    "categories": [
+        {
+            "category": "Politics"
+        }
+
+    ]
 }

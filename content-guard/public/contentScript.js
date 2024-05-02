@@ -2,68 +2,42 @@ var nodes = [];
 var targetNode = null;
 var observer = null;
 
-filters_obj = null;
-kw_filters = [];
+var userSettings;
+var kw_filters = ["akp"];
+var category_filters = ["Politics"];
+var count_blocked_kw = 0;
+var count_blocked_category = 0;
 
 // ================================ Settings ================================================================================
 
-function fetchSettings(attempt) {
-    if (attempt === 50) {
-        console.error('Failed to load settings after 1000 attempts');
-        return; // Stop retrying after 50 attempts
-    }
-
-    fetch(chrome.runtime.getURL('userSettings.json'))
-        .then((response) => response.json())
-        .then((settings) => {
-            filters_obj = settings.keywords;
-
-            for (let kw in filters_obj)
-                if (filters_obj[kw].blockTimer.enabled && filters_obj[kw].blockTimer.remainingTime > 0)
-                    kw_filters.push(kw);
-                else if (filters_obj[kw].scheduler.enabled) {
-                    let sch = filters_obj[kw].scheduler;
-                    let date = getDate();
-                    if (!sch.days.includes(date.day) || !triS(sch.startTime, date.hour, sch.endTime))
-                        kw_filters.push(kw);
-                }
-        })
-        .catch((error) => {
-            console.error(`Error loading settings on attempt ${attempt}:`, error);
-            fetchSettings(attempt + 1); // Increment attempt count and retry
-        });
+// Function to save user settings to chrome.storage
+function saveSettings() {
+    // Save userSettings to chrome.storage.local
+    chrome.storage.local.set({'userSettings': userSettings}, function() {
+        console.log('User settings saved:', userSettings);
+    });
 }
 
-function handleSettings() {
-    // Start handling tasks asynchronously
-    setInterval(() => {
-        if (filters_obj)
-            for (let kw in filters_obj) {
-                if (filters_obj[kw].blockTimer.enabled) {
-                    let timer = filters_obj[kw].blockTimer;
-                    if (timer.remainingTime > 0)
-                        timer.remainingTime -= 1000;
-                    else {
-                        if (kw_filters.includes(kw))
-                            kw_filters.splice(kw_filters.indexOf(kw), 1);
-                        filters_obj[kw].blockTimer.enabled = false;
-                    }
-                }
-                else if (filters_obj[kw].allowTimer.enabled) {
-                    let timer = filters_obj[kw].allowTimer;
-                    if (timer.remainingTime > 0)
-                        timer.remainingTime -= 1000;
-                    else {
-                        if (!kw_filters.includes(kw))
-                            kw_filters.push(kw);
-                        filters_obj[kw].blockTimer.enabled = false;
-                    }
-                }
-                else if (filters_obj[kw].scheduler.enabled) {
-                    // WTF
-                }
-            }
-    }, 1000);
+// Function to load user settings from chrome.storage
+function loadSettings(callback) {
+    // Retrieve userSettings from chrome.storage.local
+    chrome.storage.local.get('userSettings', function(data) {
+        userSettings = data.userSettings;
+        console.log('User settings loaded:', userSettings);
+        // Call the callback function with the loaded user settings
+        callback();
+    });
+}
+
+function loadedSettings() {
+    console.log("Settings loaded.");
+
+    if (userSettings === undefined)
+        userSettings = {
+            "username": "uname",
+            "id": 492,
+            "keywords": []
+        };
 }
 
 // ================================ Tweet handlings ================================================================================
@@ -98,16 +72,51 @@ function handleNode(node) {
         const tweetText = tweetTextElement.textContent.toLowerCase();  // Convert text to lower case here
         //console.log(tweetText);
 
+        // ================================ Keyword block ================================================================================
         // Check each keyword in kw_filters
-        let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
-
+        const isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
         if (isBlocked) {
-            console.log("Blocked");
+            console.log("BLOCKED_kw");
             // If any keyword is found, mute the tweet by hiding it
             node.style.display = 'none';
+            count_blocked_kw++;
         }
         else
             node.style.display = 'true';
+
+        // ================================ Category block ================================================================================
+        // Check each category in category_filters
+        const isBlockedCategory = category_filters.some(category => tweetText.includes(category.toLowerCase()));  // Use includes() and convert category to lower case
+        if (isBlockedCategory) {
+            const userId = 492;
+            const tabId = 79782103;
+            fetch('http://localhost:8000/api/tweet/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: userId,
+                    tabId: tabId,
+                    tweetText: tweetText,
+                }),
+            }).then(response => response.json()) // parse the JSON from the response
+            .then(data => {
+                // console.log("Tweet Text:", tweetText, "Category received:", data.category);
+                // check if the caategory is in the category_filters
+                if (category_filters.includes(data.category)) {
+                    console.log("BLOCKED_cgtry");
+                    node.style.display = 'none'; // This assumes 'node' is the element containing the tweet
+                    count_blocked_category++;
+                }
+            })
+            .catch(error => {
+                console.error("Failed to send data:", error);
+            });
+        }
+        else
+            node.style.display = 'true';
+
     } else {
         console.log("Tweet text element not found.");
     }
@@ -129,7 +138,7 @@ function handleTweet(tweet) {
     const node = findTweetTextNode(tweet);
     if (node) {
         nodes.push(node);
-        handleNode(tweet);
+        handleNode(node);
     }
 }
 
@@ -226,8 +235,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 
 trimNodes();
 
-fetchSettings(0);  // Initial call to fetch settings
-handleSettings();
+loadSettings(loadedSettings);  // Initial call to fetch settings
 
 /* ================================ Graveyard ================================================================================================
 
@@ -247,10 +255,6 @@ function getDate() {
         day: adjustedDayOfWeek,
         hour: hourOfDay
     };
-}
-
-function triS(a, b, c) {
-    return a <= b && b <= c;
 }
 
 

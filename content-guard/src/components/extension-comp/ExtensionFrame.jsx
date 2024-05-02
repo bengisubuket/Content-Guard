@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 
 const data = [{
   name: "web pages",
-  url: ["https://burakozturk01.github.io/contentguard.github.io/"]
+  url: ["http://localhost:3000/dashboard"]
 }];
 
 function ExtensionFrame () {
