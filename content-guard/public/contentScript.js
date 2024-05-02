@@ -1,53 +1,46 @@
 var nodes = [];
 var targetNode = null;
 var observer = null;
-var kw_filters = [];
-var category_filters = [];
 
-// Function to handle the fetched settings
-function handleSettings(settings) {
-    console.log("Settings:");
-    console.log(settings);
-    var kw_blocker_obj = settings.keywords;
-    for (let i = 0; i < kw_blocker_obj.length; i++) {
-        kw_filters.push(kw_blocker_obj[i].keyword);
-    }
-    var category_blocker_obj = settings.categories;
-    for (let i = 0; i < category_blocker_obj.length; i++) {
-        category_filters.push(category_blocker_obj[i].category);
-    }
+var userSettings;
+var kw_filters = ["akp"];
+var category_filters = ["Politics"];
+var count_blocked_kw = 0;
+var count_blocked_category = 0;
+
+// ================================ Settings ================================================================================
+
+// Function to save user settings to chrome.storage
+function saveSettings() {
+    // Save userSettings to chrome.storage.local
+    chrome.storage.local.set({'userSettings': userSettings}, function() {
+        console.log('User settings saved:', userSettings);
+    });
 }
 
-function fetchSettings(attempt = 1) {
-    if (attempt > 1000) {
-        console.error('Failed to load settings after 1000 attempts');
-        return; // Stop retrying after 1000 attempts
-    }
-
-    fetch(chrome.runtime.getURL('userSettings.json'))
-        .then((response) => response.json())
-        .then((settings) => {
-            handleSettings(settings);
-        })
-        .catch((error) => {
-            console.error(`Error loading settings on attempt ${attempt}:`, error);
-            fetchSettings(attempt + 1); // Increment attempt count and retry
-        });
+// Function to load user settings from chrome.storage
+function loadSettings(callback) {
+    // Retrieve userSettings from chrome.storage.local
+    chrome.storage.local.get('userSettings', function(data) {
+        userSettings = data.userSettings;
+        console.log('User settings loaded:', userSettings);
+        // Call the callback function with the loaded user settings
+        callback();
+    });
 }
 
-fetchSettings();  // Initial call to fetch settings
+function loadedSettings() {
+    console.log("Settings loaded.");
 
+    if (userSettings === undefined)
+        userSettings = {
+            "username": "uname",
+            "id": 492,
+            "keywords": []
+        };
+}
 
-// Fetch the settings.json at runtime
-fetch(chrome.runtime.getURL('userSettings.json'))
-  .then((response) => response.json())
-  .then((settings) => {
-    handleSettings(settings);
-  })
-  .catch((error) => {
-    console.error('Error loading settings:', error)
-  });
-  
+// ================================ Tweet handlings ================================================================================
 
 // Function to recursively search for nodes with data-testid="tweetText" attribute
 function findTweetTextNode(node) {
@@ -70,64 +63,111 @@ function findTweetTextNode(node) {
     return null;
 }
 
-// Function to handle new tweets
-var tweetCount = 0; // Initialize a counter for the number of tweets processed
+// Finds text element from node and changes visibility.
+function handleNode(node) {
+    const tweetTextElement = node.querySelector('[data-testid="tweetText"]');
 
+    if (tweetTextElement) {
+        // Retrieve the text content of the element
+        const tweetText = tweetTextElement.textContent.toLowerCase();  // Convert text to lower case here
+        //console.log(tweetText);
+
+        // ================================ Keyword block ================================================================================
+        // Check each keyword in kw_filters
+        const isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
+        if (isBlocked) {
+            console.log("BLOCKED_kw");
+            // If any keyword is found, mute the tweet by hiding it
+            node.style.display = 'none';
+            count_blocked_kw++;
+        }
+        else
+            node.style.display = 'true';
+
+        // ================================ Category block ================================================================================
+        // Check each category in category_filters
+        const isBlockedCategory = category_filters.some(category => tweetText.includes(category.toLowerCase()));  // Use includes() and convert category to lower case
+        if (isBlockedCategory) {
+            const userId = 492;
+            const tabId = 79782103;
+            fetch('http://localhost:8000/api/tweet/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: userId,
+                    tabId: tabId,
+                    tweetText: tweetText,
+                }),
+            }).then(response => response.json()) // parse the JSON from the response
+            .then(data => {
+                // console.log("Tweet Text:", tweetText, "Category received:", data.category);
+                // check if the caategory is in the category_filters
+                if (category_filters.includes(data.category)) {
+                    console.log("BLOCKED_cgtry");
+                    node.style.display = 'none'; // This assumes 'node' is the element containing the tweet
+                    count_blocked_category++;
+                }
+            })
+            .catch(error => {
+                console.error("Failed to send data:", error);
+            });
+        }
+        else
+            node.style.display = 'true';
+
+    } else {
+        console.log("Tweet text element not found.");
+    }
+    chrome.storage.local.set({"filters": kw_filters}).then(() => {
+        console.log("Filter list is set");
+    });
+    //console.log(tweetTextNode); // Log tweet text
+}
+
+// Re-evaluates all nodes according to up-to-date keywords.
+function handleNodes() {
+    nodes.forEach(node => {
+        handleNode(node);
+    });
+}
+
+// Finds the node from tweet and handle that new tweet.
+function handleTweet(tweet) {
+    const node = findTweetTextNode(tweet);
+    if (node) {
+        nodes.push(node);
+        handleNode(node);
+    }
+}
+
+// Handles given tweets.
+function handleTweets(tweets) {
+    tweets.forEach(tweet => {
+        handleTweet(tweet);
+    });
+}
+
+// Extracts new tweets from DOM.
 function handleNewTweets(mutationsList) {
     mutationsList.forEach(mutation => {
         if (mutation.type === 'childList') {
+            // Check if the mutation added new tweets
             const newTweets = mutation.addedNodes;
-            newTweets.forEach(node => {
-                const tweetTextNode = findTweetTextNode(node);
-                if (tweetTextNode) {
-                    const tweetTextElement = tweetTextNode.querySelector('[data-testid="tweetText"]');
-                    if (tweetTextElement) {
-                        const tweetText = tweetTextElement.textContent.toLowerCase();
-                        let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));
-                        if (isBlocked) {
-                            console.log("Blocked");
-                            node.style.display = 'none';
-                        }
-
-                        // Only proceed if the tweet hasn't been blocked
-                        if (!isBlocked) {
-                            tweetCount++; // Increment the counter since this tweet will be sent
-                            const userId = 492;
-                            const tabId = 79782103;
-                            fetch('http://localhost:8000/api/tweet/', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    userId: userId,
-                                    tabId: tabId,
-                                    tweetText: tweetText,
-                                }),
-                            }).then(response => response.json()) // parse the JSON from the response
-                            .then(data => {
-                                console.log("Tweet Text:", tweetText, "Category received:", data.category);
-                                // check if the caategory is in the category_filters
-                                if (category_filters.includes(data.category)) {
-                                    console.log("BLOCKED");
-                                    node.style.display = 'none'; // This assumes 'node' is the element containing the tweet
-                                }
-                                // You can also add logic to handle other categories as needed
-                            })
-                            .catch(error => {
-                                console.error("Failed to send data:", error);
-                            });
-                        }
-                    } else {
-                        console.log("Tweet text element not found.");
-                    }
-                }
-            });
+            handleTweets(newTweets);
         }
     });
 }
 
+// Keeps last 100 loaded tweets.
+function trimNodes() {
+    setInterval(() => {
+        nodes = nodes.slice(-100);
+    }, 1000);
+}
 
+// WTF is this
 function printDataTestIds(node, hierarchy = 'root') {
     // Check if the node exists and has attributes
     if (node && node.nodeType === Node.ELEMENT_NODE && node.attributes) {
@@ -151,7 +191,10 @@ function printDataTestIds(node, hierarchy = 'root') {
     }
 }
 
-const newTabLoaded = () => {
+// ================================ Main ================================================================================
+
+// Starts everything when the tab loads.
+function newTabLoaded() {
     // Options for the MutationObserver
     const observerConfig = {
         childList: true, // Observe changes to the children of the target node
@@ -167,30 +210,56 @@ const newTabLoaded = () => {
     if (targetNode && observer )
     // Start observing the target node for mutations
         observer.observe(targetNode, observerConfig);
-};
+}
 
-console.log("auuuuuuu");
+// Listens for new tab loading.
 chrome.runtime.onMessage.addListener((obj, sender, response) => {
-    console.log("contentScript.js listener");
     const { type } = obj;
-    if (type === "NEW") {
-        console.log("NEW!!!! YIPPIE");
+    if (type === "NEW")
         newTabLoaded();
-    }
 });
 
-// Listen for messages from the background script
+// Listens for new keyword message from the background script
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-    if (message.type === "NEW" && message.keywords) {
+    if (message.type === "KWs" && message.keywords) {
         console.log("Received keywordsList in content script:", message.keywords);
         // Do something with the keywords list here
         // For example, you might want to store it, manipulate it, or display it on the page
         // add message.keywords to kw_filters, give me under this line as a code, join the lists
         kw_filters = kw_filters.concat(message.keywords);
-
+        handleNodes();
+        sendResponse({status: "Keywords received by content script"});
+        return true;
     }
-
-    // Optionally send a response back to the background script
-    sendResponse({status: "Keywords received by content script"});
-    return true; // Keep the messaging channel open if you are doing asynchronous processing
 });
+
+trimNodes();
+
+loadSettings(loadedSettings);  // Initial call to fetch settings
+
+/* ================================ Graveyard ================================================================================================
+
+function getDate() {
+    const currentDate = new Date();
+
+    // Get the day of the week (0-6)
+    const dayOfWeek = currentDate.getDay();
+
+    // Convert Sunday to 7 to match the desired output
+    const adjustedDayOfWeek = (dayOfWeek === 0) ? 7 : dayOfWeek;
+
+    // Get the hour of the day (0-23)
+    const hourOfDay = currentDate.getHours();
+
+    return {
+        day: adjustedDayOfWeek,
+        hour: hourOfDay
+    };
+}
+
+function triS(a, b, c) {
+    return a <= b && b <= c;
+}
+
+
+*/
