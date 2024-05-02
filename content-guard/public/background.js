@@ -1,6 +1,4 @@
-let keywordsList = []; // Global variable to store the keywordsList
-
-console.log("background.js keywordsList: ", keywordsList);
+var userSettings; // Global variable to store the keywordsList
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     console.log(tab);

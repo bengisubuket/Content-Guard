@@ -2,68 +2,39 @@ var nodes = [];
 var targetNode = null;
 var observer = null;
 
-filters_obj = null;
-kw_filters = [];
+var userSettings;
+var kw_filters = [];
 
 // ================================ Settings ================================================================================
 
-function fetchSettings(attempt) {
-    if (attempt === 50) {
-        console.error('Failed to load settings after 1000 attempts');
-        return; // Stop retrying after 50 attempts
-    }
-
-    fetch(chrome.runtime.getURL('userSettings.json'))
-        .then((response) => response.json())
-        .then((settings) => {
-            filters_obj = settings.keywords;
-
-            for (let kw in filters_obj)
-                if (filters_obj[kw].blockTimer.enabled && filters_obj[kw].blockTimer.remainingTime > 0)
-                    kw_filters.push(kw);
-                else if (filters_obj[kw].scheduler.enabled) {
-                    let sch = filters_obj[kw].scheduler;
-                    let date = getDate();
-                    if (!sch.days.includes(date.day) || !triS(sch.startTime, date.hour, sch.endTime))
-                        kw_filters.push(kw);
-                }
-        })
-        .catch((error) => {
-            console.error(`Error loading settings on attempt ${attempt}:`, error);
-            fetchSettings(attempt + 1); // Increment attempt count and retry
-        });
+// Function to save user settings to chrome.storage
+function saveSettings() {
+    // Save userSettings to chrome.storage.local
+    chrome.storage.local.set({'userSettings': userSettings}, function() {
+        console.log('User settings saved:', userSettings);
+    });
 }
 
-function handleSettings() {
-    // Start handling tasks asynchronously
-    setInterval(() => {
-        if (filters_obj)
-            for (let kw in filters_obj) {
-                if (filters_obj[kw].blockTimer.enabled) {
-                    let timer = filters_obj[kw].blockTimer;
-                    if (timer.remainingTime > 0)
-                        timer.remainingTime -= 1000;
-                    else {
-                        if (kw_filters.includes(kw))
-                            kw_filters.splice(kw_filters.indexOf(kw), 1);
-                        filters_obj[kw].blockTimer.enabled = false;
-                    }
-                }
-                else if (filters_obj[kw].allowTimer.enabled) {
-                    let timer = filters_obj[kw].allowTimer;
-                    if (timer.remainingTime > 0)
-                        timer.remainingTime -= 1000;
-                    else {
-                        if (!kw_filters.includes(kw))
-                            kw_filters.push(kw);
-                        filters_obj[kw].blockTimer.enabled = false;
-                    }
-                }
-                else if (filters_obj[kw].scheduler.enabled) {
-                    // WTF
-                }
-            }
-    }, 1000);
+// Function to load user settings from chrome.storage
+function loadSettings(callback) {
+    // Retrieve userSettings from chrome.storage.local
+    chrome.storage.local.get('userSettings', function(data) {
+        userSettings = data.userSettings;
+        console.log('User settings loaded:', userSettings);
+        // Call the callback function with the loaded user settings
+        callback();
+    });
+}
+
+function loadedSettings() {
+    console.log("Settings loaded.");
+
+    if (userSettings === undefined)
+        userSettings = {
+            "username": "uname",
+            "id": 492,
+            "keywords": []
+        };
 }
 
 // ================================ Tweet handlings ================================================================================
@@ -99,7 +70,7 @@ function handleNode(node) {
         //console.log(tweetText);
 
         // Check each keyword in kw_filters
-        let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
+        const isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
 
         if (isBlocked) {
             console.log("Blocked");
@@ -226,8 +197,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 
 trimNodes();
 
-fetchSettings(0);  // Initial call to fetch settings
-handleSettings();
+loadSettings(loadedSettings);  // Initial call to fetch settings
 
 /* ================================ Graveyard ================================================================================================
 
