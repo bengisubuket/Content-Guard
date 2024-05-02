@@ -100,7 +100,7 @@ function handleTweet(tweet) {
     const node = findTweetTextNode(tweet);
     if (node) {
         nodes.push(node);
-        handleNode(tweet);
+        handleNode(node);
     }
 }
 
