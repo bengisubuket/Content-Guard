@@ -1,4 +1,5 @@
 var userSettings; // Global variable to store the keywordsList
+let twitterTabCount = 0;
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     console.log(tab);
@@ -26,6 +27,35 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
+function handleTimers(){
+    timerLoop = 0;
+    timerInterval = setInterval(() => {
+        loadSettings(); // check if a new timer has been added
+        userSettings.keywordsList.forEach(keyword => {
+            userSettings.timers[keyword].remaining = userSettings.timers[keyword].remaining - 1000; // decrement every second
+            if(userSettings.timers[keyword].remaining <= 0){
+                if(userSettings.timers[keyword].type === "block"){
+                    delete userSettings.timers[keyword];
+                    delete userSettings.keywords[userSettings.keywords.indexOf(keyword)];
+                    delete userSettings.activeKeywords[userSettings.activeKeywords.indexOf(keyword)];
+                }
+                else if(userSettings.timers[keyword].type === "allow"){
+                    userSettings.activeKeywords.push(keyword);
+                    delete userSettings.timers[keyword];
+                }
+            }
+        });
+        if(timerLoop++ % 30 === 0){ // save every 30 seconds
+            saveSettings();
+        }
+        chrome.tabs.query({url: '*://twitter.com/*'}, function(tabs) {
+            if (tabs.length === 0){
+                saveSettings();
+                clearInterval(timerInterval);
+            }
+        });
+    }, 1000)
+}
 
 // // keywordList update
 // chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
