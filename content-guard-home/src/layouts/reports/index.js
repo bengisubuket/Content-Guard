@@ -37,15 +37,12 @@ function Reports() {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      <VuiBox mt={4}>
-        <VuiBox mb={1.5}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} >
-              <ReportLines />
-            </Grid>
-          </Grid>
+        <VuiBox py={10}>
+          <VuiBox sx={{ paddingLeft: '50px', paddingRight: '50px' }}>
+            <ReportLines />
+          </VuiBox>
         </VuiBox>
-      </VuiBox>
+      <Footer />
     </DashboardLayout>
   );
 }

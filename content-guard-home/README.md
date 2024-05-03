@@ -98,7 +98,7 @@ Within the download you'll find the following directories and files:
 vision-dashboard-react-free/
 ├── public
 │   ├── apple-icon.png
-│   ├── favicon.ico
+│   ├── favicon.icon
 │   ├── index.html
 │   ├── manifest.json
 │   └── robots.txt

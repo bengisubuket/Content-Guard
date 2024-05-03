@@ -44,7 +44,7 @@ import createCache from "@emotion/cache";
 
 // Vision UI Dashboard React routes
 import routes from "routes";
-
+import ReportPage from "layouts/reports/reportPage"
 // Vision UI Dashboard React contexts
 import { useVisionUIController, setMiniSidenav, setOpenConfigurator } from "context";
 
@@ -141,7 +141,7 @@ export default function App() {
             <Sidenav
               color={sidenavColor}
               brand=""
-              brandName="VISION UI FREE"
+              brandName="CONTENT GUARD"
               routes={routes}
               onMouseEnter={handleOnMouseEnter}
               onMouseLeave={handleOnMouseLeave}
@@ -165,7 +165,7 @@ export default function App() {
           <Sidenav
             color={sidenavColor}
             brand=""
-            brandName="VISION UI FREE"
+            brandName="CONTENT GUARD"
             routes={routes}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
@@ -176,6 +176,9 @@ export default function App() {
       )}
       {layout === "vr" && <Configurator />}
       <Switch>
+        <Route path="/reports/reportPage">
+          <ReportPage />
+        </Route>
         {getRoutes(routes)}
         <Redirect from="*" to="/dashboard" />
       </Switch>

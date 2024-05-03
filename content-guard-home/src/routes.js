@@ -42,6 +42,9 @@
 import Dashboard from "layouts/dashboard";
 import Tables from "layouts/tables";
 import Reports from "layouts/reports";
+import ReportPage from "layouts/reports/reportPage";
+import Blockers from "layouts/blockers";
+
 import RTL from "layouts/rtl";
 import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
@@ -69,11 +72,11 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "Tables",
-    key: "tables",
-    route: "/tables",
+    name: "Blockers",
+    key: "blockers",
+    route: "/blockers",
     icon: <IoStatsChart size="15px" color="inherit" />,
-    component: Tables,
+    component: Blockers,
     noCollapse: true,
   },
   {
@@ -83,15 +86,6 @@ const routes = [
     route: "/reports",
     icon: <BiSolidReport size="15px" color="inherit" />,
     component: Reports,
-    noCollapse: true,
-  },
-  {
-    type: "collapse",
-    name: "RTL",
-    key: "rtl",
-    route: "/rtl",
-    icon: <IoBuild size="15px" color="inherit" />,
-    component: RTL,
     noCollapse: true,
   },
   { type: "title", title: "Account Pages", key: "account-pages" },

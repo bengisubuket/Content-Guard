@@ -27,21 +27,39 @@ import Icon from "@mui/material/Icon";
 import VuiButton from "components/VuiButton";
 import linearGradient from "assets/theme/functions/linearGradient";
 import colors from "assets/theme/base/colors";
-function ReportLine({ date, id}) {
+import { Link, useHistory } from "react-router-dom";
+function ReportLine({ date, id }) {
+
+  const history = useHistory();
+
+  const handleReportClick = () => {
+    history.push({
+      pathname: "/reports/reportPage",
+      state: { id: id }
+    });
+  };
+
   return (
     <VuiBox
       component="li"
       display="flex"
       justifyContent="space-between"
       alignItems="center"
-      mb="32px"
+      sx={{
+        "&:not(:last-child)": {
+          borderBottom: ({ borders: { borderWidth }, palette: { grey } }) =>
+                    `${borderWidth[1]} solid ${grey[700]}`
+        },
+        "&:not(:first-child)": {
+          borderBottom: ({ borders: { borderWidth }, palette: { grey } }) =>
+                      `${borderWidth[1]} solid ${grey[700]}`,
+        },
+      }}
+
     >
       <VuiBox lineHeight={1}>
         <VuiTypography display="block" variant="button" fontWeight="medium" color="white">
           {date}
-        </VuiTypography>
-        <VuiTypography variant="caption" fontWeight="regular" color="text">
-          {id}
         </VuiTypography>
       </VuiBox>
       <VuiBox display="flex" alignItems="center">
@@ -52,10 +70,11 @@ function ReportLine({ date, id}) {
             </VuiBox>
         <VuiBox display="flex" alignItems="center" lineHeight={0} ml={3} sx={{ cursor: "pointer" }}>
           <IoDocumentText color="#fff" size="15px" />
-          <VuiTypography variant="button" fontWeight="medium" color="text">
+          <VuiTypography variant="button" fontWeight="medium" color="text" onClick={handleReportClick}>
             &nbsp;REPORT
           </VuiTypography>
         </VuiBox>
+
       </VuiBox>
     </VuiBox>
   );
