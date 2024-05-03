@@ -7,6 +7,7 @@ var kw_filters = [];
 var category_filters = ["Politics"];
 var count_blocked_kw = 0;
 var count_blocked_category = 0;
+var closedTime;
 
 // ================================ Settings ================================================================================
 
@@ -208,6 +209,33 @@ function printDataTestIds(node, hierarchy = 'root') {
     }
 }
 
+// ================================ Timers ==============================================================================
+// check if the day has changed after the last tab/window close action
+function isNewDay(closedTime){
+    const day = 86400000; // 24 hours in milliseconds
+    if(Date.now()/day - closedTime/day <= 1){
+        return true;
+    }
+    return false;
+}
+
+function closedTabWindow(){
+    closedTime = Date.now();
+    // push the closed time, active keywords to the chrome storage
+}
+
+chrome.tabs.onRemoved.addListener(function(tabid, removed) {
+    closedTabWindow();
+   })
+   
+chrome.windows.onRemoved.addListener(function(windowid) {
+    closedTabWindow();
+   })
+
+function startTimer(keyword, action, duration){
+
+}
+
 // ================================ Main ================================================================================
 
 // Starts everything when the tab loads.
@@ -275,10 +303,6 @@ function getDate() {
         day: adjustedDayOfWeek,
         hour: hourOfDay
     };
-}
-
-function triS(a, b, c) {
-    return a <= b && b <= c;
 }
 
 
