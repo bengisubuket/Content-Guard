@@ -211,32 +211,32 @@ function printDataTestIds(node, hierarchy = 'root') {
     }
 }
 
-// ================================ Timers ==============================================================================
-// check if the day has changed after the last tab/window close action
-function isNewDay(closedTime){
-    const day = 86400000; // 24 hours in milliseconds
-    if(Date.now()/day - closedTime/day <= 1){
-        return true;
-    }
-    return false;
-}
+// // ================================ Timers ==============================================================================
+// // check if the day has changed after the last tab/window close action
+// function isNewDay(closedTime){
+//     const day = 86400000; // 24 hours in milliseconds
+//     if(Date.now()/day - closedTime/day <= 1){
+//         return true;
+//     }
+//     return false;
+// }
 
-function closedTabWindow(){
-    closedTime = Date.now();
-    // push the closed time, active keywords to the chrome storage
-}
+// function closedTabWindow(){
+//     closedTime = Date.now();
+//     // push the closed time, active keywords to the chrome storage
+// }
 
-chrome.tabs.onRemoved.addListener(function(tabid, removed) {
-    closedTabWindow();
-   })
+// chrome.tabs.onRemoved.addListener(function(tabid, removed) {
+//     closedTabWindow();
+//    })
    
-chrome.windows.onRemoved.addListener(function(windowid) {
-    closedTabWindow();
-   })
+// chrome.windows.onRemoved.addListener(function(windowid) {
+//     closedTabWindow();
+//    })
 
-function startTimer(keyword, action, duration){
+// function startTimer(keyword, action, duration){
 
-}
+// }
 
 // ================================ Main ================================================================================
 
