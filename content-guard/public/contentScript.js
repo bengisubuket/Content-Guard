@@ -4,7 +4,7 @@ var observer = null;
 
 var userSettings;
 var kw_filters = [];
-var category_filters = ["lala"];
+var category_filters = [];
 var count_blocked_kw = 0;
 var count_blocked_category = 0;
 var closedTime;
@@ -30,12 +30,14 @@ function loadSettings() {
                 "username": "uname",
                 "id": 492,
                 "keywords": [],
-                "activeKeywords": []
+                "activeKeywords": [],
+                "activeCategories": []
             };
             saveSettings();
             return;
         }
         kw_filters = userSettings.activeKeywords;
+        category_filters = userSettings.activeCategories;
         console.log('User settings loaded:', userSettings);
         // Call the callback function with the loaded user settings
         loadedSettings();
@@ -100,42 +102,42 @@ function handleNode(node) {
             count_blocked_kw++;
         }
         else{       
-            node.style.display = 'true';
-            console.log("NOT BLOCKED_kw");
+            node.style.removeProperty('display');
         }
         // ================================ Category block ================================================================================
         // Check each category in category_filters
-        // const isBlockedCategory = category_filters.some(category => tweetText.includes(category.toLowerCase()));  // Use includes() and convert category to lower case
-        // if (isBlockedCategory) {
-        //     const userId = 492;
-        //     const tabId = 79782103;
-        //     fetch('http://localhost:8000/api/tweet/', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify({
-        //             userId: userId,
-        //             tabId: tabId,
-        //             tweetText: tweetText,
-        //         }),
-        //     }).then(response => response.json()) // parse the JSON from the response
-        //     .then(data => {
-        //         // console.log("Tweet Text:", tweetText, "Category received:", data.category);
-        //         // check if the caategory is in the category_filters
-        //         if (category_filters.includes(data.category)) {
-        //             console.log("BLOCKED_cgtry");
-        //             node.style.display = 'none'; // This assumes 'node' is the element containing the tweet
-        //             count_blocked_category++;
-        //         }
-        //     })
-        //     .catch(error => {
-        //         console.error("Failed to send data:", error);
-        //     });
-        // }
-        // else{
-        //     node.style.display = 'true';
-        // }
+        console.log("category_filters:", category_filters);
+        const isBlockedCategory = Array.isArray(category_filters) && category_filters.some(category => tweetText.includes(category.toLowerCase()));
+        if (isBlockedCategory) {
+            const userId = 492;
+            const tabId = 79782103;
+            fetch('http://localhost:8000/api/tweet/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: userId,
+                    tabId: tabId,
+                    tweetText: tweetText,
+                }),
+            }).then(response => response.json()) // parse the JSON from the response
+            .then(data => {
+                // console.log("Tweet Text:", tweetText, "Category received:", data.category);
+                // check if the caategory is in the category_filters
+                if (category_filters.includes(data.category)) {
+                    console.log("BLOCKED_cgtry");
+                    node.style.display = 'none'; // This assumes 'node' is the element containing the tweet
+                    count_blocked_category++;
+                }
+            })
+            .catch(error => {
+                console.error("Failed to send data:", error);
+            });
+        }
+        else{
+            node.style.removeProperty('display');
+        }
     } 
     else {
         console.log("Tweet text element not found.");
@@ -143,6 +145,7 @@ function handleNode(node) {
     chrome.storage.local.set({"filters": kw_filters}).then(() => {
         console.log("Filter list is set");
     });
+
     //console.log(tweetTextNode); // Log tweet text
 }
 
@@ -279,6 +282,15 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.action === "keywordDeleted") {
         console.log("Keyword deleted:", request.data);
+        loadSettings();
+        sendResponse({status: "Setting read again"});
+        return true;
+    }
+});
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.action === "updateCategories") {
+        console.log("Received categories:", request.data);
         loadSettings();
         sendResponse({status: "Setting read again"});
         return true;

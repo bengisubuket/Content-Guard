@@ -3,8 +3,6 @@ import { Button, Container, Row, Col, Form, Dropdown, Image } from 'react-bootst
 import { PlusCircleFill, ArrowLeft } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 
-var userSettings;
-
 function KeywordBlockerComponent() {
     const navigate = useNavigate();
     const [keyword, setKeyword] = useState('');
