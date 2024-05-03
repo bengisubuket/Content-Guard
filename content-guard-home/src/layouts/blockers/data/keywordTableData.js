@@ -65,7 +65,7 @@ function Function({ job, org }) {
 export default {
   columns: [
     { name: "keyword", align: "left" },
-    { name: "date", align: "left" },
+    { name: "date", align: "center" },
     { name: "action", align: "center" },
   ],
 

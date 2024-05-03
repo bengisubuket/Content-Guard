@@ -61,7 +61,7 @@ const action = (
 export default {
   columns: [
     { name: "category", align: "left" },
-    { name: "date", align: "left" },
+    { name: "date", align: "center" },
     { name: "action", align: "center" },
   ],
 

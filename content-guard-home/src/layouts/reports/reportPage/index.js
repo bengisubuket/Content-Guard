@@ -8,6 +8,7 @@ import Grid from "@mui/material/Grid";
 // Vision UI Dashboard React components
 import VuiBox from "components/VuiBox";
 import VuiTypography from "components/VuiTypography";
+import Footer from "examples/Footer"; 
 
 
 // Vision UI Dashboard React example components
@@ -27,18 +28,21 @@ const ReportPage = () => {
             <Grid item xs={12} >
                 <Card id="delete-account" sx={{ height: "100%" }}>
                     
-                    <VuiBox mb="28px" display="flex" justifyContent="space-between" alignItems="center">
+                <VuiBox component="ul" display="flex" flexDirection="column" p={0} m={0}>
                         <VuiTypography variant="h6" fontWeight="medium" color="white">
                             Report ID: {id}
                         </VuiTypography>
+                        <KeywordReport/>
                     </VuiBox>
+                    
                 </Card>
                 
             </Grid>
           </Grid>
         </VuiBox>
       </VuiBox>
-    
+      <Footer />
+
     </DashboardLayout>
     
   );

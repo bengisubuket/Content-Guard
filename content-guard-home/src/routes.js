@@ -59,6 +59,7 @@ import { BsCreditCardFill } from "react-icons/bs";
 import { IoStatsChart } from "react-icons/io5";
 import { IoHome } from "react-icons/io5";
 import { BiSolidReport } from "react-icons/bi";
+import { MdBlock } from "react-icons/md";
 
 const routes = [
   {
@@ -75,7 +76,7 @@ const routes = [
     name: "Blockers",
     key: "blockers",
     route: "/blockers",
-    icon: <IoStatsChart size="15px" color="inherit" />,
+    icon: <MdBlock size="15px" color="inherit" />,
     component: Blockers,
     noCollapse: true,
   },

@@ -37,7 +37,7 @@ function Footer() {
           sx={{ textAlign: "center", fontWeight: "400 !important" }}
           color="white"
         >
-          @ 2021, Made with ❤️&nbsp;&nbsp;&nbsp; by{" "}
+          @ 2024, Made with ❤️&nbsp;&nbsp;&nbsp; by{" "}
           <VuiTypography
             component="a"
             variant="button"
@@ -46,21 +46,9 @@ function Footer() {
             color="white"
             mr="2px"
           >
-            Simmmple
+            Content Guardians 
           </VuiTypography>
-          &
-          <VuiTypography
-            ml="2px"
-            mr="2px"
-            component="a"
-            variant="button"
-            href="https://www.creative-tim.com/"
-            sx={{ textAlign: "center", fontWeight: "500 !important" }}
-            color="white"
-          >
-            Creative Tim
-          </VuiTypography>
-          for a better web
+            for a better Twitter experience
         </VuiTypography>
       </VuiBox>
       <VuiBox item xs={10}>
@@ -68,33 +56,14 @@ function Footer() {
           <VuiBox mr={{ xs: "20px", lg: "46px" }}>
             <VuiTypography
               component="a"
-              href="https://www.creative-tim.com/templates"
+              href="https://burakozturk01.github.io/contentguard.github.io/#/homePage"
               variant="body2"
               color="white"
             >
-              Marketplace
+              About Us 
             </VuiTypography>
           </VuiBox>
-          <VuiBox mr={{ xs: "20px", lg: "46px" }}>
-            <VuiTypography
-              component="a"
-              href="https://www.creative-tim.com/blog/"
-              variant="body2"
-              color="white"
-            >
-              Blog
-            </VuiTypography>
-          </VuiBox>
-          <VuiBox>
-            <VuiTypography
-              component="a"
-              href="https://www.creative-tim.com/license"
-              variant="body2"
-              color="white"
-            >
-              License
-            </VuiTypography>
-          </VuiBox>
+
         </VuiBox>
       </VuiBox>
     </VuiBox>

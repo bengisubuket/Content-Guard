@@ -26,7 +26,6 @@ import VuiBox from "components/VuiBox";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 
-//Took the footer out for now
 import Footer from "examples/Footer"; 
 
 // old Billing page components
