@@ -16,7 +16,6 @@ function KeywordBlockerComponent() {
         activeKeywords: []
     });
 
-
     const navigateBack = () => {
         navigate('/blockers');
     };
@@ -77,6 +76,24 @@ function KeywordBlockerComponent() {
         }
     }
 
+    const deleteKeyword = (index) => {
+        const updatedKeywords = [...keywordsList];
+        updatedKeywords.splice(index, 1);
+        setKeywordsList(updatedKeywords);
+        
+        const updatedSettings = { ...userSettings, activeKeywords: updatedKeywords };
+        setUserSettings(updatedSettings);
+        
+        saveSettings(updatedSettings);
+
+        const message = { action: "keywordDeleted", data: "New Keyword List" };
+
+        // Send message to background.js
+        chrome.runtime.sendMessage(message, function(response) {
+            console.log("Response from content script:", response);
+        });
+    };
+
     return (
         <Container>
             <Row className='mb-3'>
@@ -111,7 +128,10 @@ function KeywordBlockerComponent() {
                     <Dropdown.Menu style={{ width: '100%' }}>
                         {keywordsList && keywordsList.length > 0 ? (
                             keywordsList.map((kw, index) => (
-                                <Dropdown.Item key={index}>{kw}</Dropdown.Item>
+                                <Dropdown.Item key={index}>
+                                    {kw}
+                                    <Button variant="danger" size="sm" className="ml-2" onClick={() => deleteKeyword(index)}>Delete</Button>
+                                </Dropdown.Item>
                             ))
                         ) : (
                             <Dropdown.Item>No keywords added</Dropdown.Item>
