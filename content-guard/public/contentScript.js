@@ -109,6 +109,9 @@ function handleNode(node) {
                     keyword: kw,
                 }),
             }).then(response => response.json())
+            .then(data => {
+                console.log("Keyword data sent:", data);
+            })
             .catch(error => {
                 console.error("Failed to send kw data:", error);
             });
@@ -140,6 +143,21 @@ function handleNode(node) {
                 console.log("BLOCKED_cgtry");
                 node.style.display = 'none'; // This assumes 'node' is the element containing the tweet
                 count_blocked_category++;
+                fetch('http://localhost:8000/api/category/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        category: data.category,
+                    }),
+                }).then(response => response.json())
+                .then(data => {
+                    console.log("Category data sent:", data);
+                })
+                .catch(error => {
+                    console.error("Failed to send category data:", error);
+                });
             }
             else{
                 node.style.removeProperty('display');
@@ -153,11 +171,6 @@ function handleNode(node) {
     else {
         console.log("Tweet text element not found.");
     }
-    chrome.storage.local.set({"filters": kw_filters}).then(() => {
-        console.log("Filter list is set");
-    });
-
-    //console.log(tweetTextNode); // Log tweet text
 }
 
 // Re-evaluates all nodes according to up-to-date keywords.

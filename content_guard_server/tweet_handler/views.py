@@ -1,11 +1,10 @@
 from django.http import JsonResponse
-from .models import Tweet, Keyword
+from .models import Tweet, Keyword, Category    
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 import json
 from g4f.client import Client
-import logging
 import time
 
 client = Client()
@@ -66,3 +65,20 @@ class KeywordView(View):
                 return JsonResponse({'status': 'error', 'message': 'No keyword provided.'}, status=400)
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CategoryView(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            category_text = data.get('category', '').strip()
+            if category_text:  # Make sure the category is not empty
+                category_obj, created = Category.objects.get_or_create(name=category_text)
+                category_obj.number_of_blocked_tweets += 1
+                category_obj.save()
+                return JsonResponse({'status': 'success', 'message': 'Category data saved.'}, status=201)
+            else:
+                return JsonResponse({'status': 'error', 'message': 'No category provided.'}, status=400)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
