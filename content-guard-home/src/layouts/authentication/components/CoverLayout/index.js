@@ -58,13 +58,6 @@ function CoverLayout({
         gradients.cover.angle
       )}
     >
-      <DefaultNavbar
-        action={{
-          type: "external",
-          route: "https://creative-tim.com/product/vision-ui-dashboard-pro-react",
-          label: "BUY NOW",
-        }}
-      />
       <VuiBox
         height="100%"
         width="50vw"
@@ -125,7 +118,6 @@ function CoverLayout({
           position: "relative",
           alignItems: "center",
           maxWidth: "1044px",
-          minHeight: "75vh",
           margin: "0 auto",
         }}
       >
@@ -218,7 +210,7 @@ CoverLayout.defaultProps = {
   title: "",
   description: "",
   color: "info",
-  top: 20,
+  top: 10,
 };
 
 // Typechecking props for the CoverLayout

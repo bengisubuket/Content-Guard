@@ -108,15 +108,6 @@ const routes = [
     component: SignIn,
     noCollapse: true,
   },
-  {
-    type: "collapse",
-    name: "Sign Up",
-    key: "sign-up",
-    route: "/authentication/sign-up",
-    icon: <IoRocketSharp size="15px" color="inherit" />,
-    component: SignUp,
-    noCollapse: true,
-  },
 ];
 
 export default routes;
