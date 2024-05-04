@@ -3,10 +3,11 @@ var targetNode = null;
 var observer = null;
 
 var userSettings;
-var kw_filters = ["akp"];
+var kw_filters = [];
 var category_filters = ["Politics"];
 var count_blocked_kw = 0;
 var count_blocked_category = 0;
+var closedTime;
 
 // ================================ Settings ================================================================================
 
@@ -19,25 +20,44 @@ function saveSettings() {
 }
 
 // Function to load user settings from chrome.storage
-function loadSettings(callback) {
+function loadSettings() {
     // Retrieve userSettings from chrome.storage.local
     chrome.storage.local.get('userSettings', function(data) {
         userSettings = data.userSettings;
+        
+        if (userSettings === undefined){
+            userSettings = {
+                "username": "uname",
+                "id": 492,
+                "keywords": [],
+                "activeKeywords": []
+            };
+            saveSettings();
+            return;
+        }
+        kw_filters = userSettings.activeKeywords;
         console.log('User settings loaded:', userSettings);
         // Call the callback function with the loaded user settings
-        callback();
+        loadedSettings();
     });
 }
 
 function loadedSettings() {
     console.log("Settings loaded.");
 
-    if (userSettings === undefined)
+    if (userSettings === undefined){
         userSettings = {
             "username": "uname",
             "id": 492,
-            "keywords": []
+            "keywords": ["CHEFS"],
+            "activeKeywords": ["CHEFS"],
+            "timers": {"anan": {"action": "allow", "duration": 10, "remaining": 10},
+                        "ABD": {"action": "block", "duration": 10, "remaining": 10},
+                        "CHEFS": {"action": "block", "duration": 10, "remaining": 10}},
         };
+        saveSettings();
+    }
+    handleNodes();
 }
 
 // ================================ Tweet handlings ================================================================================
@@ -81,9 +101,9 @@ function handleNode(node) {
             node.style.display = 'none';
             count_blocked_kw++;
         }
-        else
-            node.style.display = 'true';
-
+        else{
+            node.style.removeProperty('display');
+        }
         // ================================ Category block ================================================================================
         // Check each category in category_filters
         const isBlockedCategory = category_filters.some(category => tweetText.includes(category.toLowerCase()));  // Use includes() and convert category to lower case
@@ -114,10 +134,11 @@ function handleNode(node) {
                 console.error("Failed to send data:", error);
             });
         }
-        else
-            node.style.display = 'true';
-
-    } else {
+        else{
+            node.style.removeProperty('display');
+        }
+    } 
+    else {
         console.log("Tweet text element not found.");
     }
     chrome.storage.local.set({"filters": kw_filters}).then(() => {
@@ -220,22 +241,25 @@ chrome.runtime.onMessage.addListener((obj, sender, response) => {
 });
 
 // Listens for new keyword message from the background script
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-    if (message.type === "KWs" && message.keywords) {
-        console.log("Received keywordsList in content script:", message.keywords);
-        // Do something with the keywords list here
-        // For example, you might want to store it, manipulate it, or display it on the page
-        // add message.keywords to kw_filters, give me under this line as a code, join the lists
-        kw_filters = kw_filters.concat(message.keywords);
-        handleNodes();
-        sendResponse({status: "Keywords received by content script"});
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    if (request.action === "updateKeywords") {
+        console.log("Received keywords:", request.data);
+        loadSettings();
+        sendResponse({status: "Setting read again"});
         return true;
     }
 });
 
+// chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+//     console.log('Message received in contentScript:', request);
+//     loadSettings();
+//     sendResponse({status: "Setting read again"});
+//     return true;
+// });
+
 trimNodes();
 
-loadSettings(loadedSettings);  // Initial call to fetch settings
+loadSettings();  // Initial call to fetch settings
 
 /* ================================ Graveyard ================================================================================================
 
