@@ -19,19 +19,24 @@ class TweetView(View):
             category = ""
             retry_count = 3
             delay = 0.5  # Initial delay in seconds
+            desired_categories = ["Technology", "Fashion", "Travel", "Music", "Movies", "Food", "Sports", "Science", "Health", "Politics", "Business", "Gaming", "Books", "Art", "Photography", "Fitness", "Education", "Environment", "Celebrities", "News", "Weather", "Humor", "SelfCare", "Relationships", "Pets", "Parenting", "Space", "Motivation", "SocialJustice"]
 
             for attempt in range(retry_count):
                 try:
                     response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
-                        messages=[{"role": "user", "content": "Categorize the following tweet into one of the following categories: [Technology, Fashion, Travel, Music, Movies, Food, Sports, Science, Health, Politics, Business, Gaming, Books, Art, Photography, Fitness, Education, Environment, Celebrities, News, Weather, Humor, SelfCare, Relationships, Pets, Parenting, TechnologyTrends, Space, Motivation, SocialJustice] and give it as a one-word answer, do not give any further information: {tweet}".format(tweet=tweet_text)}],
+                        messages=[{"role": "user", "content": "Categorize the following tweet into one of the following categories: " + ", ".join(desired_categories) + " and give it as a one-word answer, do not give any further information: {tweet}".format(tweet=tweet_text)}],
                     )
                     category = response.choices[0].message.content
-                    break  # Exit loop if successful
+                    if category in desired_categories:
+                        break  # Exit loop if successful
                 except Exception as e:
-                    logging.error(f"Attempt {attempt + 1}: {str(e)}")
                     time.sleep(delay)
                     delay *= 2  # Exponential backoff
+
+            if category not in desired_categories:
+                logging.warning("Failed to categorize tweet after multiple attempts.")
+                category = None
 
             tweet = Tweet(user_id=data['userId'], tab_id=data['tabId'], category=category)
             tweet.save()

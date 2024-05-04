@@ -102,12 +102,10 @@ function handleNode(node) {
             count_blocked_kw++;
         }
         else{       
-            node.style.display = 'true';
+            node.style.removeProperty('display');
         }
         // ================================ Category block ================================================================================
         // Check each category in category_filters
-        console.log("-----------------------------------------------")
-        console.log("Tweet Text:", tweetText);
         const userId = 492;
         const tabId = 79782103;
         fetch('http://localhost:8000/api/tweet/', {
@@ -122,7 +120,9 @@ function handleNode(node) {
             }),
         }).then(response => response.json()) // parse the JSON from the response
         .then(data => {
-            console.log("Category:", data.category);
+            // console.log("---------------------")
+            // console.log("Tweet Text:", tweetText);
+            // console.log("Category:", data.category);
             // check if the caategory is in the category_filters
             if (category_filters.includes(data.category)) {
                 console.log("BLOCKED_cgtry");
@@ -130,8 +130,9 @@ function handleNode(node) {
                 count_blocked_category++;
             }
             else{
-                node.style.display = 'true';
+                node.style.removeProperty('display');
             }
+            // console.log("---------------------")
         })
         .catch(error => {
             console.error("Failed to send data:", error);
