@@ -42,7 +42,11 @@ function KeywordBlockerComponent() {
 
             let kwObj = {
                 "name": keyword,
-                "timer": null
+                "timer": {
+                    "action": "block",
+                    "duration": 15000,
+                    "remainingTime": 15000
+                }
             };
 
             const updatedKeywords = [...userSettings.keywords, kwObj];

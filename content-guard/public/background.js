@@ -1,6 +1,4 @@
 var userSettings; // Global variable to store the keywordsList
-
-loadSettings(); // Load user settings from chrome.storage
 // ================================ Settings ================================================================================
 
 // Function to save user settings to chrome.storage
@@ -117,3 +115,31 @@ function broadcastKeywords() {
         }
     });
 }
+
+function handleTimers() {
+    timerInterval = setInterval(() => {
+        chrome.tabs.query({url: '*://twitter.com/*'}, function(tabs) {
+            if (tabs.length > 0) {
+                loadSettings(); // check if a new timer has been added
+                userSettings.keywords.forEach((keyword, index) => {
+                    if (keyword.timer) {
+                        keyword.timer.remainingTime -= 1000; // decrement every second
+                        if (keyword.timer.remainingTime <= 0) {
+                            if (keyword.timer.action === "block") {
+                                userSettings.activeKeywords.splice(userSettings.activeKeywords.indexOf(keyword.name), 1);
+                                userSettings.keywords.splice(index, 1);
+                            } else if (keyword.timer.action === "allow") {
+                                userSettings.activeKeywords.push(keyword.name);
+                                userSettings.keywords[index].timer = null;
+                            }
+                        }
+                    }
+                });
+                saveSettings();
+            }
+        });
+    }, 1000);
+}
+
+loadSettings(); // Load user settings from chrome.storage
+handleTimers(); // Start the timer for each keyword
