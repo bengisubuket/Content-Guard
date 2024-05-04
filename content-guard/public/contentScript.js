@@ -102,42 +102,40 @@ function handleNode(node) {
             count_blocked_kw++;
         }
         else{       
-            node.style.removeProperty('display');
+            node.style.display = 'true';
         }
         // ================================ Category block ================================================================================
         // Check each category in category_filters
-        console.log("category_filters:", category_filters);
-        const isBlockedCategory = Array.isArray(category_filters) && category_filters.some(category => tweetText.includes(category.toLowerCase()));
-        if (isBlockedCategory) {
-            const userId = 492;
-            const tabId = 79782103;
-            fetch('http://localhost:8000/api/tweet/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId: userId,
-                    tabId: tabId,
-                    tweetText: tweetText,
-                }),
-            }).then(response => response.json()) // parse the JSON from the response
-            .then(data => {
-                // console.log("Tweet Text:", tweetText, "Category received:", data.category);
-                // check if the caategory is in the category_filters
-                if (category_filters.includes(data.category)) {
-                    console.log("BLOCKED_cgtry");
-                    node.style.display = 'none'; // This assumes 'node' is the element containing the tweet
-                    count_blocked_category++;
-                }
-            })
-            .catch(error => {
-                console.error("Failed to send data:", error);
-            });
-        }
-        else{
-            node.style.removeProperty('display');
-        }
+        console.log("-----------------------------------------------")
+        console.log("Tweet Text:", tweetText);
+        const userId = 492;
+        const tabId = 79782103;
+        fetch('http://localhost:8000/api/tweet/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userId: userId,
+                tabId: tabId,
+                tweetText: tweetText,
+            }),
+        }).then(response => response.json()) // parse the JSON from the response
+        .then(data => {
+            console.log("Category:", data.category);
+            // check if the caategory is in the category_filters
+            if (category_filters.includes(data.category)) {
+                console.log("BLOCKED_cgtry");
+                node.style.display = 'none'; // This assumes 'node' is the element containing the tweet
+                count_blocked_category++;
+            }
+            else{
+                node.style.display = 'true';
+            }
+        })
+        .catch(error => {
+            console.error("Failed to send data:", error);
+        });
     } 
     else {
         console.log("Tweet text element not found.");
