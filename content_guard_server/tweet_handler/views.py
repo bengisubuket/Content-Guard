@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from .models import Tweet
+from .models import Tweet, Keyword
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -35,7 +35,7 @@ class TweetView(View):
                     delay *= 2  # Exponential backoff
 
             if category not in desired_categories:
-                logging.warning("Failed to categorize tweet after multiple attempts.")
+                # logging.warning("Failed to categorize tweet after multiple attempts.")
                 category = None
 
             tweet = Tweet(user_id=data['userId'], tab_id=data['tabId'], category=category)
@@ -49,3 +49,20 @@ class TweetView(View):
     def get(self, request):
         # Testing endpoint, to be disabled in production
         return JsonResponse({'status': 'success', 'message': 'GET request received. This method is for testing only.'})
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class KeywordView(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            keyword_text = data.get('keyword', '').strip()
+            if keyword_text:  # Make sure the keyword is not empty
+                keyword_obj, created = Keyword.objects.get_or_create(keyword=keyword_text)
+                keyword_obj.number_of_blocked_tweets += 1
+                keyword_obj.save()
+                return JsonResponse({'status': 'success', 'message': 'Keyword data saved.'}, status=201)
+            else:
+                return JsonResponse({'status': 'error', 'message': 'No keyword provided.'}, status=400)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)

@@ -82,6 +82,7 @@ function findTweetTextNode(node) {
     return null;
 }
 
+
 // Finds text element from node and changes visibility.
 function handleNode(node) {
     const tweetTextElement = node.querySelector('[data-testid="tweetText"]');
@@ -93,13 +94,24 @@ function handleNode(node) {
 
         // ================================ Keyword block ================================================================================
         // Check each keyword in kw_filters
-        const isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
-        if (isBlocked) {
-            console.log("BLOCKED_kw");
+        const kw = kw_filters.find(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
+        if (kw) {
+            console.log("BLOCKED_kw: ", kw);
             // If any keyword is found, mute the tweet by hiding it
-            console.log("node:", node , )
             node.style.display = 'none';
             count_blocked_kw++;
+            fetch('http://localhost:8000/api/keyword/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    keyword: kw,
+                }),
+            }).then(response => response.json())
+            .catch(error => {
+                console.error("Failed to send kw data:", error);
+            });
         }
         else{       
             node.style.removeProperty('display');
