@@ -24,6 +24,7 @@ function loadSettings() {
                 "username": "uname",
                 "id": 492,
                 "keywords": [],
+                "categories": [],
                 "activeKeywords": [],
                 "activeCategories": []
             };
@@ -58,7 +59,13 @@ chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         // Check for the correct action
         if (request.action === "updateKeywords") {
-            userSettings.activeKeywords = request.data;
+            userSettings.keywords = request.data;
+            
+            userSettings.activeKeywords = [];
+            userSettings.keywords.forEach((kwObj) => {
+                userSettings.activeKeywords.push(kwObj.name);
+            });
+
             saveSettings();
         }
         return true; // Keeps the message channel open for async response
@@ -69,7 +76,13 @@ chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         // Check for the correct action
         if (request.action === "keywordDeleted") {
-            userSettings.activeKeywords = request.data;
+            userSettings.keywords = request.data;
+            
+            userSettings.activeKeywords = [];
+            userSettings.keywords.forEach((kwObj) => {
+                userSettings.activeKeywords.push(kwObj.name);
+            });
+            
             saveSettings();
         }
         return true; // Keeps the message channel open for async response

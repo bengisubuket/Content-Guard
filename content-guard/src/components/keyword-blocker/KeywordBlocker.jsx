@@ -10,8 +10,7 @@ function KeywordBlockerComponent() {
     const [userSettings, setUserSettings] = useState({
         username: "uname",
         id: 492,
-        keywords: [],
-        activeKeywords: []
+        keywords: []
     });
 
     const navigateBack = () => {
@@ -23,47 +22,33 @@ function KeywordBlockerComponent() {
             chrome.storage.local.get('userSettings', (data) => {
                 if (data.userSettings) {
                     setUserSettings(data.userSettings);
-                    setKeywordsList(data.userSettings.activeKeywords || []);
+                    setKeywordsList(data.userSettings.keywords || []);
                 } else {
                     const initialSettings = {
                         username: "uname",
                         id: 492,
-                        keywords: [],
-                        activeKeywords: []
+                        keywords: []
                     };
                     setUserSettings(initialSettings);
-                    saveSettings(initialSettings);
                 }
             });
         }
 
         loadSettings();
-
-        const listener = (request, sender, sendResponse) => {
-            if (request.keywordsList) {
-                setKeywordsList(request.keywordsList);
-                sendResponse({ status: 'keywords received' });
-            }
-            return true;
-        };
-
-        chrome.runtime.onMessage.addListener(listener);
-        return () => chrome.runtime.onMessage.removeListener(listener);
     }, []);
-
-    function saveSettings(settings) {
-        chrome.storage.local.set({ 'userSettings': settings }, () => {
-            console.log('User settings saved:', settings);
-        });
-    }
 
     function handleAddKeyword() {
         if (keyword.trim() !== '') {
-            const updatedKeywords = [...userSettings.activeKeywords, keyword];
-            const updatedSettings = { ...userSettings, activeKeywords: updatedKeywords };
+
+            let kwObj = {
+                "name": keyword,
+                "timer": null
+            };
+
+            const updatedKeywords = [...userSettings.keywords, kwObj];
+            const updatedSettings = { ...userSettings, keywords: updatedKeywords };
             setUserSettings(updatedSettings);
             setKeywordsList(updatedKeywords);
-            saveSettings(updatedSettings);
 
             // Create a message object with the updated keywords list
             const message = { action: "updateKeywords", data: updatedKeywords };
@@ -76,17 +61,15 @@ function KeywordBlockerComponent() {
         }
     }
 
-    const deleteKeyword = (index) => {
+    const handleDeleteKeyword = (index) => {
         const updatedKeywords = [...keywordsList];
         updatedKeywords.splice(index, 1);
         setKeywordsList(updatedKeywords);
         
-        const updatedSettings = { ...userSettings, activeKeywords: updatedKeywords };
+        const updatedSettings = { ...userSettings, keywords: updatedKeywords };
         setUserSettings(updatedSettings);
-        
-        saveSettings(updatedSettings);
 
-        const message = { action: "keywordDeleted", data:updatedKeywords };
+        const message = { action: "keywordDeleted", data: updatedKeywords };
 
         // Send message to background.js
         chrome.runtime.sendMessage(message, function(response) {
@@ -129,8 +112,8 @@ function KeywordBlockerComponent() {
                         {keywordsList && keywordsList.length > 0 ? (
                             keywordsList.map((kw, index) => (
                                 <Dropdown.Item key={index}>
-                                    {kw}
-                                    <Button variant="danger" size="sm" className="ml-2" onClick={() => deleteKeyword(index)}>Delete</Button>
+                                    {kw.name}
+                                    <Button variant="danger" size="sm" className="ml-2" onClick={() => handleDeleteKeyword(index)}>Delete</Button>
                                 </Dropdown.Item>
                             ))
                         ) : (
