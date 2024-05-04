@@ -9,56 +9,6 @@ var count_blocked_kw = 0;
 var count_blocked_category = 0;
 var closedTime;
 
-// ================================ Settings ================================================================================
-
-// Function to save user settings to chrome.storage
-function saveSettings() {
-    // Save userSettings to chrome.storage.local
-    chrome.storage.local.set({'userSettings': userSettings}, function() {
-        console.log('User settings saved:', userSettings);
-    });
-}
-
-// Function to load user settings from chrome.storage
-function loadSettings() {
-    // Retrieve userSettings from chrome.storage.local
-    chrome.storage.local.get('userSettings', function(data) {
-        userSettings = data.userSettings;
-        
-        if (userSettings === undefined){
-            userSettings = {
-                "username": "uname",
-                "id": 492,
-                "keywords": [],
-                "activeKeywords": [],
-                "activeCategories": []
-            };
-            saveSettings();
-            return;
-        }
-        kw_filters = userSettings.activeKeywords;
-        category_filters = userSettings.activeCategories;
-        console.log('User settings loaded:', userSettings);
-        // Call the callback function with the loaded user settings
-        loadedSettings();
-    });
-}
-
-function loadedSettings() {
-    console.log("Settings loaded.");
-
-    if (userSettings === undefined){
-        userSettings = {
-            "username": "uname",
-            "id": 492,
-            "keywords": [],
-            "activeKeywords": []
-        };
-        saveSettings();
-    }
-    handleNodes();
-}
-
 // ================================ Tweet handlings ================================================================================
 
 // Function to recursively search for nodes with data-testid="tweetText" attribute
@@ -81,7 +31,6 @@ function findTweetTextNode(node) {
     // If not found, return null
     return null;
 }
-
 
 // Finds text element from node and changes visibility.
 function handleNode(node) {
@@ -238,6 +187,7 @@ function printDataTestIds(node, hierarchy = 'root') {
     }
 }
 
+
 // // ================================ Timers ==============================================================================
 // // check if the day has changed after the last tab/window close action
 // function isNewDay(closedTime){
@@ -269,6 +219,7 @@ function printDataTestIds(node, hierarchy = 'root') {
 
 // Starts everything when the tab loads.
 function newTabLoaded() {
+    trimNodes();
     // Options for the MutationObserver
     const observerConfig = {
         childList: true, // Observe changes to the children of the target node
@@ -293,64 +244,23 @@ chrome.runtime.onMessage.addListener((obj, sender, response) => {
         newTabLoaded();
 });
 
-// Listens for new keyword message from the background script
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.action === "updateKeywords") {
-        console.log("Received keywords:", request.data);
-        loadSettings();
-        sendResponse({status: "Setting read again"});
-        return true;
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === "filters") {
+        // Handle the incoming keywords and categories
+        console.log("Received keywords:", message.activeKeywords);
+        console.log("Received categories:", message.activeCategories);
+
+        // Update the content script's local settings or perform other actions
+        kw_filters = message.activeKeywords;
+        category_filters = message.activeCategories;
+        handleNodes();
     }
 });
-
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.action === "keywordDeleted") {
-        console.log("Keyword deleted:", request.data);
-        loadSettings();
-        sendResponse({status: "Setting read again"});
-        return true;
-    }
-});
-
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    if (request.action === "updateCategories") {
-        console.log("Received categories:", request.data);
-        loadSettings();
-        sendResponse({status: "Setting read again"});
-        return true;
-    }
-});
-
-// chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-//     console.log('Message received in contentScript:', request);
-//     loadSettings();
-//     sendResponse({status: "Setting read again"});
-//     return true;
-// });
-
-trimNodes();
-
-loadSettings();  // Initial call to fetch settings
 
 /* ================================ Graveyard ================================================================================================
 
-function getDate() {
-    const currentDate = new Date();
+X_X
 
-    // Get the day of the week (0-6)
-    const dayOfWeek = currentDate.getDay();
-
-    // Convert Sunday to 7 to match the desired output
-    const adjustedDayOfWeek = (dayOfWeek === 0) ? 7 : dayOfWeek;
-
-    // Get the hour of the day (0-23)
-    const hourOfDay = currentDate.getHours();
-
-    return {
-        day: adjustedDayOfWeek,
-        hour: hourOfDay
-    };
-}
-
+DAED ZONE 
 
 */

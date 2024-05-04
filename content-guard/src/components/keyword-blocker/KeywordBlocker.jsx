@@ -64,11 +64,13 @@ function KeywordBlockerComponent() {
             setUserSettings(updatedSettings);
             setKeywordsList(updatedKeywords);
             saveSettings(updatedSettings);
-            const message = { action: "updateKeywords", data: "New Keyword List" };
+
+            // Create a message object with the updated keywords list
+            const message = { action: "updateKeywords", data: updatedKeywords };
 
             // Send message to background.js
             chrome.runtime.sendMessage(message, function(response) {
-                console.log("Response from content script:", response);
+                console.log("Response from background script:", response);
             });
             setKeyword('');
         }
@@ -84,7 +86,7 @@ function KeywordBlockerComponent() {
         
         saveSettings(updatedSettings);
 
-        const message = { action: "keywordDeleted", data: "New Keyword List" };
+        const message = { action: "keywordDeleted", data:updatedKeywords };
 
         // Send message to background.js
         chrome.runtime.sendMessage(message, function(response) {

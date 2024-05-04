@@ -93,10 +93,9 @@ function CategoryBlockerComponent() {
         const updatedSettings = { ...userSettings, activeCategories: updatedCategories };
         setUserSettings(updatedSettings);
         saveSettings(updatedSettings);
-        console.log("activeCategories:", updatedSettings.activeCategories);
 
         // Send the updated categories list to the background script
-        chrome.runtime.sendMessage({ action: "updateCategories" }, (response) => {
+        chrome.runtime.sendMessage({ action: "updateCategories", data: updatedSettings.activeCategories }, (response) => {
             console.log("Response from content script:", response);
         });
     };

@@ -1,5 +1,48 @@
 var userSettings; // Global variable to store the keywordsList
 
+loadSettings(); // Load user settings from chrome.storage
+// ================================ Settings ================================================================================
+
+// Function to save user settings to chrome.storage
+function saveSettings() {
+    // Save userSettings to chrome.storage.local
+    chrome.storage.local.set({'userSettings': userSettings}, function() {
+        console.log('User settings saved:', userSettings);
+    });
+    broadcastKeywords();
+}
+
+// Function to load user settings from chrome.storage
+function loadSettings() {
+    // Retrieve userSettings from chrome.storage.local
+    chrome.storage.local.get('userSettings', function(data) {
+        console.log('User settings loaded:', data.user);
+        userSettings = data.userSettings;
+        
+        if (userSettings === undefined){
+            userSettings = {
+                "username": "uname",
+                "id": 492,
+                "keywords": [],
+                "activeKeywords": [],
+                "activeCategories": []
+            };
+            saveSettings();
+            return;
+        }
+        console.log('User settings loaded:', userSettings);
+        // Call the callback function with the loaded user settings
+        loadedSettings();
+    });
+}
+
+function loadedSettings() {
+    console.log("Settings are ready to use.");
+    
+    //saveSettings();
+}
+
+
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     console.log(tab);
     if(tab.url && (tab.url.includes("twitter.com") || changeInfo.status === "loading")) {
@@ -15,12 +58,8 @@ chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         // Check for the correct action
         if (request.action === "updateKeywords") {
-            // Send the message to content script
-            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                chrome.tabs.sendMessage(tabs[0].id, request, function(response) {
-                    console.log("Received response from content script");
-                });
-            });
+            userSettings.activeKeywords = request.data;
+            saveSettings();
         }
         return true; // Keeps the message channel open for async response
     }
@@ -30,12 +69,8 @@ chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         // Check for the correct action
         if (request.action === "keywordDeleted") {
-            // Send the message to content script
-            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                chrome.tabs.sendMessage(tabs[0].id, request, function(response) {
-                    console.log("Received response from content script");
-                });
-            });
+            userSettings.activeKeywords = request.data;
+            saveSettings();
         }
         return true; // Keeps the message channel open for async response
     }
@@ -45,41 +80,27 @@ chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         // Check for the correct action
         if (request.action === "updateCategories") {
-            // Send the message to content script
-            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                chrome.tabs.sendMessage(tabs[0].id, request, function(response) {
-                    console.log("Received response from content script");
-                });
-            });
+            userSettings.activeCategories = request.data;
+            saveSettings();   
         }
         return true; // Keeps the message channel open for async response
     }
 );
 
-
-// // keywordList update
-// chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-//     console.log('Message received in background:', request);
-//     if (request.keywordsList) {
-//       keywordsList = request.keywordsList;
-//       broadcastKeywords();
-//       sendResponse({ status: 'keywords updated' });
-//     } else if (request.request === "getKeywords") {
-//       sendResponse({ keywordsList: keywordsList });
-//     }
-//     return true;
-// });
+// send message to KeywordBlocker.jsx
   
-// // Function to broadcast keywordsList to all tabs
-// function broadcastKeywords() {
-//     chrome.tabs.query({}, function(tabs) {
-//         for (let tab of tabs) {
-//             if (tab.url && tab.url.includes("twitter.com")) {
-//             chrome.tabs.sendMessage(tab.id, {
-//                 type: "KWs",
-//                 keywords: keywordsList
-//             });
-//             }
-//         }
-//     });
-// }
+// Function to broadcast keywordsList to all tabs
+function broadcastKeywords() {
+    console.log("activeKeywords:", userSettings.activeKeywords);
+    chrome.tabs.query({}, function(tabs) {
+        for (let tab of tabs) {
+            if (tab.url && tab.url.includes("twitter.com")) {
+                chrome.tabs.sendMessage(tab.id, {
+                    type: "filters",
+                    activeKeywords: userSettings.activeKeywords,
+                    activeCategories: userSettings.activeCategories
+                });
+            }
+        }
+    });
+}
