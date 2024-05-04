@@ -101,8 +101,8 @@ function handleNode(node) {
             node.style.display = 'none';
             count_blocked_kw++;
         }
-        else{       
-            node.style.display = 'true';
+        else{
+            node.style.removeProperty('display');
         }
         // ================================ Category block ================================================================================
         // Check each category in category_filters
@@ -135,7 +135,7 @@ function handleNode(node) {
             });
         }
         else{
-            node.style.display = 'true';
+            node.style.removeProperty('display');
         }
     } 
     else {
