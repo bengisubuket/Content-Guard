@@ -3,15 +3,24 @@ import { Button, Container, Row, Col, Form, Dropdown, Image } from 'react-bootst
 import { PlusCircleFill, ArrowLeft } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 
+// Converts HH:MM time format to milliseconds
+function timeToMilliseconds(time) {
+    const [hours, minutes] = time.split(':').map(Number);
+    return (hours * 3600000) + (minutes * 60000);
+}
+
 function KeywordBlockerComponent() {
     const navigate = useNavigate();
     const [keyword, setKeyword] = useState('');
     const [keywordsList, setKeywordsList] = useState();
     const [userSettings, setUserSettings] = useState({
         username: "uname",
-        id: 492,
+        id: 493,
         keywords: []
     });
+    const [timerEnabled, setTimerEnabled] = useState(false);
+    const [timerDuration, setTimerDuration] = useState('');
+    const [timerAction, setTimerAction] = useState('allow');
 
     const navigateBack = () => {
         navigate('/blockers');
@@ -39,11 +48,20 @@ function KeywordBlockerComponent() {
 
     function handleAddKeyword() {
         if (keyword.trim() !== '') {
+            const durationInMs = timeToMilliseconds(timerDuration);
 
             let kwObj = {
                 "name": keyword,
                 "timer": null
             };
+
+            if(timerEnabled) {
+                kwObj.timer = {
+                    "action" : timerAction,
+                    "duration": durationInMs,
+                    "remainingTime": durationInMs
+                };
+            }
 
             const updatedKeywords = [...userSettings.keywords, kwObj];
             const updatedSettings = { ...userSettings, keywords: updatedKeywords };
@@ -62,6 +80,7 @@ function KeywordBlockerComponent() {
     }
 
     const handleDeleteKeyword = (index) => {
+        console.log("delete keyword called")
         const updatedKeywords = [...keywordsList];
         updatedKeywords.splice(index, 1);
         setKeywordsList(updatedKeywords);
@@ -73,7 +92,7 @@ function KeywordBlockerComponent() {
 
         // Send message to background.js
         chrome.runtime.sendMessage(message, function(response) {
-            console.log("Response from content script:", response);
+            console.log("Response from background script:", response);
         });
     };
 
@@ -102,6 +121,53 @@ function KeywordBlockerComponent() {
                     </Button>
                 </Col>
             </Row>
+            <Row className='mb-3'>
+                <Col>
+                    <Form.Check
+                        type="checkbox"
+                        label="Enable Timer"
+                        checked={timerEnabled}
+                        onChange={e => setTimerEnabled(e.target.checked)}
+                    />
+                </Col>
+            </Row>
+            {timerEnabled && (
+                <Row className='mb-3'>
+                    <Col>
+                        <Form>
+                            <Form.Group controlId="duration">
+                                <Form.Label>Duration:</Form.Label>
+                                <Form.Control type="time" value={timerDuration} onChange={e => setTimerDuration(e.target.value)} placeholder="HH:MM" />
+                            </Form.Group>
+                            <Form.Group>
+                                <Form.Label>Action:</Form.Label>
+                                <div key={`inline-radio`} className="mb-3">
+                                    <Form.Check
+                                        inline
+                                        label="Allow"
+                                        name="action"
+                                        type="radio"
+                                        id={`inline-radio-allow`}
+                                        value="allow"
+                                        checked={timerAction === 'allow'}
+                                        onChange={e => setTimerAction(e.target.value)}
+                                    />
+                                    <Form.Check
+                                        inline
+                                        label="Block"
+                                        name="action"
+                                        type="radio"
+                                        id={`inline-radio-block`}
+                                        value="block"
+                                        checked={timerAction === 'block'}
+                                        onChange={e => setTimerAction(e.target.value)}
+                                    />
+                                </div>
+                            </Form.Group>
+                        </Form>
+                    </Col>
+                </Row>
+            )}
             <Row className='mb-3'>
                 <Dropdown>
                     <Dropdown.Toggle id="dropdown-basic" style={{ width: '100%' }}>

@@ -4,7 +4,7 @@ var userSettings; // Global variable to store the keywordsList
 // Function to save user settings to chrome.storage
 function saveSettings() {
     // Save userSettings to chrome.storage.local
-    chrome.storage.local.set({'userSettings': userSettings}, function() {
+    chrome.storage.local.set({ 'userSettings': userSettings }, function() {
         console.log('User settings saved:', userSettings);
     });
     broadcastKeywords();
@@ -16,8 +16,8 @@ function loadSettings() {
     chrome.storage.local.get('userSettings', function(data) {
         console.log('User settings loaded:', data.user);
         userSettings = data.userSettings;
-        
-        if (userSettings === undefined){
+
+        if (userSettings === undefined) {
             userSettings = {
                 "username": "uname",
                 "id": 492,
@@ -37,14 +37,14 @@ function loadSettings() {
 
 function loadedSettings() {
     console.log("Settings are ready to use.");
-    
+
     //saveSettings();
 }
 
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     console.log(tab);
-    if(tab.url && (tab.url.includes("twitter.com") || changeInfo.status === "loading")) {
+    if (tab.url && (tab.url.includes("twitter.com") || changeInfo.status === "loading")) {
         console.log("Sending to tabId:", tabId);
         console.log("background.js listener");
         chrome.tabs.sendMessage(tabId, {
@@ -58,7 +58,7 @@ chrome.runtime.onMessage.addListener(
         // Check for the correct action
         if (request.action === "updateKeywords") {
             userSettings.keywords = request.data;
-            
+
             userSettings.activeKeywords = [];
             userSettings.keywords.forEach((kwObj) => {
                 userSettings.activeKeywords.push(kwObj.name);
@@ -75,12 +75,12 @@ chrome.runtime.onMessage.addListener(
         // Check for the correct action
         if (request.action === "keywordDeleted") {
             userSettings.keywords = request.data;
-            
+
             userSettings.activeKeywords = [];
             userSettings.keywords.forEach((kwObj) => {
                 userSettings.activeKeywords.push(kwObj.name);
             });
-            
+
             saveSettings();
         }
         return true; // Keeps the message channel open for async response
@@ -92,14 +92,14 @@ chrome.runtime.onMessage.addListener(
         // Check for the correct action
         if (request.action === "updateCategories") {
             userSettings.activeCategories = request.data;
-            saveSettings();   
+            saveSettings();
         }
         return true; // Keeps the message channel open for async response
     }
 );
 
 // send message to KeywordBlocker.jsx
-  
+
 // Function to broadcast keywordsList to all tabs
 function broadcastKeywords() {
     console.log("activeKeywords:", userSettings.activeKeywords);
@@ -117,16 +117,27 @@ function broadcastKeywords() {
 }
 
 function handleTimers() {
+    let lastTime = Date.now(); // Record the initial current time
+
     timerInterval = setInterval(() => {
-        chrome.tabs.query({url: '*://twitter.com/*'}, function(tabs) {
+        let currentTime = Date.now(); // Get the current time
+        let elapsedTime = currentTime - lastTime; // Calculate elapsed time since last interval
+        lastTime = currentTime; // Update lastTime to the current time for the next interval
+
+        chrome.tabs.query({ url: '*://twitter.com/*' }, function(tabs) {
             if (tabs.length > 0) {
-                loadSettings(); // check if a new timer has been added
+                loadSettings(); // Load settings to check if a new timer has been added
+
                 userSettings.keywords.forEach((keyword, index) => {
                     if (keyword.timer) {
-                        keyword.timer.remainingTime -= 1000; // decrement every second
+                        keyword.timer.remainingTime -= elapsedTime; // Decrement by the elapsed time
+
                         if (keyword.timer.remainingTime <= 0) {
                             if (keyword.timer.action === "block") {
-                                userSettings.activeKeywords.splice(userSettings.activeKeywords.indexOf(keyword.name), 1);
+                                const keywordIndex = userSettings.activeKeywords.indexOf(keyword.name);
+                                if (keywordIndex !== -1) {
+                                    userSettings.activeKeywords.splice(keywordIndex, 1);
+                                }
                                 userSettings.keywords.splice(index, 1);
                             } else if (keyword.timer.action === "allow") {
                                 userSettings.activeKeywords.push(keyword.name);
@@ -135,10 +146,10 @@ function handleTimers() {
                         }
                     }
                 });
-                saveSettings();
+                saveSettings(); // Save the updated settings
             }
         });
-    }, 1000);
+    }, 1000); // The timer still fires every 1000 milliseconds
 }
 
 loadSettings(); // Load user settings from chrome.storage
