@@ -37,7 +37,7 @@ class TweetView(View):
                 # logging.warning("Failed to categorize tweet after multiple attempts.")
                 category = None
 
-            tweet = Tweet(user_id=data['userId'], tab_id=data['tabId'], category=category)
+            tweet = Tweet(user_id=data['userId'], tab_id=data['tabId'], category=category, tweet_text=tweet_text)
             tweet.save()
 
             # Include the category in the response

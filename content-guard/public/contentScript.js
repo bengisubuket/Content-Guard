@@ -32,96 +32,75 @@ function findTweetTextNode(node) {
     return null;
 }
 
-// Finds text element from node and changes visibility.
+const requestQueue = [];
+let activeRequests = 0;
+const maxActiveRequests = 5;
+
 function handleNode(node) {
     const tweetTextElement = node.querySelector('[data-testid="tweetText"]');
-
-    if (tweetTextElement) {
-        // Retrieve the text content of the element
-        const tweetText = tweetTextElement.textContent.toLowerCase();  // Convert text to lower case here
-        //console.log(tweetText);
-
-        // ================================ Keyword block ================================================================================
-        // Check each keyword in kw_filters
-        const kw = kw_filters.find(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
-        if (kw) {
-            console.log("BLOCKED_kw: ", kw);
-            // If any keyword is found, mute the tweet by hiding it
-            node.style.display = 'none';
-            count_blocked_kw++;
-            fetch('http://localhost:8000/api/keyword/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    keyword: kw,
-                }),
-            }).then(response => response.json())
-            .then(data => {
-                console.log("Keyword data sent:", data);
-            })
-            .catch(error => {
-                console.error("Failed to send kw data:", error);
-            });
-        }
-        else{       
-            node.style.removeProperty('display');
-        }
-        // ================================ Category block ================================================================================
-        // Check each category in category_filters
-        const userId = 492;
-        const tabId = 79782103;
-        fetch('http://localhost:8000/api/tweet/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                userId: userId,
-                tabId: tabId,
-                tweetText: tweetText,
-            }),
-        }).then(response => response.json()) // parse the JSON from the response
-        .then(data => {
-            // console.log("---------------------")
-            // console.log("Tweet Text:", tweetText);
-            // console.log("Category:", data.category);
-            // check if the caategory is in the category_filters
-            if (category_filters.includes(data.category)) {
-                console.log("BLOCKED_cgtry");
-                node.style.display = 'none'; // This assumes 'node' is the element containing the tweet
-                count_blocked_category++;
-                fetch('http://localhost:8000/api/category/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        category: data.category,
-                    }),
-                }).then(response => response.json())
-                .then(data => {
-                    console.log("Category data sent:", data);
-                })
-                .catch(error => {
-                    console.error("Failed to send category data:", error);
-                });
-            }
-            else{
-                node.style.removeProperty('display');
-            }
-            // console.log("---------------------")
-        })
-        .catch(error => {
-            console.error("Failed to send data:", error);
-        });
-    } 
-    else {
+    if (!tweetTextElement) {
         console.log("Tweet text element not found.");
+        return;
+    }
+
+    // Retrieve and process the tweet text
+    const tweetText = tweetTextElement.textContent.toLowerCase();
+    const kw = kw_filters.find(keyword => tweetText.includes(keyword.toLowerCase()));
+
+    // If a keyword block is found, block immediately and do not make the category check
+    if (kw) {
+        console.log("BLOCKED_kw: ", kw);
+        node.style.display = 'none';
+        count_blocked_kw++;
+    } else {
+        // If no keyword block, enqueue for category checking
+        enqueueTweetProcessing(node, tweetText);
     }
 }
 
+function enqueueTweetProcessing(node, tweetText) {
+    requestQueue.push(() => processTweet(node, tweetText));
+
+    // Try to process the next item in the queue
+    processNextInQueue();
+}
+
+function processNextInQueue() {
+    if (activeRequests < maxActiveRequests && requestQueue.length > 0) {
+        const processTweet = requestQueue.shift();
+        activeRequests++;
+        processTweet();
+    }
+}
+
+function processTweet(node, tweetText) {
+    const userId = 492;
+    const tabId = 79782103;
+
+    fetch('http://localhost:8000/api/tweet/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({userId, tabId, tweetText})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (category_filters.includes(data.category)) {
+            console.log("BLOCKED_cgtry");
+            node.style.display = 'none';
+            count_blocked_category++;
+        } else {
+            // If not blocked by category, revert to visible only if keywords also did not block it
+            node.style.removeProperty('display');
+        }
+        activeRequests--;
+        processNextInQueue();
+    })
+    .catch(error => {
+        console.error("Failed to send data:", error);
+        activeRequests--;
+        processNextInQueue();
+    });
+}
 // Re-evaluates all nodes according to up-to-date keywords.
 function handleNodes() {
     nodes.forEach(node => {
@@ -133,8 +112,11 @@ function handleNodes() {
 function handleTweet(tweet) {
     const node = findTweetTextNode(tweet);
     if (node) {
-        nodes.push(node);
-        handleNode(node);
+        // push only the unique nodes
+        if (!nodes.includes(node)){
+            nodes.push(node);
+            handleNode(node);
+        }
     }
 }
 
