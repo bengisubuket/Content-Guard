@@ -5,6 +5,7 @@ class Tweet(models.Model):
     tab_id = models.CharField(max_length=255)
     category = models.TextField()
     tweet_text = models.TextField()
+    tweet_id = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.category

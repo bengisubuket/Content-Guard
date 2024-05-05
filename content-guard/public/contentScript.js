@@ -36,6 +36,16 @@ const requestQueue = [];
 let activeRequests = 0;
 const maxActiveRequests = 5;
 
+function extractTweetId(node) {
+    const statusLink = node.querySelector('[href*="/status/"]');
+    if (statusLink) {
+        const href = statusLink.getAttribute('href');
+        const parts = href.split('/status/')[1].split('?')[0];
+        return parts.includes('/') ? parts.split('/')[0] : parts;
+    }
+    return null;
+}
+
 function handleNode(node) {
     const tweetTextElement = node.querySelector('[data-testid="tweetText"]');
     if (!tweetTextElement) {
@@ -43,25 +53,25 @@ function handleNode(node) {
         return;
     }
 
-    // Retrieve and process the tweet text
     const tweetText = tweetTextElement.textContent.toLowerCase();
-    const kw = kw_filters.find(keyword => tweetText.includes(keyword.toLowerCase()));
+    const tweetId = extractTweetId(node);
+    if (!tweetId) {
+        console.log("Could not extract tweet ID.");
+        return;
+    }
 
-    // If a keyword block is found, block immediately and do not make the category check
+    const kw = kw_filters.find(keyword => tweetText.includes(keyword.toLowerCase()));
     if (kw) {
         console.log("BLOCKED_kw: ", kw);
         node.style.display = 'none';
         count_blocked_kw++;
     } else {
-        // If no keyword block, enqueue for category checking
-        enqueueTweetProcessing(node, tweetText);
+        enqueueTweetProcessing(node, tweetText, tweetId);
     }
 }
 
-function enqueueTweetProcessing(node, tweetText) {
-    requestQueue.push(() => processTweet(node, tweetText));
-
-    // Try to process the next item in the queue
+function enqueueTweetProcessing(node, tweetText, tweetId) {
+    requestQueue.push(() => processTweet(node, tweetText, tweetId));
     processNextInQueue();
 }
 
@@ -73,14 +83,13 @@ function processNextInQueue() {
     }
 }
 
-function processTweet(node, tweetText) {
+function processTweet(node, tweetText, tweetId) {
     const userId = 492;
     const tabId = 79782103;
-
     fetch('http://localhost:8000/api/tweet/', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({userId, tabId, tweetText})
+        body: JSON.stringify({userId, tabId, tweetText, tweetId})
     })
     .then(response => response.json())
     .then(data => {
@@ -89,7 +98,6 @@ function processTweet(node, tweetText) {
             node.style.display = 'none';
             count_blocked_category++;
         } else {
-            // If not blocked by category, revert to visible only if keywords also did not block it
             node.style.removeProperty('display');
         }
         activeRequests--;
@@ -101,6 +109,7 @@ function processTweet(node, tweetText) {
         processNextInQueue();
     });
 }
+
 // Re-evaluates all nodes according to up-to-date keywords.
 function handleNodes() {
     nodes.forEach(node => {
