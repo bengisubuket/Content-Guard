@@ -61,7 +61,11 @@ chrome.runtime.onMessage.addListener(
 
             userSettings.activeKeywords = [];
             userSettings.keywords.forEach((kwObj) => {
-                userSettings.activeKeywords.push(kwObj.name);
+                if (kwObj.timer) {
+                    if (kwObj.timer.action === "block")
+                        userSettings.activeKeywords.push(kwObj.name);
+                } else
+                    userSettings.activeKeywords.push(kwObj.name);
             });
 
             saveSettings();
@@ -78,7 +82,11 @@ chrome.runtime.onMessage.addListener(
 
             userSettings.activeKeywords = [];
             userSettings.keywords.forEach((kwObj) => {
-                userSettings.activeKeywords.push(kwObj.name);
+                if (kwObj.timer) {
+                    if (kwObj.timer.action === "block")
+                        userSettings.activeKeywords.push(kwObj.name);
+                } else
+                    userSettings.activeKeywords.push(kwObj.name);
             });
 
             saveSettings();
@@ -91,7 +99,17 @@ chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         // Check for the correct action
         if (request.action === "updateCategories") {
-            userSettings.activeCategories = request.data;
+            userSettings.categories = request.data;
+
+            userSettings.activeCategories = [];
+            userSettings.categories.forEach((catObj) => {
+                if (catObj.timer) {
+                    if (catObj.timer.action === "block")
+                        userSettings.activeCategories.push(catObj.name);
+                } else
+                    userSettings.activeCategories.push(kwObj.name);
+            });
+
             saveSettings();
         }
         return true; // Keeps the message channel open for async response
@@ -142,6 +160,25 @@ function handleTimers() {
                             } else if (keyword.timer.action === "allow") {
                                 userSettings.activeKeywords.push(keyword.name);
                                 userSettings.keywords[index].timer = null;
+                            }
+                        }
+                    }
+                });
+
+                userSettings.categories.forEach((category, index) => {
+                    if (category.timer) {
+                        category.timer.remainingTime -= elapsedTime; // Decrement by the elapsed time
+
+                        if (category.timer.remainingTime <= 0) {
+                            if (category.timer.action === "block") {
+                                const categoryIndex = userSettings.activeCategories.indexOf(category.name);
+                                if (categoryIndex !== -1) {
+                                    userSettings.activeCategories.splice(categoryIndex, 1);
+                                }
+                                userSettings.categories.splice(index, 1);
+                            } else if (category.timer.action === "allow") {
+                                userSettings.activeCategories.push(category.name);
+                                userSettings.categories[index].timer = null;
                             }
                         }
                     }

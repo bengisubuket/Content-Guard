@@ -1,4 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Button, Container, Row, Col, Form, Dropdown, Image } from 'react-bootstrap';
+import { PlusCircleFill, ArrowLeft } from 'react-bootstrap-icons';
+import { useNavigate } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Image from 'react-bootstrap/Image';
@@ -14,9 +18,8 @@ function CategoryBlockerComponent() {
     
     const [userSettings, setUserSettings] = useState({
         username: "uname",
-        id: 492,
-        keywords: [],
-        activeKeywords: [],
+        id: 493,
+        categories: [],
         activeCategories: []
     });
 
@@ -50,8 +53,7 @@ function CategoryBlockerComponent() {
                     const initialSettings = {
                         username: "uname",
                         id: 492,
-                        keywords: [],
-                        activeKeywords: [],
+                        categories: [],
                         activeCategories: []
                     };
                     setUserSettings(initialSettings);
@@ -95,7 +97,7 @@ function CategoryBlockerComponent() {
         saveSettings(updatedSettings);
 
         // Send the updated categories list to the background script
-        chrome.runtime.sendMessage({ action: "updateCategories", data: updatedSettings.activeCategories }, (response) => {
+        chrome.runtime.sendMessage({ action: "updateCategories", data: updatedSettings.categories }, (response) => {
             console.log("Response from content script:", response);
         });
     };
