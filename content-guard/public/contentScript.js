@@ -9,6 +9,10 @@ var count_blocked_kw = 0;
 var count_blocked_category = 0;
 var closedTime;
 
+//create dictionary for each category which keeps blocked counts
+var blockedCategoryCount = {}
+var blockedKwCount = {}
+
 // ================================ Tweet handlings ================================================================================
 
 // Function to recursively search for nodes with data-testid="tweetText" attribute
@@ -31,6 +35,32 @@ function findTweetTextNode(node) {
     // If not found, return null
     return null;
 }
+
+// function to send blocked counts to the server
+function sendBlockedCounts(){
+    console.log("blockedCategoryCount: ", blockedCategoryCount)
+    console.log("blockedKwCount: ", blockedKwCount)
+    const userId = 492;
+    const tabId = 79782103;
+    fetch('http://localhost:8000/api/blockedCounts/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({userId, tabId, blockedCategoryCount, blockedKwCount})
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Blocked counts sent successfully.");
+    })
+    .catch(error => {
+        console.error("Failed to send blocked counts:", error);
+    }
+    );
+
+}
+
+//send blocked counts to the server every 5 minutes
+setInterval(sendBlockedCounts, 30000);
+
 
 const requestQueue = [];
 let activeRequests = 0;
@@ -65,6 +95,12 @@ function handleNode(node) {
         console.log("BLOCKED_kw: ", kw);
         node.style.display = 'none';
         count_blocked_kw++;
+        // Update the count of blocked tweets for the keyword
+        if (blockedKwCount[kw]) {
+            blockedKwCount[kw] += 1;
+        } else {
+            blockedKwCount[kw] = 1;
+        }
     } else {
         enqueueTweetProcessing(node, tweetText, tweetId);
     }
@@ -97,6 +133,12 @@ function processTweet(node, tweetText, tweetId) {
             console.log("BLOCKED_cgtry");
             node.style.display = 'none';
             count_blocked_category++;
+            // Update the count of blocked tweets for the category
+            if (blockedCategoryCount[data.category]) {
+                blockedCategoryCount[data.category] += 1;
+            } else {
+                blockedCategoryCount[data.category] = 1;
+            }
         } else {
             node.style.removeProperty('display');
         }
