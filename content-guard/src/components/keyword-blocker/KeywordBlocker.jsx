@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Button, Container, Row, Col, Form, Dropdown, Image } from 'react-bootstrap';
+import { Button, Container, Row, Col, Form, Dropdown, Image, Alert } from 'react-bootstrap';
 import { PlusCircleFill, ArrowLeft } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,6 +11,7 @@ function timeToMilliseconds(time) {
 
 function KeywordBlockerComponent() {
     const navigate = useNavigate();
+
     const [keyword, setKeyword] = useState('');
     const [keywordsList, setKeywordsList] = useState();
     const [userSettings, setUserSettings] = useState({
@@ -18,9 +19,12 @@ function KeywordBlockerComponent() {
         id: 493,
         keywords: []
     });
+
     const [timerEnabled, setTimerEnabled] = useState(false);
-    const [timerDuration, setTimerDuration] = useState('');
+    const [timerDuration, setTimerDuration] = useState('00:00:00');
     const [timerAction, setTimerAction] = useState('allow');
+
+    const [kwExists, setKwExists] = useState(false);
 
     const navigateBack = () => {
         navigate('/blockers');
@@ -56,15 +60,24 @@ function KeywordBlockerComponent() {
     };
 
     function handleAddKeyword() {
+        setKwExists(false);
         if (keyword.trim() !== '') {
-            const durationInMs = timeToMilliseconds(timerDuration);
+
+            let kwT = keyword.trim().toLowerCase();
+
+            // if userSettings.keywords includes the keyword, return
+            if (userSettings.keywords.find(kw => kw.name === kwT)) {
+                setKwExists(true);
+                return;
+            }
 
             let kwObj = {
-                "name": keyword,
+                "name": kwT,
                 "timer": null
             };
 
             if(timerEnabled) {
+                const durationInMs = timeToMilliseconds(timerDuration);
                 kwObj.timer = {
                     "action" : timerAction,
                     "duration": durationInMs,
@@ -85,6 +98,9 @@ function KeywordBlockerComponent() {
                 console.log("Response from background script:", response);
             });
             setKeyword('');
+            setTimerEnabled(false);
+            setTimerDuration('00:00:00');
+            setTimerAction('allow');
         }
     }
 
@@ -130,6 +146,11 @@ function KeywordBlockerComponent() {
                     </Button>
                 </Col>
             </Row>
+            {kwExists && (
+                <Row className='mb-3'>
+                    <Col><Alert variant="danger">This keyword already exists.</Alert></Col>
+                </Row>
+            )}
             <Row className='mb-3'>
                 <Col>
                     <Form.Check
