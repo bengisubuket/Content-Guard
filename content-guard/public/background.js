@@ -162,7 +162,13 @@ function handleTimers() {
                             }
                         }
                     }
+                    currentTime = Date.now(); // Get the current time
+                    elapsedTime = currentTime - lastTime; // Calculate elapsed time since last interval
+                    lastTime = currentTime; // Update lastTime to the current time for the next interval
                 });
+                currentTime = Date.now(); // Get the current time
+                elapsedTime = currentTime - lastTime; // Calculate elapsed time since last interval
+                lastTime = currentTime; // Update lastTime to the current time for the next interval
 
                 userSettings.categories.forEach((category, index) => {
                     if (category.timer) {
@@ -181,6 +187,9 @@ function handleTimers() {
                             }
                         }
                     }
+                    currentTime = Date.now(); // Get the current time
+                    elapsedTime = currentTime - lastTime; // Calculate elapsed time since last interval
+                    lastTime = currentTime; // Update lastTime to the current time for the next interval
                 });
                 saveSettings(); // Save the updated settings
             }
