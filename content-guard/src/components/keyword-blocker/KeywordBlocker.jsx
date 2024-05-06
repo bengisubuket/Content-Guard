@@ -66,6 +66,7 @@ function KeywordBlockerComponent() {
 
             if(timerEnabled) {
                 kwObj.timer = {
+                    "enabled": true,
                     "action" : timerAction,
                     "duration": durationInMs,
                     "remainingTime": durationInMs
