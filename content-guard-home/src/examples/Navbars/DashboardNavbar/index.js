@@ -58,8 +58,12 @@ import {
 } from "context";
 
 // Images
-import team2 from "assets/images/team-2.jpg";
+import taylor from "assets/images/taylor-swift.jpeg";
+import kanye from "assets/images/kanye-west.jpeg";
+
 import logoSpotify from "assets/images/small-logos/logo-spotify.svg";
+import { ImEvil2 } from "react-icons/im";
+import { whitespace } from "stylis";
 
 function DashboardNavbar({ absolute, light, isMini }) {
   const [navbarType, setNavbarType] = useState();
@@ -113,26 +117,25 @@ function DashboardNavbar({ absolute, light, isMini }) {
       sx={{ mt: 2 }}
     >
       <NotificationItem
-        image={<img src={team2} alt="person" />}
-        title={["New message", "from Laur"]}
+        color="text"
+        image={
+          <ImEvil2 sx={{ color: 'white' }}>
+          </ImEvil2>
+        }
+        title={["", "Creating chaos successfully completed"]}
         date="13 minutes ago"
         onClick={handleCloseMenu}
       />
       <NotificationItem
-        image={<img src={logoSpotify} alt="person" />}
-        title={["New album", "by Travis Scott"]}
+        image={<img src={taylor} alt="person" />}
+        title={["New message", "from Taylor Swift"]}
         date="1 day"
         onClick={handleCloseMenu}
       />
       <NotificationItem
-        color="text"
-        image={
-          <Icon fontSize="small" sx={{ color: ({ palette: { white } }) => white.main }}>
-            payment
-          </Icon>
-        }
-        title={["", "Payment successfully completed"]}
-        date="2 days"
+        image={<img src={kanye} alt="person" />}
+        title={["New message", "from Kanye West"]}
+        date="2 day"
         onClick={handleCloseMenu}
       />
     </Menu>

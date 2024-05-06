@@ -14,16 +14,26 @@ import ReportLine from "layouts/reports/components/ReportLine";
 import { InfoOutlined } from '@mui/icons-material';
 
 const KeywordReport = () => {
-	const pieChartData = {
-    labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E', 'Team f'],
+	const categ_KeywPieChartData = {
+    labels: ['elon musk', 'parti', 'global warming', 'Politics', 'Football', 'Memes and Jokes'],
     series: [44, 55, 13, 43, 30, 90],
   };
   
+  const keywordPieChartData = {
+    labels: ['elon musk', 'parti', 'global warming'],
+    series: [44, 55, 13],
+  };
+
+  const categoryPieChartData = {
+    labels: ['Politics', 'Football', 'Memes and Jokes'],
+    series: [43, 30, 90],
+  };
+
   const options = {
     chart: {
       type: 'pie',
     },
-    labels: pieChartData.labels,
+    labels: categ_KeywPieChartData.labels,
     colors: ['#4318ff', '#0f1535', '#0075ff', '#01b574', '#ffb547', '#e31a1a', '#e9ecef', '#344767'],
     
     markers: {
@@ -31,6 +41,29 @@ const KeywordReport = () => {
     },
   };
 
+  const optionsKeyw = {
+    chart: {
+      type: 'pie',
+    },
+    labels: keywordPieChartData.labels,
+    colors: ['#4318ff', '#0f1535', '#0075ff', '#01b574', '#ffb547', '#e31a1a', '#e9ecef', '#344767'],
+    
+    markers: {
+      colors: ['#F44336', '#E91E63', '#9C27B0']
+    },
+  };
+
+  const optionsCateg = {
+    chart: {
+      type: 'pie',
+    },
+    labels: categoryPieChartData.labels,
+    colors: ['#4318ff', '#0f1535', '#0075ff', '#01b574', '#ffb547', '#e31a1a', '#e9ecef', '#344767'],
+    
+    markers: {
+      colors: ['#F44336', '#E91E63', '#9C27B0']
+    },
+  };
 	return (
 	<Card m={20}>
     <Card id="delete-account" sx={{ height: "100%"}}>
@@ -39,7 +72,7 @@ const KeywordReport = () => {
         Keywords and Categories Blocked
       </VuiTypography>
       
-      <Chart options={options} series={pieChartData.series} type="pie" width="400" />
+      <Chart options={options} series={categ_KeywPieChartData.series} type="pie" width="400" />
 
       </VuiBox>
       <VuiBox sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -48,13 +81,13 @@ const KeywordReport = () => {
       <VuiTypography variant="h6" sx={{color: '#e9ecef'}}>
         Keywords Blocked
       </VuiTypography>
-      <Chart options={options} series={pieChartData.series} type="pie" width="400" />
+      <Chart options={optionsKeyw} series={keywordPieChartData.series} type="pie" width="400" />
       </VuiBox>
       <VuiBox>
       <VuiTypography variant="h6" sx={{color: '#e9ecef'}}>
         Categories Blocked
       </VuiTypography>
-      <Chart options={options} series={pieChartData.series} type="pie" width="400" />
+      <Chart options={optionsCateg} series={categoryPieChartData.series} type="pie" width="400" />
       </VuiBox>
       </VuiBox>
     
