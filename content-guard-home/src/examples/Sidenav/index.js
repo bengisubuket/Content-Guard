@@ -46,7 +46,7 @@ import sidenavLogoLabel from "examples/Sidenav/styles/sidenav";
 // Vision UI Dashboard React context
 import { useVisionUIController, setMiniSidenav, setTransparentSidenav } from "context";
 
-// Vision UI Dashboard React icons
+// Content Guard Dashboard React icons
 import GuardianLogo from "examples/Icons/GuardianLogo";
 
 // function Sidenav({ color, brand, brandName, routes, ...rest }) {
