@@ -142,9 +142,10 @@ function handleTimers() {
         let elapsedTime = currentTime - lastTime; // Calculate elapsed time since last interval
         lastTime = currentTime; // Update lastTime to the current time for the next interval
 
+        loadSettings(); // Load settings to check if a new timer has been added
         chrome.tabs.query({ url: '*://twitter.com/*' }, function(tabs) {
             if (tabs.length > 0) {
-                loadSettings(); // Load settings to check if a new timer has been added
+
 
                 userSettings.keywords.forEach((keyword, index) => {
                     if (keyword.timer) {
@@ -163,9 +164,6 @@ function handleTimers() {
                             }
                         }
                     }
-                    currentTime = Date.now(); // Get the current time
-                    elapsedTime = currentTime - lastTime; // Calculate elapsed time since last interval
-                    lastTime = currentTime; // Update lastTime to the current time for the next interval
                 });
                 currentTime = Date.now(); // Get the current time
                 elapsedTime = currentTime - lastTime; // Calculate elapsed time since last interval
@@ -181,16 +179,13 @@ function handleTimers() {
                                 if (categoryIndex !== -1) {
                                     userSettings.activeCategories.splice(categoryIndex, 1);
                                 }
-                                userSettings.categories.splice(index, 1);
+                                userSettings.categories[index].timer = null;
                             } else if (category.timer.action === "allow") {
                                 userSettings.activeCategories.push(category.name);
                                 userSettings.categories[index].timer = null;
                             }
                         }
                     }
-                    currentTime = Date.now(); // Get the current time
-                    elapsedTime = currentTime - lastTime; // Calculate elapsed time since last interval
-                    lastTime = currentTime; // Update lastTime to the current time for the next interval
                 });
                 saveSettings(); // Save the updated settings
             }
