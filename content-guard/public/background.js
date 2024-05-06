@@ -147,7 +147,7 @@ function handleTimers() {
 
 
                 userSettings.keywords.forEach((keyword, index) => {
-                    if (keyword.timer && keyword.timer.enabled) {
+                    if (keyword.timer) {
                         keyword.timer.remainingTime -= elapsedTime; // Decrement by the elapsed time
 
                         if (keyword.timer.remainingTime <= 0) {
@@ -159,16 +159,14 @@ function handleTimers() {
                                 userSettings.keywords.splice(index, 1);
                             } else if (keyword.timer.action === "allow") {
                                 userSettings.activeKeywords.push(keyword.name);
-                                userSettings.keywords[index].timer.enabled = false;
+                                userSettings.keywords[index].timer = null;
                             }
                         }
-                        else 
-                            userSettings.timer.enabled = false;
                     }
                 });
 
                 userSettings.categories.forEach((category, index) => {
-                    if (category.timer && category.timer.enabled) {
+                    if (category.timer) {
                         category.timer.remainingTime -= elapsedTime; // Decrement by the elapsed time
 
                         if (category.timer.remainingTime <= 0) {
@@ -177,15 +175,13 @@ function handleTimers() {
                                 if (categoryIndex !== -1) {
                                     userSettings.activeCategories.splice(categoryIndex, 1);
                                 }
-                                userSettings.categories[index].timer.enabled = false;
+                                userSettings.categories[index].timer = null;
                             } else if (category.timer.action === "allow") {
                                 userSettings.activeCategories.push(category.name);
-                                userSettings.categories[index].timer.enabled = false;
+                                userSettings.categories[index].timer = null;
                             }
                         }
                     }
-                    else 
-                        userSettings.timer.enabled = false;
                 });
                 saveSettings(); // Save the updated settings
             }
