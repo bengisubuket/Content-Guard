@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 
 // Converts HH:MM time format to milliseconds
 function timeToMilliseconds(time) {
-    const [hours, minutes] = time.split(':').map(Number);
-    return (hours * 3600000) + (minutes * 60000);
+    const [hours, minutes, seconds] = time.split(':').map(Number);
+    return (hours * 3600000) + (minutes * 60000) + (seconds * 1000);
 }
 
 function KeywordBlockerComponent() {
@@ -46,6 +46,15 @@ function KeywordBlockerComponent() {
         loadSettings();
     }, []);
 
+    function handleTimeChange(e) {
+        const { name, value } = e.target;
+        setTimerDuration(prevValue => {
+            const timeValues = prevValue.split(':');
+            timeValues[name] = value;
+            return timeValues.join(':');
+        });
+    };
+
     function handleAddKeyword() {
         if (keyword.trim() !== '') {
             const durationInMs = timeToMilliseconds(timerDuration);
@@ -83,9 +92,9 @@ function KeywordBlockerComponent() {
         console.log("delete keyword called")
         const updatedKeywords = [...keywordsList];
         updatedKeywords.splice(index, 1);
-        setKeywordsList(updatedKeywords);
-        
         const updatedSettings = { ...userSettings, keywords: updatedKeywords };
+
+        setKeywordsList(updatedKeywords);
         setUserSettings(updatedSettings);
 
         const message = { action: "keywordDeleted", data: updatedKeywords };
@@ -137,7 +146,17 @@ function KeywordBlockerComponent() {
                         <Form>
                             <Form.Group controlId="duration">
                                 <Form.Label>Duration:</Form.Label>
-                                <Form.Control type="time" value={timerDuration} onChange={e => setTimerDuration(e.target.value)} placeholder="HH:MM" />
+                                <Row>
+                                    <Col>
+                                        <Form.Control type="number" name="0" value={timerDuration.split(':')[0]} onChange={handleTimeChange} placeholder="HH" />
+                                    </Col>
+                                    <Col>
+                                        <Form.Control type="number" name="1" value={timerDuration.split(':')[1]} onChange={handleTimeChange} placeholder="MM" />
+                                    </Col>
+                                    <Col>
+                                        <Form.Control type="number" name="2" value={timerDuration.split(':')[2]} onChange={handleTimeChange} placeholder="SS" />
+                                    </Col>
+                                </Row>
                             </Form.Group>
                             <Form.Group>
                                 <Form.Label>Action:</Form.Label>
