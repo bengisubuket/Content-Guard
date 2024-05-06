@@ -116,8 +116,6 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
-// send message to KeywordBlocker.jsx
-
 // Function to broadcast keywordsList to all tabs
 function broadcastKeywords() {
     console.log("activeKeywords:", userSettings.activeKeywords);
@@ -135,15 +133,16 @@ function broadcastKeywords() {
 }
 
 function handleTimers() {
-    let lastTime = Date.now(); // Record the initial current time
+    var lastTime = Date.now(); // Record the initial current time
 
     timerInterval = setInterval(() => {
         let currentTime = Date.now(); // Get the current time
-        let elapsedTime = currentTime - lastTime; // Calculate elapsed time since last interval
+        let elapsedTime = 2 * (currentTime - lastTime); // Calculate elapsed time since last interval
         lastTime = currentTime; // Update lastTime to the current time for the next interval
 
         loadSettings(); // Load settings to check if a new timer has been added
         chrome.tabs.query({ url: '*://twitter.com/*' }, function(tabs) {
+            console.log("tabs:", tabs.length);
             if (tabs.length > 0) {
 
 
@@ -165,9 +164,6 @@ function handleTimers() {
                         }
                     }
                 });
-                currentTime = Date.now(); // Get the current time
-                elapsedTime = currentTime - lastTime; // Calculate elapsed time since last interval
-                lastTime = currentTime; // Update lastTime to the current time for the next interval
 
                 userSettings.categories.forEach((category, index) => {
                     if (category.timer) {
