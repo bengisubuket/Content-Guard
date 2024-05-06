@@ -87,27 +87,27 @@ function processTweet(node, tweetText, tweetId) {
     const userId = 492;
     const tabId = 79782103;
     fetch('http://localhost:8000/api/tweet/', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({userId, tabId, tweetText, tweetId})
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (category_filters.includes(data.category)) {
-            console.log("BLOCKED_cgtry");
-            node.style.display = 'none';
-            count_blocked_category++;
-        } else {
-            node.style.removeProperty('display');
-        }
-        activeRequests--;
-        processNextInQueue();
-    })
-    .catch(error => {
-        console.error("Failed to send data:", error);
-        activeRequests--;
-        processNextInQueue();
-    });
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, tabId, tweetText, tweetId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (category_filters.includes(data.category)) {
+                console.log("BLOCKED_cgtry");
+                node.style.display = 'none';
+                count_blocked_category++;
+            } else {
+                node.style.removeProperty('display');
+            }
+            activeRequests--;
+            processNextInQueue();
+        })
+        .catch(error => {
+            console.error("Failed to send data:", error);
+            activeRequests--;
+            processNextInQueue();
+        });
 }
 
 // Re-evaluates all nodes according to up-to-date keywords.
@@ -122,7 +122,7 @@ function handleTweet(tweet) {
     const node = findTweetTextNode(tweet);
     if (node) {
         // push only the unique nodes
-        if (!nodes.includes(node)){
+        if (!nodes.includes(node)) {
             nodes.push(node);
             handleNode(node);
         }
@@ -178,34 +178,6 @@ function printDataTestIds(node, hierarchy = 'root') {
     }
 }
 
-
-// // ================================ Timers ==============================================================================
-// // check if the day has changed after the last tab/window close action
-// function isNewDay(closedTime){
-//     const day = 86400000; // 24 hours in milliseconds
-//     if(Date.now()/day - closedTime/day <= 1){
-//         return true;
-//     }
-//     return false;
-// }
-
-// function closedTabWindow(){
-//     closedTime = Date.now();
-//     // push the closed time, active keywords to the chrome storage
-// }
-
-// chrome.tabs.onRemoved.addListener(function(tabid, removed) {
-//     closedTabWindow();
-//    })
-   
-// chrome.windows.onRemoved.addListener(function(windowid) {
-//     closedTabWindow();
-//    })
-
-// function startTimer(keyword, action, duration){
-
-// }
-
 // ================================ Main ================================================================================
 
 // Starts everything when the tab loads.
@@ -214,7 +186,7 @@ function newTabLoaded() {
     // Options for the MutationObserver
     const observerConfig = {
         childList: true, // Observe changes to the children of the target node
-        subtree: true,   // Observe changes in the entire subtree of the target node
+        subtree: true, // Observe changes in the entire subtree of the target node
     };
 
     // Select the node that contains the tweets
@@ -223,7 +195,7 @@ function newTabLoaded() {
     // Create a new MutationObserver
     observer = new MutationObserver(handleNewTweets);
 
-    if (targetNode && observer )
+    if (targetNode && observer)
     // Start observing the target node for mutations
         observer.observe(targetNode, observerConfig);
 }

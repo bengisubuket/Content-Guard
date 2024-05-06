@@ -1,16 +1,6 @@
-import React, { useEffect, useState } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Container, Row, Col, Form, Dropdown, Image } from 'react-bootstrap';
 import { PlusCircleFill, ArrowLeft } from 'react-bootstrap-icons';
-import { useNavigate } from 'react-router-dom';
-import Button from 'react-bootstrap/Button';
-import Container from 'react-bootstrap/Container';
-import Image from 'react-bootstrap/Image';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Dropdown from 'react-bootstrap/Dropdown';
-import Form from 'react-bootstrap/Form';
-import { ArrowLeft } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 
 function CategoryBlockerComponent() {
