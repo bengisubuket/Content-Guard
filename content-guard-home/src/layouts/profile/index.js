@@ -87,41 +87,25 @@ function Overview() {
           >
             <ProfileInfoCard
               title="profile information"
-              description="Hi, I’m Mark Johnson, Decisions: If you can’t decide, the answer is no. If two equally difficult paths, choose the one more painful in the short term (pain avoidance is creating an illusion of equality)."
+              description="Hi, I’m İlayda Zehra Yılmaz, Decisions: If you can’t decide, the answer is no. If two equally difficult paths, choose the one more painful in the short term (pain avoidance is creating an illusion of equality)."
               info={{
-                fullName: "Mark Johnson",
-                mobile: "(44) 123 1234 123",
-                email: "mark@simmmple.com",
-                location: "United States",
+                fullName: "İlayda Zehra Yılmaz",
+                mobile: "+(90) 123 1234 123",
+                email: "ilayda@contentguard.com",
+                location: "Turkey",
               }}
               social={[
                 {
-                  link: "https://www.facebook.com/CreativeTim/",
-                  icon: <FacebookIcon />,
-                  color: "facebook",
-                },
-                {
-                  link: "https://twitter.com/creativetim",
+                  link: "https://twitter.com",
                   icon: <TwitterIcon />,
                   color: "twitter",
-                },
-                {
-                  link: "https://www.instagram.com/creativetimofficial/",
-                  icon: <InstagramIcon />,
-                  color: "instagram",
                 },
               ]}
             />
           </Grid>
         </Grid>
       </VuiBox>
-      <Grid container spacing={3} mb="30px">
-        <Grid item xs={12} xl={3} height="100%">
-          <PlatformSettings />
-        </Grid>
-        
-      </Grid>
-
+      
       <Footer />
     </DashboardLayout>
   );

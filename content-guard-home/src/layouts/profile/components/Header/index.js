@@ -23,7 +23,7 @@ import Grid from "@mui/material/Grid";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 // Images
-import burceMars from "assets/images/avatar-simmmple.png";
+import girl from "assets/images/avatar10.png";
 // Vision UI Dashboard React base styles
 import breakpoints from "assets/theme/base/breakpoints";
 import VuiAvatar from "components/VuiAvatar";
@@ -105,7 +105,7 @@ function Header() {
             })}
           >
             <VuiAvatar
-              src={burceMars}
+              src={girl}
               alt="profile-image"
               variant="rounded"
               size="xl"
@@ -127,25 +127,16 @@ function Header() {
               })}
             >
               <VuiTypography variant="lg" color="white" fontWeight="bold">
-                Mark Johnson
+                  İlayda Zehra Yılmaz
               </VuiTypography>
               <VuiTypography variant="button" color="text" fontWeight="regular">
-                mark@simmmple.com
+                ilayda@contentguard.com
               </VuiTypography>
             </VuiBox>
           </Grid>
           <Grid item xs={12} md={6} lg={6.5} xl={6} xxl={4} sx={{ ml: "auto" }}>
             <AppBar position="static">
-              <Tabs
-                orientation={tabsOrientation}
-                value={tabValue}
-                onChange={handleSetTabValue}
-                sx={{ background: "transparent", display: "flex", justifyContent: "flex-end" }}
-              >
-                <Tab label="OVERVIEW" icon={<IoCube color="white" size="16px" />} />
-                <Tab label="TEAMS" icon={<IoDocument color="white" size="16px" />} />
-                <Tab label="PROJECTS" icon={<IoBuild color="white" size="16px" />} />
-              </Tabs>
+              
             </AppBar>
           </Grid>
         </Grid>

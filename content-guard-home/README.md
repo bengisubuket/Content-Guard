@@ -95,7 +95,7 @@ The documentation for the Vision UI Dashboard Free is hosted at our [website](ht
 Within the download you'll find the following directories and files:
 
 ```
-vision-dashboard-react-free/
+content-guard/
 ├── public
 │   ├── apple-icon.png
 │   ├── favicon.icon

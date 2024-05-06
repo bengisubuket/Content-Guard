@@ -48,7 +48,6 @@ import Blockers from "layouts/blockers";
 import RTL from "layouts/rtl";
 import Profile from "layouts/profile";
 import SignIn from "layouts/authentication/sign-in";
-import SignUp from "layouts/authentication/sign-up";
 
 // Vision UI Dashboard React icons
 import { IoRocketSharp } from "react-icons/io5";

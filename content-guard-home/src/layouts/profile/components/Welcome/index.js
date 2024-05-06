@@ -18,7 +18,7 @@
 
 import React from "react";
 import { Card, Icon } from "@mui/material";
-import welcome from "assets/images/welcome-profile.png";
+import welcome from "assets/images/content-guard-images/guardian-welcome-profile.jpeg";
 import VuiTypography from "components/VuiTypography/index";
 import VuiBox from "components/VuiBox/index";
 
@@ -41,7 +41,7 @@ const Welcome = () => {
             Welcome back!
           </VuiTypography>
           <VuiTypography color="white" variant="button" fontWeight="regular">
-            Nice to see you, Mark Johnson!
+            Nice to see you, İlayda Zehra YILMAZ!
           </VuiTypography>
         </VuiBox>
         <VuiBox justifySelf="flex-end">
@@ -69,8 +69,10 @@ const Welcome = () => {
               },
             }}
           >
-            Tap to record
+            Content Guard is guarding your content for you. Explore Content Guard Home.
+            <Icon sx={{ fontWeight: "bold", ml: "5px" }}>lock</Icon>
             <Icon sx={{ fontWeight: "bold", ml: "5px" }}>arrow_forward</Icon>
+                   
           </VuiTypography>
         </VuiBox>
       </VuiBox>
