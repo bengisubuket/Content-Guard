@@ -52,7 +52,7 @@ function handleText(filters, text) {
     // const tweetWords = tweetText.split(/\s+|[,./\\!@#$%^&*();:{}[\]<>?\'\"]+/);
     // const kw = tweetWords.some(tw => kw_filters.some(kwf => tw === kwf))
 
-    return filters.find(keyword => text.includes(keyword.toLowerCase()));
+    return filters.find(keyword => text.includes(keyword));
 }
 
 function handleNode(node) {
@@ -72,10 +72,10 @@ function handleNode(node) {
     const kw = handleText(kw_filters, tweetText);
     
     if (kw) {
-        console.log("BLOCKED_kw: ", kw);
         node.style.display = 'none';
         count_blocked_kw++;
     } else {
+        node.style.removeProperty('display');
         enqueueTweetProcessing(node, tweetText, tweetId);
     }
 }
