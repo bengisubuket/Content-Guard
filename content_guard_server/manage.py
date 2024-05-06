@@ -3,14 +3,26 @@
 import os
 import sys
 import asyncio
-from asyncio import WindowsSelectorEventLoopPolicy
 
 def main():
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "content_guard_server.settings")
-    
-    asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())
 
+    if sys.platform == 'win32':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    elif sys.platform == 'darwin':
+        # macOS already uses the default selector event loop policy
+        pass
+    elif sys.platform.startswith('linux'):
+        try:
+            import uvloop
+            asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+        except ImportError:
+            # Fallback to default selector event loop policy if uvloop is not available
+            pass
+    else:
+        # For other platforms, use the default event loop policy
+        pass
 
     try:
         from django.core.management import execute_from_command_line
@@ -21,7 +33,6 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
     execute_from_command_line(sys.argv)
-
 
 if __name__ == "__main__":
     main()
