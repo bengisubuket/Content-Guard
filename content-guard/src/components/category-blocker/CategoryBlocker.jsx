@@ -1,17 +1,17 @@
-import React, {useState} from 'react';
-import Button from 'react-bootstrap/Button';
-import Container from 'react-bootstrap/Container';
-import Image from 'react-bootstrap/Image';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Dropdown from 'react-bootstrap/Dropdown';
-import Form from 'react-bootstrap/Form';
-import { ArrowLeft } from 'react-bootstrap-icons';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Button, Container, Row, Col, Form, Dropdown, Image } from 'react-bootstrap';
+import { PlusCircleFill, ArrowLeft } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
 
 function CategoryBlockerComponent() {
-
     const categories = ["Technology", "Fashion", "Travel", "Music", "Movies", "Food", "Sports", "Science", "Health", "Politics", "Business", "Gaming", "Books", "Art", "Photography", "Fitness", "Education", "Environment", "Celebrities", "News", "Weather", "Humor", "SelfCare", "Relationships", "Pets", "Parenting", "TechnologyTrends", "Space", "Motivation", "SocialJustice"];
+    
+    const [userSettings, setUserSettings] = useState({
+        username: "uname",
+        id: 493,
+        categories: [],
+        activeCategories: []
+    });
 
     const navigate = useNavigate();
 
@@ -19,17 +19,77 @@ function CategoryBlockerComponent() {
         navigate('/blockers');
     };
 
-    // Initialize the enabledCategories state as an object with keys from categories and false as default value
-    const [enabledCategories, setEnabledCategories] = useState(
-        categories.reduce((status, category) => ({ ...status, [category]: false }), {})
-    );
+    // Initialize enabledCategories state based on activeCategories from userSettings
+    const [enabledCategories, setEnabledCategories] = useState(() => {
+        const initialCategories = categories.reduce((status, category) => ({
+            ...status,
+            [category]: userSettings.activeCategories.includes(category)
+        }), {});
+        return initialCategories;
+    });
 
-    // Function to handle the toggle of a category
+    useEffect(() => {
+        function loadSettings() {
+            chrome.storage.local.get('userSettings', (data) => {
+                if (data.userSettings) {
+                    setUserSettings(data.userSettings);
+                    setEnabledCategories(
+                        categories.reduce((status, category) => ({
+                            ...status,
+                            [category]: data.userSettings.activeCategories.includes(category)
+                        }), {})
+                    );
+                } else {
+                    const initialSettings = {
+                        username: "uname",
+                        id: 492,
+                        categories: [],
+                        activeCategories: []
+                    };
+                    setUserSettings(initialSettings);
+                    saveSettings(initialSettings);
+                }
+            });
+        }
+
+        loadSettings();
+        const listener = (request, sender, sendResponse) => {
+            if (request.categoriesList) {
+                setEnabledCategories(request.categoriesList);
+                sendResponse({ status: 'categories received' });
+            }
+            return true;
+        };
+
+        chrome.runtime.onMessage.addListener(listener);
+        return () => chrome.runtime.onMessage.removeListener(listener);
+    }, []);
+
+    function saveSettings(settings) {
+        chrome.storage.local.set({ 'userSettings': settings }, () => {
+            console.log('User settings saved:', settings);
+        });
+    }
+
+    // Handle the toggle of a category
     const handleToggleCategory = (category) => {
         setEnabledCategories(prevEnabledCategories => ({
             ...prevEnabledCategories,
             [category]: !prevEnabledCategories[category]
         }));
+
+        const updatedCategories = !enabledCategories[category]
+            ? [...userSettings.activeCategories, category]
+            : userSettings.activeCategories.filter((activeCategory) => activeCategory !== category);
+
+        const updatedSettings = { ...userSettings, activeCategories: updatedCategories };
+        setUserSettings(updatedSettings);
+        saveSettings(updatedSettings);
+
+        // Send the updated categories list to the background script
+        chrome.runtime.sendMessage({ action: "updateCategories", data: updatedSettings.categories }, (response) => {
+            console.log("Response from content script:", response);
+        });
     };
 
     // Function to get a list of enabled categories to display
