@@ -46,6 +46,15 @@ function extractTweetId(node) {
     return null;
 }
 
+function handleText(filters, text) {
+    // kelimenin bağımsız olarak geçip geçmediğini kontrol etmek için
+    // TAM BAĞIMSIZ KELİME İÇİN
+    // const tweetWords = tweetText.split(/\s+|[,./\\!@#$%^&*();:{}[\]<>?\'\"]+/);
+    // const kw = tweetWords.some(tw => kw_filters.some(kwf => tw === kwf))
+
+    return filters.find(keyword => text.includes(keyword.toLowerCase()));
+}
+
 function handleNode(node) {
     const tweetTextElement = node.querySelector('[data-testid="tweetText"]');
     if (!tweetTextElement) {
@@ -59,8 +68,9 @@ function handleNode(node) {
         console.log("Could not extract tweet ID.");
         return;
     }
-
-    const kw = kw_filters.find(keyword => tweetText.includes(keyword.toLowerCase()));
+    
+    const kw = handleText(kw_filters, tweetText);
+    
     if (kw) {
         console.log("BLOCKED_kw: ", kw);
         node.style.display = 'none';
