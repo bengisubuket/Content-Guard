@@ -5,8 +5,6 @@ var observer = null;
 var userSettings;
 var kw_filters = [];
 var category_filters = [];
-var count_blocked_kw = 0;
-var count_blocked_category = 0;
 var closedTime;
 
 //create dictionary for each category which keeps blocked counts
@@ -94,7 +92,6 @@ function handleNode(node) {
     if (kw) {
         console.log("BLOCKED_kw: ", kw);
         node.style.display = 'none';
-        count_blocked_kw++;
         // Update the count of blocked tweets for the keyword
         if (blockedKwCount[kw]) {
             // push unique tweet id to the existing keyword 
@@ -135,7 +132,6 @@ function processTweet(node, tweetText, tweetId) {
         if (category_filters.includes(data.category)) {
             console.log("BLOCKED_cgtry");
             node.style.display = 'none';
-            count_blocked_category++;
             // Update the count of blocked tweets for the category
             if (blockedCategoryCount[data.category]) {
                 // push unique tweet id to the existing category 
