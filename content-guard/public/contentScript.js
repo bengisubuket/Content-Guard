@@ -97,9 +97,12 @@ function handleNode(node) {
         count_blocked_kw++;
         // Update the count of blocked tweets for the keyword
         if (blockedKwCount[kw]) {
-            blockedKwCount[kw] += 1;
+            // push unique tweet id to the existing keyword 
+            if (!blockedKwCount[kw].includes(tweetId)) {
+                blockedKwCount[kw].push(tweetId);
+            }
         } else {
-            blockedKwCount[kw] = 1;
+            blockedKwCount[kw] = [tweetId];
         }
     } else {
         enqueueTweetProcessing(node, tweetText, tweetId);
@@ -135,9 +138,12 @@ function processTweet(node, tweetText, tweetId) {
             count_blocked_category++;
             // Update the count of blocked tweets for the category
             if (blockedCategoryCount[data.category]) {
-                blockedCategoryCount[data.category] += 1;
+                // push unique tweet id to the existing category 
+                if (!blockedCategoryCount[data.category].includes(tweetId)) {
+                    blockedCategoryCount[data.category].push(tweetId);
+                }
             } else {
-                blockedCategoryCount[data.category] = 1;
+                blockedCategoryCount[data.category] = [tweetId];
             }
         } else {
             node.style.removeProperty('display');

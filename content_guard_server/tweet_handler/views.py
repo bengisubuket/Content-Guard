@@ -3,6 +3,7 @@ from .models import Tweet, Keyword, Category
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
 import json
 from g4f.client import Client
 import time
@@ -82,21 +83,33 @@ class KeywordCategoryView(View):
             keyword_count_dic = data.get('blockedKwCount', {})
             category_count_dic = data.get('blockedCategoryCount', {})
 
+            # # Debug: Print the received data
+            # print("Received keyword counts:", keyword_count_dic)
+            # print("Received category counts:", category_count_dic)
+
             # Update or create keyword data
-            for keyword, count in keyword_count_dic.items():
-                Keyword.objects.update_or_create(
-                    keyword=keyword, 
-                    defaults={'number_of_blocked_tweets': count}
-                )
+            with transaction.atomic():
+                for keyword, tweet_ids in keyword_count_dic.items():
+                    keyword = keyword.lower()  # Normalize keyword if case-insensitivity is required
+                    obj, created = Keyword.objects.update_or_create(
+                        keyword=keyword,
+                        defaults={'number_of_blocked_tweets': len(tweet_ids)}
+                    )
+                    # Debug: Print or log the result of the operation
+                    # print(f"Keyword '{keyword}': {'created' if created else 'updated'}.")
 
             # Update or create category data
-            for category, count in category_count_dic.items():
-                Category.objects.update_or_create(
-                    name=category, 
-                    defaults={'number_of_blocked_tweets': count}
-                )
+            with transaction.atomic():
+                for category, tweet_ids in category_count_dic.items():
+                    category = category.lower()  # Normalize category if required
+                    obj, created = Category.objects.update_or_create(
+                        name=category,
+                        defaults={'number_of_blocked_tweets': len(tweet_ids)}
+                    )
+                    # print(f"Category '{category}': {'created' if created else 'updated'}.")
 
             return JsonResponse({'status': 'success', 'message': 'Blocked keyword and category counts updated.'}, status=200)
-            
+
         except Exception as e:
+            print(f"Error processing request: {e}")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
