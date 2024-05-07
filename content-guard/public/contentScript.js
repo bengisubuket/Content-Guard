@@ -68,14 +68,13 @@ function handleNode(node) {
         console.log("Could not extract tweet ID.");
         return;
     }
-    
+
     const kw = handleText(kw_filters, tweetText);
-    
+
     if (kw) {
         node.style.display = 'none';
         count_blocked_kw++;
     } else {
-        node.style.removeProperty('display');
         enqueueTweetProcessing(node, tweetText, tweetId);
     }
 }

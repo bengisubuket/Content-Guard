@@ -5,7 +5,7 @@ var userSettings; // Global variable to store the keywordsList
 function saveSettings() {
     // Save userSettings to chrome.storage.local
     chrome.storage.local.set({ 'userSettings': userSettings }, function() {
-        console.log('User settings saved:', userSettings);
+        //console.log('User settings saved:', userSettings);
     });
     broadcastKeywords();
 }
@@ -14,13 +14,13 @@ function saveSettings() {
 function loadSettings() {
     // Retrieve userSettings from chrome.storage.local
     chrome.storage.local.get('userSettings', function(data) {
-        console.log('User settings loaded:', data.user);
+        //console.log('User settings loaded:', data.user);
         userSettings = data.userSettings;
 
         if (userSettings === undefined) {
             userSettings = {
                 "username": "uname",
-                "id": 492,
+                "id": 493,
                 "keywords": [],
                 "categories": [],
                 "activeKeywords": [],
@@ -29,24 +29,24 @@ function loadSettings() {
             saveSettings();
             return;
         }
-        console.log('User settings loaded:', userSettings);
+        //console.log('User settings loaded:', userSettings);
         // Call the callback function with the loaded user settings
         loadedSettings();
     });
 }
 
 function loadedSettings() {
-    console.log("Settings are ready to use.");
+    //console.log("Settings are ready to use.");
 
     //saveSettings();
 }
 
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    console.log(tab);
+    //console.log(tab);
     if (tab.url && (tab.url.includes("twitter.com") || changeInfo.status === "loading")) {
-        console.log("Sending to tabId:", tabId);
-        console.log("background.js listener");
+        //console.log("Sending to tabId:", tabId);
+        //console.log("background.js listener");
         chrome.tabs.sendMessage(tabId, {
             type: "NEW"
         });
@@ -99,15 +99,18 @@ chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         // Check for the correct action
         if (request.action === "updateCategories") {
+            // change later
             userSettings.categories = request.data;
 
             userSettings.activeCategories = [];
             userSettings.categories.forEach((catObj) => {
-                if (catObj.timer) {
-                    if (catObj.timer.action === "block")
-                        userSettings.activeCategories.push(catObj.name);
-                } else
-                    userSettings.activeCategories.push(kwObj.name);
+                if (catObj.enabled) {
+                    if (catObj.timer.enabled) {
+                        if (catObj.timer.action == "block")
+                            userSettings.activeCategories.push(catObj.category);
+                    } else
+                        userSettings.activeCategories.push(catObj.category);
+                }
             });
 
             saveSettings();
@@ -118,7 +121,7 @@ chrome.runtime.onMessage.addListener(
 
 // Function to broadcast keywordsList to all tabs
 function broadcastKeywords() {
-    console.log("activeKeywords:", userSettings.activeKeywords);
+    //console.log("activeKeywords:", userSettings.activeKeywords);
     chrome.tabs.query({}, function(tabs) {
         for (let tab of tabs) {
             if (tab.url && tab.url.includes("twitter.com")) {
@@ -142,9 +145,8 @@ function handleTimers() {
 
         loadSettings(); // Load settings to check if a new timer has been added
         chrome.tabs.query({ url: '*://twitter.com/*' }, function(tabs) {
-            console.log("tabs:", tabs.length);
+            //console.log("tabs:", tabs.length);
             if (tabs.length > 0) {
-
 
                 userSettings.keywords.forEach((keyword, index) => {
                     if (keyword.timer) {
@@ -166,7 +168,7 @@ function handleTimers() {
                 });
 
                 userSettings.categories.forEach((category, index) => {
-                    if (category.timer) {
+                    if (category.enabled && category.timer.enabled) {
                         category.timer.remainingTime -= elapsedTime; // Decrement by the elapsed time
 
                         if (category.timer.remainingTime <= 0) {
@@ -175,10 +177,14 @@ function handleTimers() {
                                 if (categoryIndex !== -1) {
                                     userSettings.activeCategories.splice(categoryIndex, 1);
                                 }
-                                userSettings.categories[index].timer = null;
+                                userSettings.categories[index].timer.enabled = false;
+                                userSettings.categories[index].timer.duration = 0;
+                                userSettings.categories[index].timer.remainingTime = 0;
                             } else if (category.timer.action === "allow") {
                                 userSettings.activeCategories.push(category.name);
-                                userSettings.categories[index].timer = null;
+                                userSettings.categories[index].timer.enabled = false;
+                                userSettings.categories[index].timer.duration = 0;
+                                userSettings.categories[index].timer.remainingTime = 0;
                             }
                         }
                     }
