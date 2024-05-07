@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.http import JsonResponse
 from .models import Tweet, Keyword, Category    
 from django.views import View
@@ -7,6 +8,7 @@ from django.db import transaction
 import json
 from g4f.client import Client
 import time
+
 
 client = Client()
 
@@ -93,7 +95,7 @@ class KeywordCategoryView(View):
                     keyword = keyword.lower()  # Normalize keyword if case-insensitivity is required
                     obj, created = Keyword.objects.update_or_create(
                         keyword=keyword,
-                        defaults={'number_of_blocked_tweets': len(tweet_ids)}
+                        defaults={'number_of_blocked_tweets': len(tweet_ids), 'time_added': timezone.now()}
                     )
                     # Debug: Print or log the result of the operation
                     # print(f"Keyword '{keyword}': {'created' if created else 'updated'}.")
@@ -104,7 +106,8 @@ class KeywordCategoryView(View):
                     category = category.lower()  # Normalize category if required
                     obj, created = Category.objects.update_or_create(
                         name=category,
-                        defaults={'number_of_blocked_tweets': len(tweet_ids)}
+                        # add time_added to the defaults
+                        defaults={'number_of_blocked_tweets': len(tweet_ids), 'time_added': timezone.now()}
                     )
                     # print(f"Category '{category}': {'created' if created else 'updated'}.")
 
