@@ -1,48 +1,17 @@
 var nodes = [];
 var targetNode = null;
 var observer = null;
+
+var userSettings;
 var kw_filters = [];
+var category_filters = [];
+var closedTime;
 
-// Function to handle the fetched settings
-function handleSettings(settings) {
-    console.log("Settings:");
-    console.log(settings);
-    var kw_blocker_obj = settings.keywords;
-    for (let i = 0; i < kw_blocker_obj.length; i++) {
-        kw_filters.push(kw_blocker_obj[i].keyword);
-    }
-}
+//create dictionary for each category which keeps blocked counts
+var blockedCategoryCount = {}
+var blockedKwCount = {}
 
-function fetchSettings(attempt = 1) {
-    if (attempt > 1000) {
-        console.error('Failed to load settings after 1000 attempts');
-        return; // Stop retrying after 1000 attempts
-    }
-
-    fetch(chrome.runtime.getURL('userSettings.json'))
-        .then((response) => response.json())
-        .then((settings) => {
-            handleSettings(settings);
-        })
-        .catch((error) => {
-            console.error(`Error loading settings on attempt ${attempt}:`, error);
-            fetchSettings(attempt + 1); // Increment attempt count and retry
-        });
-}
-
-fetchSettings();  // Initial call to fetch settings
-
-
-// Fetch the settings.json at runtime
-fetch(chrome.runtime.getURL('userSettings.json'))
-  .then((response) => response.json())
-  .then((settings) => {
-    handleSettings(settings);
-  })
-  .catch((error) => {
-    console.error('Error loading settings:', error)
-  });
-  
+// ================================ Tweet handlings ================================================================================
 
 // Function to recursively search for nodes with data-testid="tweetText" attribute
 function findTweetTextNode(node) {
@@ -65,49 +34,171 @@ function findTweetTextNode(node) {
     return null;
 }
 
-// Function to handle new tweets
+// function to send blocked counts to the server
+function sendBlockedCounts(){
+    console.log("blockedCategoryCount: ", blockedCategoryCount)
+    console.log("blockedKwCount: ", blockedKwCount)
+    const userId = 492;
+    const tabId = 79782103;
+    fetch('http://localhost:8000/api/blockedCounts/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({userId, tabId, blockedCategoryCount, blockedKwCount})
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Blocked counts sent successfully.");
+    })
+    .catch(error => {
+        console.error("Failed to send blocked counts:", error);
+    }
+    );
+
+}
+
+//send blocked counts to the server every 5 minutes
+setInterval(sendBlockedCounts, 30000);
+
+
+const requestQueue = [];
+let activeRequests = 0;
+const maxActiveRequests = 5;
+
+function extractTweetId(node) {
+    const statusLink = node.querySelector('[href*="/status/"]');
+    if (statusLink) {
+        const href = statusLink.getAttribute('href');
+        const parts = href.split('/status/')[1].split('?')[0];
+        return parts.includes('/') ? parts.split('/')[0] : parts;
+    }
+    return null;
+}
+
+function handleNode(node) {
+    const tweetTextElement = node.querySelector('[data-testid="tweetText"]');
+    if (!tweetTextElement) {
+        console.log("Tweet text element not found.");
+        return;
+    }
+
+    const tweetText = tweetTextElement.textContent.toLowerCase();
+    const tweetId = extractTweetId(node);
+    if (!tweetId) {
+        console.log("Could not extract tweet ID.");
+        return;
+    }
+
+    const kw = kw_filters.find(keyword => tweetText.includes(keyword.toLowerCase()));
+    if (kw) {
+        console.log("BLOCKED_kw: ", kw);
+        node.style.display = 'none';
+        // Update the count of blocked tweets for the keyword
+        if (blockedKwCount[kw]) {
+            // push unique tweet id to the existing keyword 
+            if (!blockedKwCount[kw].includes(tweetId)) {
+                blockedKwCount[kw].push(tweetId);
+            }
+        } else {
+            blockedKwCount[kw] = [tweetId];
+        }
+    } else {
+        enqueueTweetProcessing(node, tweetText, tweetId);
+    }
+}
+
+function enqueueTweetProcessing(node, tweetText, tweetId) {
+    requestQueue.push(() => processTweet(node, tweetText, tweetId));
+    processNextInQueue();
+}
+
+function processNextInQueue() {
+    if (activeRequests < maxActiveRequests && requestQueue.length > 0) {
+        const processTweet = requestQueue.shift();
+        activeRequests++;
+        processTweet();
+    }
+}
+
+function processTweet(node, tweetText, tweetId) {
+    const userId = 492;
+    const tabId = 79782103;
+    fetch('http://localhost:8000/api/tweet/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({userId, tabId, tweetText, tweetId})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (category_filters.includes(data.category)) {
+            console.log("BLOCKED_cgtry");
+            node.style.display = 'none';
+            // Update the count of blocked tweets for the category
+            if (blockedCategoryCount[data.category]) {
+                // push unique tweet id to the existing category 
+                if (!blockedCategoryCount[data.category].includes(tweetId)) {
+                    blockedCategoryCount[data.category].push(tweetId);
+                }
+            } else {
+                blockedCategoryCount[data.category] = [tweetId];
+            }
+        } else {
+            node.style.removeProperty('display');
+        }
+        activeRequests--;
+        processNextInQueue();
+    })
+    .catch(error => {
+        console.error("Failed to send data:", error);
+        activeRequests--;
+        processNextInQueue();
+    });
+}
+
+// Re-evaluates all nodes according to up-to-date keywords.
+function handleNodes() {
+    nodes.forEach(node => {
+        handleNode(node);
+    });
+}
+
+// Finds the node from tweet and handle that new tweet.
+function handleTweet(tweet) {
+    const node = findTweetTextNode(tweet);
+    if (node) {
+        // push only the unique nodes
+        if (!nodes.includes(node)){
+            nodes.push(node);
+            handleNode(node);
+        }
+    }
+}
+
+// Handles given tweets.
+function handleTweets(tweets) {
+    tweets.forEach(tweet => {
+        handleTweet(tweet);
+    });
+}
+
+// Extracts new tweets from DOM.
 function handleNewTweets(mutationsList) {
     mutationsList.forEach(mutation => {
         if (mutation.type === 'childList') {
             // Check if the mutation added new tweets
             const newTweets = mutation.addedNodes;
-            newTweets.forEach(node => {
-                // Recursively search for the tweet text node
-                const tweetTextNode = findTweetTextNode(node);
-                if (tweetTextNode) {
-                    // Access the tweet text
-                    nodes.push(tweetTextNode);
-                    console.log(nodes);
-
-                    const tweetTextElement = tweetTextNode.querySelector('[data-testid="tweetText"]');
-
-                    if (tweetTextElement) {
-                        // Retrieve the text content of the element
-                        const tweetText = tweetTextElement.textContent.toLowerCase();  // Convert text to lower case here
-                        //console.log(tweetText);
-
-                        // Check each keyword in kw_filters
-                        let isBlocked = kw_filters.some(keyword => tweetText.includes(keyword.toLowerCase()));  // Use includes() and convert keyword to lower case
-
-                        if (isBlocked) {
-                            console.log("Blocked");
-                            // If any keyword is found, mute the tweet by hiding it
-                            node.style.display = 'none';
-                        }
-                    } else {
-                        console.log("Tweet text element not found.");
-                    }
-                    chrome.storage.local.set({"filters": kw_filters}).then(() => {
-                        console.log("Filter list is set");
-                    });
-                    //console.log(tweetTextNode); // Log tweet text
-                }
-            });
+            handleTweets(newTweets);
         }
     });
 }
 
+// Keeps last 100 loaded tweets.
+function trimNodes() {
+    setInterval(() => {
+        nodes = nodes.slice(-100);
+    }, 1000);
+}
 
+// WTF is this
 function printDataTestIds(node, hierarchy = 'root') {
     // Check if the node exists and has attributes
     if (node && node.nodeType === Node.ELEMENT_NODE && node.attributes) {
@@ -131,7 +222,39 @@ function printDataTestIds(node, hierarchy = 'root') {
     }
 }
 
-const newTabLoaded = () => {
+
+// // ================================ Timers ==============================================================================
+// // check if the day has changed after the last tab/window close action
+// function isNewDay(closedTime){
+//     const day = 86400000; // 24 hours in milliseconds
+//     if(Date.now()/day - closedTime/day <= 1){
+//         return true;
+//     }
+//     return false;
+// }
+
+// function closedTabWindow(){
+//     closedTime = Date.now();
+//     // push the closed time, active keywords to the chrome storage
+// }
+
+// chrome.tabs.onRemoved.addListener(function(tabid, removed) {
+//     closedTabWindow();
+//    })
+   
+// chrome.windows.onRemoved.addListener(function(windowid) {
+//     closedTabWindow();
+//    })
+
+// function startTimer(keyword, action, duration){
+
+// }
+
+// ================================ Main ================================================================================
+
+// Starts everything when the tab loads.
+function newTabLoaded() {
+    trimNodes();
     // Options for the MutationObserver
     const observerConfig = {
         childList: true, // Observe changes to the children of the target node
@@ -147,30 +270,32 @@ const newTabLoaded = () => {
     if (targetNode && observer )
     // Start observing the target node for mutations
         observer.observe(targetNode, observerConfig);
-};
+}
 
-console.log("auuuuuuu");
+// Listens for new tab loading.
 chrome.runtime.onMessage.addListener((obj, sender, response) => {
-    console.log("contentScript.js listener");
     const { type } = obj;
-    if (type === "NEW") {
-        console.log("NEW!!!! YIPPIE");
+    if (type === "NEW")
         newTabLoaded();
+});
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === "filters") {
+        // Handle the incoming keywords and categories
+        console.log("Received keywords:", message.activeKeywords);
+        console.log("Received categories:", message.activeCategories);
+
+        // Update the content script's local settings or perform other actions
+        kw_filters = message.activeKeywords;
+        category_filters = message.activeCategories;
+        handleNodes();
     }
 });
 
-// Listen for messages from the background script
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-    if (message.type === "NEW" && message.keywords) {
-        console.log("Received keywordsList in content script:", message.keywords);
-        // Do something with the keywords list here
-        // For example, you might want to store it, manipulate it, or display it on the page
-        // add message.keywords to kw_filters, give me under this line as a code, join the lists
-        kw_filters = kw_filters.concat(message.keywords);
+/* ================================ Graveyard ================================================================================================
 
-    }
+X_X
 
-    // Optionally send a response back to the background script
-    sendResponse({status: "Keywords received by content script"});
-    return true; // Keep the messaging channel open if you are doing asynchronous processing
-});
+DAED ZONE 
+
+*/
