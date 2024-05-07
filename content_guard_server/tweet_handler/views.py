@@ -85,34 +85,64 @@ class KeywordCategoryView(View):
             keyword_count_dic = data.get('blockedKwCount', {})
             category_count_dic = data.get('blockedCategoryCount', {})
 
-            # # Debug: Print the received data
-            # print("Received keyword counts:", keyword_count_dic)
-            # print("Received category counts:", category_count_dic)
+            # Process keywords
+            self.process_keywords(keyword_count_dic)
 
-            # Update or create keyword data
-            with transaction.atomic():
-                for keyword, tweet_ids in keyword_count_dic.items():
-                    keyword = keyword.lower()  # Normalize keyword if case-insensitivity is required
-                    obj, created = Keyword.objects.update_or_create(
-                        keyword=keyword,
-                        defaults={'number_of_blocked_tweets': len(tweet_ids), 'time_added': timezone.now()}
-                    )
-                    # Debug: Print or log the result of the operation
-                    # print(f"Keyword '{keyword}': {'created' if created else 'updated'}.")
-
-            # Update or create category data
-            with transaction.atomic():
-                for category, tweet_ids in category_count_dic.items():
-                    category = category.lower()  # Normalize category if required
-                    obj, created = Category.objects.update_or_create(
-                        name=category,
-                        # add time_added to the defaults
-                        defaults={'number_of_blocked_tweets': len(tweet_ids), 'time_added': timezone.now()}
-                    )
-                    # print(f"Category '{category}': {'created' if created else 'updated'}.")
+            # Process categories
+            self.process_categories(category_count_dic)
 
             return JsonResponse({'status': 'success', 'message': 'Blocked keyword and category counts updated.'}, status=200)
 
         except Exception as e:
             print(f"Error processing request: {e}")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+    def process_keywords(self, keyword_count_dic):
+        with transaction.atomic():
+            for keyword, tweet_ids in keyword_count_dic.items():
+                keyword = keyword.lower()  # Normalize keyword
+                previous_instance = Keyword.objects.filter(keyword=keyword).order_by('-time_added').first()
+                
+                if previous_instance:
+                    previous_tweet_ids = set(previous_instance.tweet_ids)
+                    new_tweet_ids = set(tweet_ids) - previous_tweet_ids
+                else:
+                    new_tweet_ids = set(tweet_ids)
+
+                # Create a new Keyword instance only if there are new blocked tweets
+                number_of_blocked_tweets = len(new_tweet_ids)
+                if number_of_blocked_tweets > 0:
+                    Keyword.objects.create(
+                        keyword=keyword,
+                        tweet_ids=list(new_tweet_ids),  # Convert the set back to a list
+                        number_of_blocked_tweets=number_of_blocked_tweets,
+                        time_added=timezone.now()
+                    )
+                    print(f"Keyword '{keyword}': created with {number_of_blocked_tweets} newly blocked tweets.")
+                else:
+                    print(f"Keyword '{keyword}': No new blocked tweets to create.")
+
+    def process_categories(self, category_count_dic):
+        with transaction.atomic():
+            for category, tweet_ids in category_count_dic.items():
+                category = category.lower()  # Normalize category
+                previous_instance = Category.objects.filter(name=category).order_by('-time_added').first()
+                
+                if previous_instance:
+                    previous_tweet_ids = set(previous_instance.tweet_ids)
+                    new_tweet_ids = set(tweet_ids) - previous_tweet_ids
+                else:
+                    new_tweet_ids = set(tweet_ids)
+
+                # Create a new Category instance only if there are new blocked tweets
+                number_of_blocked_tweets = len(new_tweet_ids)
+                if number_of_blocked_tweets > 0:
+                    Category.objects.create(
+                        name=category,
+                        tweet_ids=list(new_tweet_ids),  # Convert the set back to a list
+                        number_of_blocked_tweets=number_of_blocked_tweets,
+                        time_added=timezone.now()
+                    )
+                    print(f"Category '{category}': created with {number_of_blocked_tweets} newly blocked tweets.")
+                else:
+                    print(f"Category '{category}': No new blocked tweets to create.")

@@ -11,7 +11,8 @@ class Tweet(models.Model):
         return self.category
     
 class Keyword(models.Model):
-    keyword = models.CharField(max_length=255, unique=True)
+    keyword = models.CharField(max_length=255)
+    tweet_ids = models.JSONField(default=list)
     number_of_blocked_tweets = models.IntegerField(default=0)
     time_added = models.DateTimeField(auto_now_add=True)
 
@@ -19,7 +20,8 @@ class Keyword(models.Model):
         return self.keyword
     
 class Category(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
+    tweet_ids = models.JSONField(default=list)
     number_of_blocked_tweets = models.IntegerField(default=0)
     time_added = models.DateTimeField(auto_now_add=True)
 
