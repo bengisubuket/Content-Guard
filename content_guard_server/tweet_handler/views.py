@@ -2,6 +2,7 @@ import logging
 from django.utils import timezone
 from django.http import JsonResponse
 from .models import Tweet, Keyword, Category, Report
+from django.db.models import Sum
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -9,7 +10,6 @@ from django.db import transaction
 import json
 from g4f.client import Client
 import time
-
 
 client = Client()
 
@@ -299,3 +299,64 @@ class ReportView(View):
                 'status': 'success',
                 'reports': reports_list
             })
+
+from datetime import timedelta
+
+class KeywordsGroupedBySecondView(View):
+    def get(self, request):
+        # Fetch all keywords
+        keywords = Keyword.objects.all()
+
+        # Normalize time_added to the nearest second
+        for keyword in keywords:
+            keyword.time_added = keyword.time_added - timedelta(microseconds=keyword.time_added.microsecond)
+
+        # Convert QuerySet to list to manipulate
+        keywords = list(keywords)
+
+        # Group by 'time_added' with second precision
+        grouped_data = {}
+        for keyword in keywords:
+            key = keyword.time_added
+            if key in grouped_data:
+                grouped_data[key] += keyword.number_of_blocked_tweets
+            else:
+                grouped_data[key] = keyword.number_of_blocked_tweets
+
+        # Convert the dictionary to the desired output format
+        result = [
+            {'time_added': key, 'total_blocked_tweets': value}
+            for key, value in grouped_data.items()
+        ]
+
+        return JsonResponse(sorted(result, key=lambda x: x['time_added']), safe=False)  # Return sorted by time_added
+    
+
+class CategoryGroupedBySecondView(View):
+    def get(self, request):
+        # Fetch all categories
+        categories = Category.objects.all()
+
+        # Normalize time_added to the nearest second
+        for category in categories:
+            category.time_added = category.time_added - timedelta(microseconds=category.time_added.microsecond)
+
+        # Convert QuerySet to list to manipulate
+        categories = list(categories)
+
+        # Group by 'time_added' with second precision
+        grouped_data = {}
+        for category in categories:
+            key = category.time_added
+            if key in grouped_data:
+                grouped_data[key] += category.number_of_blocked_tweets
+            else:
+                grouped_data[key] = category.number_of_blocked_tweets
+
+        # Convert the dictionary to the desired output format
+        result = [
+            {'time_added': key, 'total_blocked_tweets': value}
+            for key, value in grouped_data.items()
+        ]
+
+        return JsonResponse(sorted(result, key=lambda x: x['time_added']), safe=False)  # Return sorted by time_added
