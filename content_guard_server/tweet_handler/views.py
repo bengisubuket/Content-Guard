@@ -1,6 +1,7 @@
+import logging
 from django.utils import timezone
 from django.http import JsonResponse
-from .models import Tweet, Keyword, Category    
+from .models import Tweet, Keyword, Category, Report
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -101,20 +102,20 @@ class KeywordCategoryView(View):
         with transaction.atomic():
             for keyword, tweet_ids in keyword_count_dic.items():
                 keyword = keyword.lower()  # Normalize keyword
-                previous_instance = Keyword.objects.filter(keyword=keyword).order_by('-time_added').first()
+                # Fetch all previous instances and aggregate their tweet IDs
+                previous_instances = Keyword.objects.filter(keyword=keyword)
+                all_previous_tweet_ids = set()
+                for instance in previous_instances:
+                    all_previous_tweet_ids.update(instance.tweet_ids)
                 
-                if previous_instance:
-                    previous_tweet_ids = set(previous_instance.tweet_ids)
-                    new_tweet_ids = set(tweet_ids) - previous_tweet_ids
-                else:
-                    new_tweet_ids = set(tweet_ids)
+                new_tweet_ids = set(tweet_ids) - all_previous_tweet_ids
 
                 # Create a new Keyword instance only if there are new blocked tweets
                 number_of_blocked_tweets = len(new_tweet_ids)
                 if number_of_blocked_tweets > 0:
                     Keyword.objects.create(
                         keyword=keyword,
-                        tweet_ids=list(new_tweet_ids),  # Convert the set back to a list
+                        tweet_ids=list(new_tweet_ids),
                         number_of_blocked_tweets=number_of_blocked_tweets,
                         time_added=timezone.now()
                     )
@@ -126,23 +127,88 @@ class KeywordCategoryView(View):
         with transaction.atomic():
             for category, tweet_ids in category_count_dic.items():
                 category = category.lower()  # Normalize category
-                previous_instance = Category.objects.filter(name=category).order_by('-time_added').first()
+                # Fetch all previous instances and aggregate their tweet IDs
+                previous_instances = Category.objects.filter(name=category)
+                all_previous_tweet_ids = set()
+                for instance in previous_instances:
+                    all_previous_tweet_ids.update(instance.tweet_ids)
                 
-                if previous_instance:
-                    previous_tweet_ids = set(previous_instance.tweet_ids)
-                    new_tweet_ids = set(tweet_ids) - previous_tweet_ids
-                else:
-                    new_tweet_ids = set(tweet_ids)
+                new_tweet_ids = set(tweet_ids) - all_previous_tweet_ids
 
                 # Create a new Category instance only if there are new blocked tweets
                 number_of_blocked_tweets = len(new_tweet_ids)
                 if number_of_blocked_tweets > 0:
                     Category.objects.create(
                         name=category,
-                        tweet_ids=list(new_tweet_ids),  # Convert the set back to a list
+                        tweet_ids=list(new_tweet_ids),
                         number_of_blocked_tweets=number_of_blocked_tweets,
                         time_added=timezone.now()
                     )
                     print(f"Category '{category}': created with {number_of_blocked_tweets} newly blocked tweets.")
                 else:
                     print(f"Category '{category}': No new blocked tweets to create.")
+
+    def get(self, request):
+        # get all blocked keywords and categories
+        blocked_keywords = Keyword.objects.all()
+        blocked_categories = Category.objects.all()
+        blocked_keywords_list = []
+        blocked_categories_list = []
+        for keyword in blocked_keywords:
+            blocked_keywords_list.append({
+                'keyword': keyword.keyword,
+                'tweet_ids': keyword.tweet_ids,
+                'number_of_blocked_tweets': keyword.number_of_blocked_tweets,
+                'time_added': keyword.time_added
+            })
+        for category in blocked_categories:
+            blocked_categories_list.append({
+                'category': category.name,
+                'tweet_ids': category.tweet_ids,
+                'number_of_blocked_tweets': category.number_of_blocked_tweets,
+                'time_added': category.time_added
+            })
+        return JsonResponse({
+            'status': 'success',
+            'blockedKeywords': blocked_keywords_list,
+            'blockedCategories': blocked_categories_list
+        })
+    
+logger = logging.getLogger(__name__)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ReportView(View):
+    def post(self, request):
+        try:
+            # Parse the JSON body
+            body_unicode = request.body.decode('utf-8')
+            body_data = json.loads(body_unicode)
+            user_id = body_data.get('user_id')
+            print(f"Received user_id: {user_id}")
+
+            # Retrieve all keywords and categories
+            keywords = Keyword.objects.all()
+            categories = Category.objects.all()
+
+            # Aggregate blocked tweet counts
+            keyword_counts = {keyword.keyword: sum(len(kw.tweet_ids) for kw in keywords if kw.keyword == keyword.keyword) for keyword in keywords}
+            category_counts = {category.name: sum(len(cat.tweet_ids) for cat in categories if cat.name == category.name) for category in categories}
+
+            print(f"Keyword counts: {keyword_counts}")
+            print(f"Category counts: {category_counts}")
+
+            # Create a new Report object
+            new_report = Report.objects.create(
+                user_id=user_id,
+                keywords_reported=keyword_counts,
+                categories_reported=category_counts,
+                time_added=timezone.now()
+            )
+
+            return JsonResponse({'status': 'success', 'message': 'Report created successfully.'}, status=200)
+
+        except Exception as e:
+            logger.error(f"Error processing the request: {str(e)}")
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    

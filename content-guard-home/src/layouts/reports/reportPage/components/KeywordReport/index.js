@@ -1,19 +1,21 @@
 import React from 'react';
-
+import { useEffect, useState } from 'react';
 import Card from "@mui/material/Card";
 import VuiBox from 'components/VuiBox';
 import VuiTypography from 'components/VuiTypography';
-import { IoHappy } from 'react-icons/io5';
-import linearGradient from 'assets/theme/functions/linearGradient';
-import CircularProgress from '@mui/material/CircularProgress';
-//import { PieChart } from '@mui/x-charts/PieChart';
-//import { Chart } from "react-google-charts";
 import Chart from 'react-apexcharts';
-import colors from "assets/theme/base/colors";
-import ReportLine from "layouts/reports/components/ReportLine";
-import { InfoOutlined } from '@mui/icons-material';
+import { fetchBlockedItems } from 'services/api';
 
 const KeywordReport = () => {
+    const [blockedItems, setBlockedItems] = useState({});
+    const userId = '22'; // This should be dynamically set based on your application context
+
+    useEffect(() => {
+        fetchBlockedItems(userId).then(data => {
+            setBlockedItems(data);
+        });
+    }, []);
+
 	const categ_KeywPieChartData = {
     labels: ['elon musk', 'parti', 'global warming', 'Politics', 'Football', 'Memes and Jokes'],
     series: [44, 55, 13, 43, 30, 90],
