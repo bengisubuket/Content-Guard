@@ -67,7 +67,6 @@ chrome.runtime.onMessage.addListener(
                 } else
                     userSettings.activeKeywords.push(kwObj.name);
             });
-
             saveSettings();
         }
         return true; // Keeps the message channel open for async response
@@ -107,12 +106,11 @@ chrome.runtime.onMessage.addListener(
                 if (catObj.enabled) {
                     if (catObj.timer.enabled) {
                         if (catObj.timer.action == "block")
-                            userSettings.activeCategories.push(catObj.category);
+                            userSettings.activeCategories.push(catObj.name);
                     } else
-                        userSettings.activeCategories.push(catObj.category);
+                        userSettings.activeCategories.push(catObj.name);
                 }
             });
-
             saveSettings();
         }
         return true; // Keeps the message channel open for async response
@@ -177,6 +175,7 @@ function handleTimers() {
                                 if (categoryIndex !== -1) {
                                     userSettings.activeCategories.splice(categoryIndex, 1);
                                 }
+                                userSettings.categories[index].enabled = false;
                                 userSettings.categories[index].timer.enabled = false;
                                 userSettings.categories[index].timer.duration = 0;
                                 userSettings.categories[index].timer.remainingTime = 0;
@@ -189,6 +188,7 @@ function handleTimers() {
                         }
                     }
                 });
+                console.log(userSettings.categories)
                 saveSettings(); // Save the updated settings
             }
         });

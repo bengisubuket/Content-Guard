@@ -10,7 +10,6 @@ function CategoryBlockerComponent() {
         username: "uname",
         id: 492,
         categories: categoryNames.map(cat => ({ name: cat, enabled: false, timer: { enabled: false, duration: 0, action: 'allow', remainingTime: 0 } })),
-        activeCategories: []
     });
     const [timerEnabled, setTimerEnabled] = useState(false);
     const [timerDuration, setTimerDuration] = useState({ hours: 0, minutes: 0, seconds: 0 });
@@ -37,10 +36,9 @@ function CategoryBlockerComponent() {
                         username: "uname",
                         id: 492,
                         categories: categoryNames.map(cat => ({ name: cat, enabled: false, timer: { enabled: false, duration: 0, action: 'allow', remainingTime: 0 } })),
-                        activeCategories: []
                     };
                     setUserSettings(initialSettings);
-                    saveSettings(initialSettings);
+                    //saveSettings(initialSettings);
                 }
             });
         }
@@ -58,11 +56,13 @@ function CategoryBlockerComponent() {
         return () => chrome.runtime.onMessage.removeListener(listener);
     }, []);
 
-    function saveSettings(settings) {
-        chrome.storage.local.set({ 'userSettings': settings }, () => {
-            console.log('User settings React saved:', settings);
-        });
-    }
+    // function saveSettings(settings) {
+    //     console.log("React Save Settings Function")
+    //     chrome.storage.local.set({ 'userSettings': settings }, () => {
+    //         console.log('User settings React saved:', settings);
+    //     });
+
+    // }
 
     const handleToggleCategory = (category) => {
         const updatedCategories = userSettings.categories.map(cat => {
@@ -74,7 +74,14 @@ function CategoryBlockerComponent() {
 
         const updatedSettings = { ...userSettings, categories: updatedCategories };
         setUserSettings(updatedSettings);
-        saveSettings(updatedSettings);
+        //saveSettings(updatedSettings);
+
+        console.log("before send data to background:");
+        console.log(updatedSettings.categories)
+        // Send the updated categories list to the background script
+        chrome.runtime.sendMessage({ action: "updateCategories", data: updatedSettings.categories }, (response) => {
+            console.log("Response from background script:", response);
+        });
     };
 
     const handleToggle = (isOpen, event) => {
@@ -93,8 +100,14 @@ function CategoryBlockerComponent() {
 
         const updatedSettings = { ...userSettings, categories: updatedCategories };
         setUserSettings(updatedSettings);
-        saveSettings(updatedSettings);
+        //saveSettings(updatedSettings);
         setActiveCategory(null);
+        // Send the updated categories list to the background script
+        console.log("before send data to background:");
+        console.log(updatedSettings.categories)
+        chrome.runtime.sendMessage({ action: "updateCategories", data: updatedSettings.categories }, (response) => {
+            console.log("Response from background script:", response);
+        });
     };
 
     const handleTimerButtonClick = (category) => {
@@ -112,7 +125,7 @@ function CategoryBlockerComponent() {
 
         const updatedSettings = { ...userSettings, categories: updatedCategories };
         setUserSettings(updatedSettings);
-        saveSettings(updatedSettings);
+        //saveSettings(updatedSettings);
     };
 
     const handleTimeChange = (e) => {
