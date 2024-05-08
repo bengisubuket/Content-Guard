@@ -1,102 +1,67 @@
-import React from 'react';
-import { useEffect, useState } from 'react';
+// Import dependencies and components
+import React, { useEffect, useMemo, useState } from 'react';
 import Card from "@mui/material/Card";
 import VuiBox from 'components/VuiBox';
 import VuiTypography from 'components/VuiTypography';
 import Chart from 'react-apexcharts';
-import { fetchBlockedItems } from 'services/api';
+import { getReportById } from 'services/api';
 
-const KeywordReport = () => {
+// Main report component
+const KeywordReport = ({id}) => {
+
     const [blockedItems, setBlockedItems] = useState({});
-    const userId = '22'; // This should be dynamically set based on your application context
 
+    // Fetch the blocked items for the specified user on mount
     useEffect(() => {
-        fetchBlockedItems(userId).then(data => {
-            setBlockedItems(data);
+        getReportById(id).then(data => {
+            setBlockedItems(data || {});
         });
+        console.log("Blocked Items:", blockedItems);
     }, []);
 
-	const categ_KeywPieChartData = {
-    labels: ['elon musk', 'parti', 'global warming', 'Politics', 'Football', 'Memes and Jokes'],
-    series: [44, 55, 13, 43, 30, 90],
-  };
-  
-  const keywordPieChartData = {
-    labels: ['elon musk', 'parti', 'global warming'],
-    series: [44, 55, 13],
-  };
+    // Destructure the fetched report data or provide default empty objects
+    const { categories_reported = {}, keywords_reported = {} } = blockedItems;
 
-  const categoryPieChartData = {
-    labels: ['Politics', 'Football', 'Memes and Jokes'],
-    series: [43, 30, 90],
-  };
+    // Memoize the chart data to avoid unnecessary recalculations
+    const keywordPieChartData = useMemo(() => ({
+        series: Object.values(keywords_reported),
+        options: {
+            labels: Object.keys(keywords_reported),
+            colors: ['#FF4560', '#775DD0', '#008FFB', '#00E396', '#FEB019']
+        }
+    }), [keywords_reported]);
 
-  const options = {
-    chart: {
-      type: 'pie',
-    },
-    labels: categ_KeywPieChartData.labels,
-    colors: ['#4318ff', '#0f1535', '#0075ff', '#01b574', '#ffb547', '#e31a1a', '#e9ecef', '#344767'],
-    
-    markers: {
-      colors: ['#F44336', '#E91E63', '#9C27B0']
-    },
-  };
+    const categoryPieChartData = useMemo(() => ({
+        series: Object.values(categories_reported),
+        options: {
+            labels: Object.keys(categories_reported),
+            colors: ['#FF4560', '#775DD0', '#008FFB', '#00E396', '#FEB019']
+        }
+    }), [categories_reported]);
 
-  const optionsKeyw = {
-    chart: {
-      type: 'pie',
-    },
-    labels: keywordPieChartData.labels,
-    colors: ['#4318ff', '#0f1535', '#0075ff', '#01b574', '#ffb547', '#e31a1a', '#e9ecef', '#344767'],
-    
-    markers: {
-      colors: ['#F44336', '#E91E63', '#9C27B0']
-    },
-  };
+    // Render the UI
+    return (
+        <Card m={20}>
+            <Card id="delete-account" sx={{ height: "100%" }}>
+                <VuiBox sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <VuiBox>
+                        <VuiTypography variant="h6" sx={{ color: '#e9ecef' }}>
+                            Keywords Blocked
+                        </VuiTypography>
+                        <Chart options={keywordPieChartData.options} series={keywordPieChartData.series} type="pie" width="400" />
+                    </VuiBox>
+                    <VuiBox>
+                        <VuiTypography variant="h6" sx={{ color: '#e9ecef' }}>
+                            Categories Blocked
+                        </VuiTypography>
+                        <Chart options={categoryPieChartData.options} series={categoryPieChartData.series} type="pie" width="400" />
+                    </VuiBox>
+                </VuiBox>
+            </Card>
+        </Card>
+    );
 
-  const optionsCateg = {
-    chart: {
-      type: 'pie',
-    },
-    labels: categoryPieChartData.labels,
-    colors: ['#4318ff', '#0f1535', '#0075ff', '#01b574', '#ffb547', '#e31a1a', '#e9ecef', '#344767'],
-    
-    markers: {
-      colors: ['#F44336', '#E91E63', '#9C27B0']
-    },
-  };
-	return (
-	<Card m={20}>
-    <Card id="delete-account" sx={{ height: "100%"}}>
-      <VuiBox sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-      <VuiTypography variant="h6" sx={{color: '#e9ecef'}}>
-        Keywords and Categories Blocked
-      </VuiTypography>
-      
-      <Chart options={options} series={categ_KeywPieChartData.series} type="pie" width="400" />
-
-      </VuiBox>
-      <VuiBox sx={{ display: 'flex', justifyContent: 'space-between' }}>
-
-      <VuiBox>
-      <VuiTypography variant="h6" sx={{color: '#e9ecef'}}>
-        Keywords Blocked
-      </VuiTypography>
-      <Chart options={optionsKeyw} series={keywordPieChartData.series} type="pie" width="400" />
-      </VuiBox>
-      <VuiBox>
-      <VuiTypography variant="h6" sx={{color: '#e9ecef'}}>
-        Categories Blocked
-      </VuiTypography>
-      <Chart options={optionsCateg} series={categoryPieChartData.series} type="pie" width="400" />
-      </VuiBox>
-      </VuiBox>
-    
-
-    </Card>
-    </Card>
-	);
+   
 };
 
 export default KeywordReport;

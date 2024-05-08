@@ -19,6 +19,7 @@ import KeywordReport from "layouts/reports/reportPage/components/KeywordReport";
 const ReportPage = () => {
     const location = useLocation();
     const id = location.state.id;
+    const date = location.state.date;
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -30,9 +31,9 @@ const ReportPage = () => {
                     
                 <VuiBox component="ul" display="flex" flexDirection="column" p={0} m={0}>
                         <VuiTypography variant="h6" fontWeight="medium" color="white">
-                            Report ID: {id}
+                            Report ID: {id} - Date: {date}
                         </VuiTypography>
-                        <KeywordReport/>
+                        <KeywordReport id={id}/>
                     </VuiBox>
                     
                 </Card>

@@ -184,7 +184,9 @@ class ReportView(View):
             body_unicode = request.body.decode('utf-8')
             body_data = json.loads(body_unicode)
             user_id = body_data.get('user_id')
+            report_id = body_data.get('report_id')
             print(f"Received user_id: {user_id}")
+            print(f"Received report_id: {report_id}")
 
             # Retrieve all keywords and categories
             keywords = Keyword.objects.all()
@@ -200,15 +202,78 @@ class ReportView(View):
             # Create a new Report object
             new_report = Report.objects.create(
                 user_id=user_id,
+                report_id=report_id,
                 keywords_reported=keyword_counts,
                 categories_reported=category_counts,
                 time_added=timezone.now()
             )
 
-            return JsonResponse({'status': 'success', 'message': 'Report created successfully.'}, status=200)
+            #in response send data as well
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Report successfully saved.',
+                'keywords_reported': keyword_counts,
+                'categories_reported': category_counts
+            }, status=201)
 
         except Exception as e:
             logger.error(f"Error processing the request: {str(e)}")
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+        
+    # get by report_id
+    def get(self, request, report_id):
+        try:
+            # Retrieve the report by the given report_id
+            report = Report.objects.get(report_id=report_id)
+            print(f"Report {report}.")
+            return JsonResponse({
+                'status': 'success',
+                'user_id': report.user_id,
+                'report_id': report.report_id,
+                'keywords_reported': report.keywords_reported,
+                'categories_reported': report.categories_reported,
+                'time_added': report.time_added
+            })
+
+        except Report.DoesNotExist:
+            logger.error(f"Report with id {report_id} does not exist.")
+            return JsonResponse({'status': 'error', 'message': f'Report with id {report_id} does not exist.'}, status=404)
+
+        except Exception as e:
+            logger.error(f"Error retrieving the report: {str(e)}")
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+        
+    def get(self, request):
+        # get all reports
+        reports = Report.objects.all()
+        reports_list = []
+        for report in reports:
+            reports_list.append({
+                'user_id': report.user_id,
+                'report_id': report.report_id,
+                'keywords_reported': report.keywords_reported,
+                'categories_reported': report.categories_reported,
+                'time_added': report.time_added
+            })
+        return JsonResponse({
+            'status': 'success',
+            'reports': reports_list
+        })
+        
+    def delete(self, request, report_id):
+        try:
+            # Retrieve the report by the given report_id
+            report = Report.objects.get(report_id=report_id)
+            report.delete()
+
+            return JsonResponse({'status': 'success', 'message': 'Report deleted successfully.'}, status=200)
+
+        except Report.DoesNotExist:
+            logger.error(f"Report with id {report_id} does not exist.")
+            return JsonResponse({'status': 'error', 'message': f'Report with id {report_id} does not exist.'}, status=404)
+
+        except Exception as e:
+            logger.error(f"Error deleting the report: {str(e)}")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     
