@@ -27,3 +27,10 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+class Report(models.Model):
+    user_id = models.CharField(max_length=255)
+    report_id = models.CharField(max_length=255, unique=True)
+    categories_reported = models.JSONField(default=list)
+    keywords_reported = models.JSONField(default=list)
+    time_added = models.DateTimeField(auto_now_add=True)

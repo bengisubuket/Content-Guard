@@ -74,6 +74,15 @@ function extractTweetId(node) {
     return null;
 }
 
+function handleText(filters, text) {
+    // kelimenin bağımsız olarak geçip geçmediğini kontrol etmek için
+    // TAM BAĞIMSIZ KELİME İÇİN
+    // const tweetWords = tweetText.split(/\s+|[,./\\!@#$%^&*();:{}[\]<>?\'\"]+/);
+    // const kw = tweetWords.some(tw => kw_filters.some(kwf => tw === kwf))
+
+    return filters.find(keyword => text.includes(keyword));
+}
+
 function handleNode(node) {
     const tweetTextElement = node.querySelector('[data-testid="tweetText"]');
     if (!tweetTextElement) {
@@ -88,9 +97,9 @@ function handleNode(node) {
         return;
     }
 
-    const kw = kw_filters.find(keyword => tweetText.includes(keyword.toLowerCase()));
+    const kw = handleText(kw_filters, tweetText);
+
     if (kw) {
-        console.log("BLOCKED_kw: ", kw);
         node.style.display = 'none';
         // Update the count of blocked tweets for the keyword
         if (blockedKwCount[kw]) {
@@ -166,7 +175,7 @@ function handleTweet(tweet) {
     const node = findTweetTextNode(tweet);
     if (node) {
         // push only the unique nodes
-        if (!nodes.includes(node)){
+        if (!nodes.includes(node)) {
             nodes.push(node);
             handleNode(node);
         }
@@ -222,34 +231,6 @@ function printDataTestIds(node, hierarchy = 'root') {
     }
 }
 
-
-// // ================================ Timers ==============================================================================
-// // check if the day has changed after the last tab/window close action
-// function isNewDay(closedTime){
-//     const day = 86400000; // 24 hours in milliseconds
-//     if(Date.now()/day - closedTime/day <= 1){
-//         return true;
-//     }
-//     return false;
-// }
-
-// function closedTabWindow(){
-//     closedTime = Date.now();
-//     // push the closed time, active keywords to the chrome storage
-// }
-
-// chrome.tabs.onRemoved.addListener(function(tabid, removed) {
-//     closedTabWindow();
-//    })
-   
-// chrome.windows.onRemoved.addListener(function(windowid) {
-//     closedTabWindow();
-//    })
-
-// function startTimer(keyword, action, duration){
-
-// }
-
 // ================================ Main ================================================================================
 
 // Starts everything when the tab loads.
@@ -258,7 +239,7 @@ function newTabLoaded() {
     // Options for the MutationObserver
     const observerConfig = {
         childList: true, // Observe changes to the children of the target node
-        subtree: true,   // Observe changes in the entire subtree of the target node
+        subtree: true, // Observe changes in the entire subtree of the target node
     };
 
     // Select the node that contains the tweets
@@ -267,7 +248,7 @@ function newTabLoaded() {
     // Create a new MutationObserver
     observer = new MutationObserver(handleNewTweets);
 
-    if (targetNode && observer )
+    if (targetNode && observer)
     // Start observing the target node for mutations
         observer.observe(targetNode, observerConfig);
 }

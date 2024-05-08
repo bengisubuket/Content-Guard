@@ -44,9 +44,9 @@ function BlockersComponent() {
                 <Row className='mb-3'>
                     <Button onClick={navigateToCategoryBlocker}>Category Blocker</Button>
                 </Row>
-                <Row className='mb-3'>
+                {/*<Row className='mb-3'>
                     <Button onClick={navigateTimer}>Timer</Button>
-                </Row>
+                </Row>*/}
                 <Row>
                     <Button
                         onClick={navigateBack}

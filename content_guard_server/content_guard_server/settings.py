@@ -59,6 +59,7 @@ ROOT_URLCONF = "content_guard_server.urls"
 CORS_ALLOW_ALL_ORIGINS = False  # Set to True to allow all origins
 CORS_ALLOWED_ORIGINS = [
     "https://twitter.com",
+    "http://localhost:3000"
     # Add any other domains you want to allow requests from
 ]
 

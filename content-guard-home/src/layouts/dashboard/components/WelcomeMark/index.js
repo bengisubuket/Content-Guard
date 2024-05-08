@@ -4,16 +4,17 @@ import { Card, Icon } from "@mui/material";
 import VuiBox from "components/VuiBox";
 import VuiTypography from "components/VuiTypography";
 
-import gif from "assets/images/cardimgfree.png";
+import jellyfishboi from "assets/images/content-guard-images/jellyfish-guardian.png";
 
 const WelcomeMark = () => {
   return (
     <Card sx={() => ({
       height: "340px",
       py: "32px",
-      backgroundImage: `url(${gif})`,
-      backgroundSize: "cover",
-      backgroundPosition: "50%"
+      backgroundImage: `url(${jellyfishboi})`,
+      backgroundSize: "contain", // Adjusted property
+      backgroundPosition: "center", // Adjusted property
+      backgroundRepeat: "no-repeat", // Adjusted property
     })}>
       <VuiBox height="100%" display="flex" flexDirection="column" justifyContent="space-between">
         <VuiBox>
@@ -21,11 +22,10 @@ const WelcomeMark = () => {
             Welcome back,
           </VuiTypography>
           <VuiTypography color="white" variant="h3" fontWeight="bold" mb="18px">
-            Mark Johnson
+            İlayda Zehra YILMAZ
           </VuiTypography>
           <VuiTypography color="text" variant="h6" fontWeight="regular" mb="auto">
             Glad to see you again!
-            <br /> Ask me anything.
           </VuiTypography>
         </VuiBox>
         <VuiTypography
@@ -51,8 +51,10 @@ const WelcomeMark = () => {
             },
           }}
         >
-          Tap to record
+          Content Guard is guarding your content for you. Explore Content Guard Home.
+          <Icon sx={{ fontWeight: "bold", ml: "5px" }}>lock</Icon>
           <Icon sx={{ fontWeight: "bold", ml: "5px" }}>arrow_forward</Icon>
+                   
         </VuiTypography>
       </VuiBox>
     </Card>

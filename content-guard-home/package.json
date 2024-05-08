@@ -1,11 +1,10 @@
 {
-	"name": "vision-ui-dashboard-react",
+	"name": "content-guard",
 	"version": "3.0.0",
 	"private": true,
-	"author": "Creative Tim",
+	"author": "Creative Tim & Content Guard Frontend Team",
 	"license": "See license in https://www.creative-tim.com/license",
-	"description": "Material UI version of Vision UI Dashboard by Creative Tim",
-	"homepage": "https://demos.creative-tim.com/vision-ui-dashboard-react/#/dashboard",
+	"homepage": "https://localhost:3000/content-guard-home-page/#/dashboard",
 	"bugs": {
 		"url": "https://github.com/creativetimofficial/vision-ui-dashboard-react/issues"
 	},

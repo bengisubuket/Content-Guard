@@ -95,10 +95,10 @@ The documentation for the Vision UI Dashboard Free is hosted at our [website](ht
 Within the download you'll find the following directories and files:
 
 ```
-vision-dashboard-react-free/
+content-guard/
 ├── public
 │   ├── apple-icon.png
-│   ├── favicon.ico
+│   ├── favicon.icon
 │   ├── index.html
 │   ├── manifest.json
 │   └── robots.txt
@@ -271,7 +271,7 @@ vision-dashboard-react-free/
     │   │   │   └── index.js
     │   │   └── sign-up
     │   │       └── index.js
-    │   ├── billing
+    │   ├── reports
     │   │   ├── components
     │   │   │   ├── Bill
     │   │   │   │   └── index.js
@@ -279,7 +279,9 @@ vision-dashboard-react-free/
     │   │   │   │   └── index.js
     │   │   │   ├── CreditBalance
     │   │   │   │   └── index.js
-    │   │   │   ├── Invoice
+    │   │   │   ├── ReportLine
+    │   │   │   │   └── index.js
+    |   |   |   ├── ReportLines
     │   │   │   │   └── index.js
     │   │   │   ├── PaymentMethod
     │   │   │   │   └── index.js
