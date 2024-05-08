@@ -26,7 +26,6 @@ function CategoryBlockerComponent() {
         function loadSettings() {
             chrome.storage.local.get('userSettings', (data) => {
                 if (data.userSettings) {
-                    //console.log(`categories length: ${data.userSettings.categories.length}`);
                     if(data.userSettings.categories.length === 0){
                         data.userSettings.categories = categoryNames.map(cat => ({ name: cat, enabled: false, timer: { enabled: false, duration: 0, action: 'allow', remainingTime: 0 } }));
                     }
@@ -56,14 +55,6 @@ function CategoryBlockerComponent() {
         return () => chrome.runtime.onMessage.removeListener(listener);
     }, []);
 
-    // function saveSettings(settings) {
-    //     console.log("React Save Settings Function")
-    //     chrome.storage.local.set({ 'userSettings': settings }, () => {
-    //         console.log('User settings React saved:', settings);
-    //     });
-
-    // }
-
     const handleToggleCategory = (category) => {
         const updatedCategories = userSettings.categories.map(cat => {
             if (cat.name === category) {
@@ -74,10 +65,7 @@ function CategoryBlockerComponent() {
 
         const updatedSettings = { ...userSettings, categories: updatedCategories };
         setUserSettings(updatedSettings);
-        //saveSettings(updatedSettings);
 
-        console.log("before send data to background:");
-        console.log(updatedSettings.categories)
         // Send the updated categories list to the background script
         chrome.runtime.sendMessage({ action: "updateCategories", data: updatedSettings.categories }, (response) => {
             console.log("Response from background script:", response);
@@ -100,11 +88,9 @@ function CategoryBlockerComponent() {
 
         const updatedSettings = { ...userSettings, categories: updatedCategories };
         setUserSettings(updatedSettings);
-        //saveSettings(updatedSettings);
         setActiveCategory(null);
+
         // Send the updated categories list to the background script
-        console.log("before send data to background:");
-        console.log(updatedSettings.categories)
         chrome.runtime.sendMessage({ action: "updateCategories", data: updatedSettings.categories }, (response) => {
             console.log("Response from background script:", response);
         });
@@ -131,7 +117,6 @@ function CategoryBlockerComponent() {
     const handleTimeChange = (e) => {
         const { name, value } = e.target;
         setTimerDuration({...timerDuration, [name]: Number(value)});
-        console.log(timerDuration);
     };
 
     return (

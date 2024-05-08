@@ -5,7 +5,7 @@ var userSettings; // Global variable to store the keywordsList
 function saveSettings() {
     // Save userSettings to chrome.storage.local
     chrome.storage.local.set({ 'userSettings': userSettings }, function() {
-        //console.log('User settings saved:', userSettings);
+        console.log('User settings saved:', userSettings);
     });
     broadcastKeywords();
 }
@@ -14,7 +14,6 @@ function saveSettings() {
 function loadSettings() {
     // Retrieve userSettings from chrome.storage.local
     chrome.storage.local.get('userSettings', function(data) {
-        //console.log('User settings loaded:', data.user);
         userSettings = data.userSettings;
 
         if (userSettings === undefined) {
@@ -29,24 +28,18 @@ function loadSettings() {
             saveSettings();
             return;
         }
-        //console.log('User settings loaded:', userSettings);
-        // Call the callback function with the loaded user settings
+
         loadedSettings();
     });
 }
 
 function loadedSettings() {
-    //console.log("Settings are ready to use.");
 
-    //saveSettings();
 }
 
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    //console.log(tab);
     if (tab.url && (tab.url.includes("twitter.com") || changeInfo.status === "loading")) {
-        //console.log("Sending to tabId:", tabId);
-        //console.log("background.js listener");
         chrome.tabs.sendMessage(tabId, {
             type: "NEW"
         });
@@ -119,7 +112,6 @@ chrome.runtime.onMessage.addListener(
 
 // Function to broadcast keywordsList to all tabs
 function broadcastKeywords() {
-    //console.log("activeKeywords:", userSettings.activeKeywords);
     chrome.tabs.query({}, function(tabs) {
         for (let tab of tabs) {
             if (tab.url && tab.url.includes("twitter.com")) {
@@ -143,7 +135,6 @@ function handleTimers() {
 
         loadSettings(); // Load settings to check if a new timer has been added
         chrome.tabs.query({ url: '*://twitter.com/*' }, function(tabs) {
-            //console.log("tabs:", tabs.length);
             if (tabs.length > 0) {
 
                 userSettings.keywords.forEach((keyword, index) => {
@@ -188,7 +179,6 @@ function handleTimers() {
                         }
                     }
                 });
-                console.log(userSettings.categories)
                 saveSettings(); // Save the updated settings
             }
         });
