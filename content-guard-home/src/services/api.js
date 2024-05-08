@@ -23,28 +23,6 @@ export const createReport = async (userId, reportId) => {
     }
 };
 
-// New function to fetch the report by its report_id via GET
-export const getReportById = async (reportId) => {
-    try {
-        const response = await fetch(`${API_URL}${reportId}/get/`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('There was a problem with the fetch operation:', error);
-    }
-};
-
-
 // New function to fetch all reports via GET
 export const getAllReports = async () => {
     try {
@@ -84,5 +62,26 @@ export const deleteReport = async (reportId) => {
     } catch (error) {
         console.error('There was a problem with the delete operation:', error);
         return { status: 'error', message: 'Failed to delete report' };
+    }
+};
+
+export const getReportById = async (reportId) => {
+    try {
+        const response = await fetch(`${API_URL}${reportId}/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+        return { status: 'error', message: 'Failed to retrieve report' };
     }
 };

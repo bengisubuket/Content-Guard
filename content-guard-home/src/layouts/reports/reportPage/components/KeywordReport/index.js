@@ -7,17 +7,20 @@ import Chart from 'react-apexcharts';
 import { getReportById } from 'services/api';
 
 // Main report component
-const KeywordReport = ({id}) => {
-
+const KeywordReport = ({ id }) => {
     const [blockedItems, setBlockedItems] = useState({});
 
-    // Fetch the blocked items for the specified user on mount
+    // Fetch report data by ID when the component mounts or when `id` changes
     useEffect(() => {
-        getReportById(id).then(data => {
-            setBlockedItems(data || {});
-        });
-        console.log("Blocked Items:", blockedItems);
-    }, []);
+        const fetchReport = async () => {
+            const data = await getReportById(id);
+            if (data && data.status === 'success') {
+                setBlockedItems(data.report);
+            }
+        };
+
+        fetchReport();
+    }, [id]);
 
     // Destructure the fetched report data or provide default empty objects
     const { categories_reported = {}, keywords_reported = {} } = blockedItems;
@@ -60,8 +63,6 @@ const KeywordReport = ({id}) => {
             </Card>
         </Card>
     );
-
-   
 };
 
 export default KeywordReport;

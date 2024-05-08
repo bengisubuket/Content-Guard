@@ -219,29 +219,7 @@ class ReportView(View):
         except Exception as e:
             logger.error(f"Error processing the request: {str(e)}")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-        
-    # get by report_id
-    def get(self, request, report_id):
-        try:
-            # Retrieve the report by the given report_id
-            report = Report.objects.get(report_id=report_id)
-            print(f"Report {report}.")
-            return JsonResponse({
-                'status': 'success',
-                'user_id': report.user_id,
-                'report_id': report.report_id,
-                'keywords_reported': report.keywords_reported,
-                'categories_reported': report.categories_reported,
-                'time_added': report.time_added
-            })
 
-        except Report.DoesNotExist:
-            logger.error(f"Report with id {report_id} does not exist.")
-            return JsonResponse({'status': 'error', 'message': f'Report with id {report_id} does not exist.'}, status=404)
-
-        except Exception as e:
-            logger.error(f"Error retrieving the report: {str(e)}")
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
         
     def get(self, request):
         # get all reports
@@ -277,3 +255,47 @@ class ReportView(View):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     
+    def get(self, request, report_id=None):
+        if report_id:
+            try:
+                # Retrieve the specific report by the given report_id
+                report = Report.objects.get(report_id=report_id)
+                report_data = {
+                    'user_id': report.user_id,
+                    'report_id': report.report_id,
+                    'keywords_reported': report.keywords_reported,
+                    'categories_reported': report.categories_reported,
+                    'time_added': report.time_added
+                }
+
+                return JsonResponse({
+                    'status': 'success',
+                    'report': report_data
+                })
+
+            except Report.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'Report with id {report_id} does not exist.'
+                }, status=404)
+
+            except Exception as e:
+                logger.error(f"Error retrieving the report: {str(e)}")
+                return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+        else:
+            # Existing code to return all reports if no report_id is provided
+            reports = Report.objects.all()
+            reports_list = []
+            for report in reports:
+                reports_list.append({
+                    'user_id': report.user_id,
+                    'report_id': report.report_id,
+                    'keywords_reported': report.keywords_reported,
+                    'categories_reported': report.categories_reported,
+                    'time_added': report.time_added
+                })
+            return JsonResponse({
+                'status': 'success',
+                'reports': reports_list
+            })
