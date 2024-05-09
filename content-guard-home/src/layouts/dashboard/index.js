@@ -128,7 +128,7 @@ function Dashboard() {
                   </VuiBox>
                   <VuiBox sx={{ height: "310px" }}>
                   <LineChart
-                    key={Date.now()} // Changes every time state updates, forcing re-render
+                    key={keywordBlockedCountList} // Changes every time state updates, forcing re-render
                     lineChartData={[
                       {
                         name: "Keywords Blocked",
@@ -157,7 +157,7 @@ function Dashboard() {
                   </VuiBox>
                   <VuiBox sx={{ height: "310px" }}>
                     <LineChart
-                      key={Date.now()} // Changes every time state updates, forcing re-render
+                      key={categoryBlockedCountList} // Changes every time state updates, forcing re-render
                       lineChartData={[
                         {
                           name: "Categories Blocked",
@@ -178,25 +178,8 @@ function Dashboard() {
           <Grid item xs={12} md={6} lg={8}>
           <Card>
                 <VuiBox>
-                  <VuiBox
-                    mb="24px"
-                    height="220px"
-                    sx={{
-                      background: linearGradient(
-                        cardContent.main,
-                        cardContent.state,
-                        cardContent.deg
-                      ),
-                      borderRadius: "20px",
-                    }}
-                  >
-                    <BarChart
-                      barChartData={barChartDataDashboard}
-                      barChartOptions={barChartOptionsDashboard}
-                    />
-                  </VuiBox>
                   <VuiTypography variant="lg" color="white" fontWeight="bold" mb="5px">
-                    Number of Keyword and Category Tweets Blocked
+                    Number of Keyword and Category Tweets Blocked So Far
                   </VuiTypography>
                   <VuiBox display="flex" alignItems="center" mb="40px">
                     <VuiTypography variant="button" color="success" fontWeight="bold">
