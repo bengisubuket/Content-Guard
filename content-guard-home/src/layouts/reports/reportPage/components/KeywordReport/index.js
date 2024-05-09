@@ -4,7 +4,7 @@ import Card from "@mui/material/Card";
 import VuiBox from 'components/VuiBox';
 import VuiTypography from 'components/VuiTypography';
 import Chart from 'react-apexcharts';
-import { getReportById } from 'services/api';
+import { getReportById } from 'services/report_api';
 
 // Main report component
 const KeywordReport = ({ id }) => {

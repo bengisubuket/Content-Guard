@@ -28,17 +28,72 @@ import { IoShieldCheckmark } from "react-icons/io5";
 // Data
 import LineChart from "examples/Charts/LineCharts/LineChart";
 import BarChart from "examples/Charts/BarCharts/BarChart";
-import { lineChartDataDashboard } from "layouts/dashboard/data/lineChartData";
 import { lineChartOptionsDashboard } from "layouts/dashboard/data/lineChartOptions";
 import { barChartDataDashboard } from "layouts/dashboard/data/barChartData";
 import { barChartOptionsDashboard } from "layouts/dashboard/data/barChartOptions";
-import { lineChartCategoryDataDashboard } from "layouts/dashboard/data/lineChartCategoryData";
-import { lineChartCategoryOptionsDashboard } from "layouts/dashboard/data/lineChartCategoryOptions";
+
+import { fetchKwStats, fetchCatStats } from "services/stats_api";
+import { useEffect, useMemo, useState } from "react";
 
 
 function Dashboard() {
   const { gradients } = colors;
   const { cardContent } = gradients;
+  const [totalKwBlockedTweets, setTotalKwBlockedTweets] = useState(0);
+  const [totalCatBlockedTweets, setTotalCatBlockedTweets] = useState(0);
+
+  // useEffect(() => {
+  //     const fetchData = async () => {
+  //         try {
+  //             const keywords = await fetchKeywordStats();
+  //             setKeywordsData(keywords);
+  //             const totalKw = keywords.reduce((acc, keyword) => acc + (keyword.total_blocked_tweets || 0), 0);
+  //             setTotalKwBlockedTweets(totalKw);
+
+  //             const categories = await fetchCategoryStats();
+  //             setCategoriesData(categories);
+  //             const totalCat = categories.reduce((acc, category) => acc + (category.total_blocked_tweets || 0), 0);
+  //             setTotalCatBlockedTweets(totalCat);
+  //         } catch (error) {
+  //             console.error('Error loading data:', error);
+  //         }
+  //     };
+
+  //     fetchData();
+  // }, []);
+
+  const [keywordsData, setKeywordsData] = useState({});
+  const [keywordBlockedCountList, setKeywordBlockedCountList] = useState([]);
+  const [categoriesData, setCategoriesData] = useState([]);
+  const [categoryBlockedCountList, setCategoryBlockedCountList] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data_kw = await fetchKwStats();
+      const data_cat = await fetchCatStats();
+      console.log(data_kw);
+      console.log(data_cat);
+      if(data_kw && data_kw.status === 'success') {
+        setKeywordsData(data_kw);
+        setKeywordBlockedCountList(data_kw.total_blocked);
+        setTotalKwBlockedTweets(keywordBlockedCountList.reduce((accumulator, currentValue) => accumulator + currentValue, 0))
+
+      }
+      if(data_cat && data_cat.status === 'success') {
+        setCategoriesData(data_cat);
+        setCategoryBlockedCountList(data_cat.total_blocked);
+        setTotalCatBlockedTweets(categoryBlockedCountList.reduce((accumulator, currentValue) => accumulator + currentValue, 0))
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  console.log(keywordsData);
+  console.log(keywordBlockedCountList);
+  console.log(categoriesData);
+  console.log(categoryBlockedCountList);
+  
 
   return (
     <DashboardLayout>
@@ -65,17 +120,23 @@ function Dashboard() {
                   </VuiTypography>
                   <VuiBox display="flex" alignItems="center" mb="40px">
                     <VuiTypography variant="button" color="success" fontWeight="bold">
-                      2,984 in total{" "}
+                      {totalKwBlockedTweets} in total{" "}
                       <VuiTypography variant="button" color="text" fontWeight="regular">
-                        in 2024
+                        last 24 hour
                       </VuiTypography>
                     </VuiTypography>
                   </VuiBox>
                   <VuiBox sx={{ height: "310px" }}>
-                    <LineChart
-                      lineChartData={lineChartDataDashboard}
-                      lineChartOptions={lineChartOptionsDashboard}
-                    />
+                  <LineChart
+                    key={Date.now()} // Changes every time state updates, forcing re-render
+                    lineChartData={[
+                      {
+                        name: "Keywords Blocked",
+                        data: keywordBlockedCountList,
+                      }
+                    ]}
+                    lineChartOptions={lineChartOptionsDashboard}
+                  />
                   </VuiBox>
                 </VuiBox>
               </Card>
@@ -88,16 +149,23 @@ function Dashboard() {
                   </VuiTypography>
                   <VuiBox display="flex" alignItems="center" mb="40px">
                     <VuiTypography variant="button" color="success" fontWeight="bold">
-                      2,016 in total{" "}
+                      {totalCatBlockedTweets} in total{" "}
                       <VuiTypography variant="button" color="text" fontWeight="regular">
-                        in 2024
+                        last 24 hour
                       </VuiTypography>
                     </VuiTypography>
                   </VuiBox>
                   <VuiBox sx={{ height: "310px" }}>
                     <LineChart
-                      lineChartData={lineChartCategoryDataDashboard}
-                      lineChartOptions={lineChartCategoryOptionsDashboard}
+                      key={Date.now()} // Changes every time state updates, forcing re-render
+                      lineChartData={[
+                        {
+                          name: "Categories Blocked",
+                          data: categoryBlockedCountList,
+                        }
+                      
+                      ]}
+                      lineChartOptions={lineChartOptionsDashboard}
                     />
                   </VuiBox>
                 </VuiBox>
@@ -223,3 +291,4 @@ function Dashboard() {
 }
 
 export default Dashboard;
+

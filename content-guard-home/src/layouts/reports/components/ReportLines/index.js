@@ -6,7 +6,7 @@ import VuiTypography from "components/VuiTypography";
 import VuiButton from "components/VuiButton";
 import ReportLine from "layouts/reports/components/ReportLine";
 import React, { useState, useEffect } from 'react';
-import { getAllReports, createReport, deleteReport } from 'services/api';
+import { getAllReports, createReport, deleteReport } from 'services/report_api';
 
 function ReportLines() {
     const [reports, setReports] = useState([]);

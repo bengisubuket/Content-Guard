@@ -2,7 +2,6 @@ import logging
 from django.utils import timezone
 from django.http import JsonResponse
 from .models import Tweet, Keyword, Category, Report
-from django.db.models import Sum
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -10,6 +9,7 @@ from django.db import transaction
 import json
 from g4f.client import Client
 import time
+from datetime import timedelta
 
 client = Client()
 
@@ -300,7 +300,70 @@ class ReportView(View):
                 'reports': reports_list
             })
 
-from datetime import timedelta
+from django.utils import timezone
+from django.http import JsonResponse
+from django.views import View
+from collections import defaultdict
+
+class KwStatsView(View):
+    def get(self, request):
+        try:
+            # Get the current time
+            now = timezone.now()
+            # Calculate the time 24 hours ago from now
+            last_24_hours = now - timezone.timedelta(hours=24)
+            
+            # Initialize a dictionary to hold counts for each hour (0-23)
+            tweets_per_hour = defaultdict(int)
+            
+            # Query all keywords where time_added is within the last 24 hours
+            keywords_last_24_hours = Keyword.objects.filter(time_added__gte=last_24_hours).values('time_added', 'number_of_blocked_tweets')
+            
+            # Populate the dictionary based on each tweet's hour of the day
+            for entry in keywords_last_24_hours:
+                hour = entry['time_added'].hour
+                tweets_per_hour[hour] += entry['number_of_blocked_tweets']
+            
+            # Prepare arrays for the 24 hours
+            hours = list(range(24))  # List from 0 to 23 representing each hour
+            total_blocked = [tweets_per_hour[hour] for hour in hours]  # Default to 0 if the hour has no data
+            
+            return JsonResponse({'status': 'success', 'hours': hours, 'total_blocked': total_blocked}, safe=False)
+        except Exception as e:
+            # Log the error (print or use logging module)
+            print(f"Error occurred: {str(e)}")
+            # Return an error response
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+class CatStatsView(View):
+    def get(self, request):
+        try:
+            # Get the current time
+            now = timezone.now()
+            # Calculate the time 24 hours ago from now
+            last_24_hours = now - timezone.timedelta(hours=24)
+            
+            # Initialize a dictionary to hold counts for each hour (0-23)
+            tweets_per_hour = defaultdict(int)
+            
+            # Query all keywords where time_added is within the last 24 hours
+            keywords_last_24_hours = Category.objects.filter(time_added__gte=last_24_hours).values('time_added', 'number_of_blocked_tweets')
+            
+            # Populate the dictionary based on each tweet's hour of the day
+            for entry in keywords_last_24_hours:
+                hour = entry['time_added'].hour
+                tweets_per_hour[hour] += entry['number_of_blocked_tweets']
+            
+            # Prepare arrays for the 24 hours
+            hours = list(range(24))  # List from 0 to 23 representing each hour
+            total_blocked = [tweets_per_hour[hour] for hour in hours]  # Default to 0 if the hour has no data
+            
+            return JsonResponse({'status': 'success', 'hours': hours, 'total_blocked': total_blocked}, safe=False)
+        except Exception as e:
+            # Log the error (print or use logging module)
+            print(f"Error occurred: {str(e)}")
+            # Return an error response
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 class KeywordsGroupedBySecondView(View):
     def get(self, request):
