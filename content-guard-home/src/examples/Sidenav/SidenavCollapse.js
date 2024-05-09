@@ -40,7 +40,7 @@ import {
 // Vision UI Dashboard React context
 import { useVisionUIController } from "context";
 
-function SidenavCollapse({ color, icon, name, children, active, noCollapse, open, ...rest }) {
+function SidenavCollapse({ color= "info", icon, name, children= false, active= false, noCollapse= false, open= false, ...rest }) {
   const [controller] = useVisionUIController();
   const { miniSidenav, transparentSidenav } = controller;
 
@@ -73,6 +73,7 @@ function SidenavCollapse({ color, icon, name, children, active, noCollapse, open
   );
 }
 
+/*
 // Setting default values for the props of SidenavCollapse
 SidenavCollapse.defaultProps = {
   color: "info",
@@ -81,6 +82,7 @@ SidenavCollapse.defaultProps = {
   children: false,
   open: false,
 };
+*/
 
 // Typechecking props for the SidenavCollapse
 SidenavCollapse.propTypes = {

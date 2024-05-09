@@ -65,7 +65,9 @@ import logoSpotify from "assets/images/small-logos/logo-spotify.svg";
 import { ImEvil2 } from "react-icons/im";
 import { whitespace } from "stylis";
 
-function DashboardNavbar({ absolute, light, isMini }) {
+function DashboardNavbar({ absolute= false,
+  light= false,
+  isMini= false,}) {
   const [navbarType, setNavbarType] = useState();
   const [controller, dispatch] = useVisionUIController();
   const { miniSidenav, transparentNavbar, fixedNavbar, openConfigurator } = controller;
@@ -218,13 +220,14 @@ function DashboardNavbar({ absolute, light, isMini }) {
   );
 }
 
+/*
 // Setting default values for the props of DashboardNavbar
 DashboardNavbar.defaultProps = {
   absolute: false,
   light: false,
   isMini: false,
 };
-
+*/
 // Typechecking props for the DashboardNavbar
 DashboardNavbar.propTypes = {
   absolute: PropTypes.bool,

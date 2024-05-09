@@ -20,7 +20,8 @@
 import PropTypes from "prop-types";
 import guardianLogo from "assets/images/content-guard-images/guardian.png";
 
-function GuardianLogo({ size }) {
+function GuardianLogo({ color= "dark",
+size= "16px" }) {
   return (
     <img
       src={guardianLogo}
@@ -29,11 +30,14 @@ function GuardianLogo({ size }) {
     />
   );
 }
+
+/*
 // Setting default values for the props of GuardianLogo
 GuardianLogo.defaultProps = {
   color: "dark",
   size: "16px",
 };
+*/
 
 // Typechecking props for the GuardianLogo
 GuardianLogo.propTypes = {

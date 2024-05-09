@@ -7,7 +7,7 @@ import Icon from "@mui/material/Icon";
 import { IoDocumentText } from "react-icons/io5";
 import { useHistory } from "react-router-dom";
 
-function ReportLine({ date, id, onDelete }) {
+function ReportLine({ date, id, onDelete, noGutter= false}) {
   const history = useHistory();
 
   const handleReportClick = () => {
@@ -70,11 +70,12 @@ function ReportLine({ date, id, onDelete }) {
   );
 }
 
+/*
 // Set default prop values
 ReportLine.defaultProps = {
   noGutter: false,
 };
-
+*/
 // Type-check the prop types
 ReportLine.propTypes = {
   date: PropTypes.string.isRequired,

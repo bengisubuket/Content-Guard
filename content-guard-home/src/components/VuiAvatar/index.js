@@ -24,17 +24,20 @@ import PropTypes from "prop-types";
 // Custom styles for VuiAvatar
 import VuiAvatarRoot from "components/VuiAvatar/VuiAvatarRoot";
 
-const VuiAvatar = forwardRef(({ bgColor, size, shadow, ...rest }, ref) => (
+const VuiAvatar = forwardRef(({ bgColor= "transparent",
+size= "md",
+shadow= "none", ...rest }, ref) => (
   <VuiAvatarRoot ref={ref} ownerState={{ shadow, bgColor, size }} {...rest} />
 ));
 
+/*
 // Setting default values for the props of VuiAvatar
 VuiAvatar.defaultProps = {
   bgColor: "transparent",
   size: "md",
   shadow: "none",
 };
-
+*/
 // Typechecking props for the VuiAvatar
 VuiAvatar.propTypes = {
   bgColor: PropTypes.oneOf([

@@ -25,7 +25,14 @@ import PropTypes from "prop-types";
 import VuiBadgeRoot from "components/VuiBadge/VuiBadgeRoot";
 
 const VuiBadge = forwardRef(
-  ({ color, variant, size, circular, indicator, border, container, children, ...rest }, ref) => (
+  ({ color="info",
+  variant= "gradient",
+  size= "sm",
+  circular= false,
+  indicator= false,
+  border= false,
+  children= false,
+  container= false, ...rest }, ref) => (
     <VuiBadgeRoot
       {...rest}
       ownerState={{ color, variant, size, circular, indicator, border, container, children }}
@@ -37,6 +44,7 @@ const VuiBadge = forwardRef(
   )
 );
 
+/*
 // Setting default values for the props of VuiBadge
 VuiBadge.defaultProps = {
   color: "info",
@@ -48,6 +56,7 @@ VuiBadge.defaultProps = {
   children: false,
   container: false,
 };
+*/
 
 // Typechecking props of the VuiBadge
 VuiBadge.propTypes = {
