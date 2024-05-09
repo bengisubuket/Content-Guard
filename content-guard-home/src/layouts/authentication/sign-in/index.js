@@ -1,12 +1,17 @@
 import { useState } from "react";
+import { useHistory } from "react-router-dom";
 
-// react-router-dom components
-import { Link } from "react-router-dom";
 
 // @mui material components
 import Icon from "@mui/material/Icon";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
+
+// Icons
+import { FaTwitter } from "react-icons/fa";
+
+// Images
+import bgSignIn from "assets/images/content-guard-images/guardian-signIn-last.png";
 
 // Vision UI Dashboard React components
 import VuiBox from "components/VuiBox";
@@ -43,6 +48,7 @@ const auth = getAuth();
 
 function SignIn() {
   const [rememberMe, setRememberMe] = useState(true);
+  const history = useHistory();
 
   // Function to handle Twitter login
   const handleTwitterLogin = () => {
@@ -109,6 +115,8 @@ function SignIn() {
           })  
 
           
+        // Redirect to the dashboard
+        history.push("/dashboard");
       }
     })
     .catch((error) => {
@@ -128,6 +136,7 @@ function SignIn() {
       title="Welcome!"
       color="white"
       description="Use Twitter to login to your Content Guard Home page to see how we guard your content. In Content Guard Home Page you can see your blockers and blocker reports."
+      image={bgSignIn}
       premotto="GUARDING YOUR CONTENT FOR YOU:"
       motto="CONTENT GUARD"
       cardContent
@@ -172,6 +181,7 @@ function SignIn() {
                 onClick={handleTwitterLogin} // Trigger Twitter login
               >
                 <Icon
+                  as={FaTwitter}
                   w="30px"
                   h="30px"
                   sx={({ palette: { white } }) => ({
