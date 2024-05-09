@@ -11,10 +11,7 @@ import VuiProgress from "components/VuiProgress";
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
-import linearGradient from "assets/theme/functions/linearGradient";
 
-// Vision UI Dashboard React base styles
-import colors from "assets/theme/base/colors";
 
 // Dashboard layout components
 import WelcomeMark from "layouts/dashboard/components/WelcomeMark";
@@ -24,43 +21,38 @@ import { MdKey } from "react-icons/md";
 import { FaFolderClosed } from "react-icons/fa6";
 import { IoShieldCheckmark } from "react-icons/io5";
 
-
 // Data
 import LineChart from "examples/Charts/LineCharts/LineChart";
-import BarChart from "examples/Charts/BarCharts/BarChart";
 import { lineChartOptionsDashboard } from "layouts/dashboard/data/lineChartOptions";
-import { barChartDataDashboard } from "layouts/dashboard/data/barChartData";
-import { barChartOptionsDashboard } from "layouts/dashboard/data/barChartOptions";
 
-import { fetchKwStats, fetchCatStats } from "services/stats_api";
-import { useEffect, useMemo, useState } from "react";
+import { fetchKwStats, fetchCatStats, fetchCategoryStats, fetchKeywordStats } from "services/stats_api";
+import { useEffect, useState } from "react";
 
 
 function Dashboard() {
-  const { gradients } = colors;
-  const { cardContent } = gradients;
+  const [totalKwBlockedTweets24h, setTotalKwBlockedTweets24h] = useState(0);
+  const [totalCatBlockedTweets24h, setTotalCatBlockedTweets24h] = useState(0);
   const [totalKwBlockedTweets, setTotalKwBlockedTweets] = useState(0);
   const [totalCatBlockedTweets, setTotalCatBlockedTweets] = useState(0);
 
-  // useEffect(() => {
-  //     const fetchData = async () => {
-  //         try {
-  //             const keywords = await fetchKeywordStats();
-  //             setKeywordsData(keywords);
-  //             const totalKw = keywords.reduce((acc, keyword) => acc + (keyword.total_blocked_tweets || 0), 0);
-  //             setTotalKwBlockedTweets(totalKw);
+  useEffect(() => {
+      const fetchData = async () => {
+          try {
+              const keywords = await fetchKeywordStats();
+              const totalKw = keywords.reduce((acc, keyword) => acc + (keyword.total_blocked_tweets || 0), 0);
+              setTotalKwBlockedTweets(totalKw);
 
-  //             const categories = await fetchCategoryStats();
-  //             setCategoriesData(categories);
-  //             const totalCat = categories.reduce((acc, category) => acc + (category.total_blocked_tweets || 0), 0);
-  //             setTotalCatBlockedTweets(totalCat);
-  //         } catch (error) {
-  //             console.error('Error loading data:', error);
-  //         }
-  //     };
+              const categories = await fetchCategoryStats();
+              const totalCat = categories.reduce((acc, category) => acc + (category.total_blocked_tweets || 0), 0);
+              setTotalCatBlockedTweets(totalCat);
 
-  //     fetchData();
-  // }, []);
+          } catch (error) {
+              console.error('Error loading data:', error);
+          }
+      };
+
+      fetchData();
+  }, []);
 
   const [keywordsData, setKeywordsData] = useState({});
   const [keywordBlockedCountList, setKeywordBlockedCountList] = useState([]);
@@ -71,29 +63,22 @@ function Dashboard() {
     const fetchData = async () => {
       const data_kw = await fetchKwStats();
       const data_cat = await fetchCatStats();
-      console.log(data_kw);
-      console.log(data_cat);
+
       if(data_kw && data_kw.status === 'success') {
         setKeywordsData(data_kw);
         setKeywordBlockedCountList(data_kw.total_blocked);
-        setTotalKwBlockedTweets(keywordBlockedCountList.reduce((accumulator, currentValue) => accumulator + currentValue, 0))
+        setTotalKwBlockedTweets24h(keywordBlockedCountList.reduce((accumulator, currentValue) => accumulator + currentValue, 0))
 
       }
       if(data_cat && data_cat.status === 'success') {
         setCategoriesData(data_cat);
         setCategoryBlockedCountList(data_cat.total_blocked);
-        setTotalCatBlockedTweets(categoryBlockedCountList.reduce((accumulator, currentValue) => accumulator + currentValue, 0))
+        setTotalCatBlockedTweets24h(categoryBlockedCountList.reduce((accumulator, currentValue) => accumulator + currentValue, 0))
       }
     };
 
     fetchData();
   }, []);
-
-  console.log(keywordsData);
-  console.log(keywordBlockedCountList);
-  console.log(categoriesData);
-  console.log(categoryBlockedCountList);
-  
 
   return (
     <DashboardLayout>
@@ -118,9 +103,9 @@ function Dashboard() {
                   <VuiTypography variant="lg" color="white" fontWeight="bold" mb="5px">
                     Number of Keywords Blocked
                   </VuiTypography>
-                  <VuiBox display="flex" alignItems="center" mb="40px">
-                    <VuiTypography variant="button" color="success" fontWeight="bold" key={Date.now()}>
-                      {totalKwBlockedTweets} in total{" "}
+                  <VuiBox display="flex" alignItems="center" mb="40px" key={Date.now()}>
+                    <VuiTypography variant="button" color="success" fontWeight="bold" >
+                      {totalKwBlockedTweets24h} in total{" "}
                       <VuiTypography variant="button" color="text" fontWeight="regular">
                         last 24 hour
                       </VuiTypography>
@@ -147,9 +132,9 @@ function Dashboard() {
                   <VuiTypography variant="lg" color="white" fontWeight="bold" mb="5px">
                     Number of Categories Blocked
                   </VuiTypography>
-                  <VuiBox display="flex" alignItems="center" mb="40px">
+                  <VuiBox display="flex" alignItems="center" mb="40px" >
                     <VuiTypography variant="button" color="success" fontWeight="bold" key={Date.now()}>
-                      {totalCatBlockedTweets} in total{" "}
+                      {totalCatBlockedTweets24h} in total{" "}
                       <VuiTypography variant="button" color="text" fontWeight="regular">
                         last 24 hour
                       </VuiTypography>
@@ -182,12 +167,6 @@ function Dashboard() {
                     Number of Keyword and Category Tweets Blocked So Far
                   </VuiTypography>
                   <VuiBox display="flex" alignItems="center" mb="40px">
-                    <VuiTypography variant="button" color="success" fontWeight="bold">
-                      (5000){" "}
-                      <VuiTypography variant="button" color="text" fontWeight="regular">
-                        tweets blocked
-                      </VuiTypography>
-                    </VuiTypography>
                   </VuiBox>
                   <Grid container spacing="50px">
                     <Grid item xs={6} md={3} lg={3}>
@@ -210,7 +189,7 @@ function Dashboard() {
                         </VuiTypography>
                       </Stack>
                       <VuiTypography color="white" variant="lg" fontWeight="bold" mb="8px">
-                        2,984
+                        {totalKwBlockedTweets}
                       </VuiTypography>
                       <VuiProgress value={60} color="info" sx={{ background: "#2D2E5F" }} />
                     </Grid>
@@ -234,7 +213,7 @@ function Dashboard() {
                         </VuiTypography>
                       </Stack>
                       <VuiTypography color="white" variant="lg" fontWeight="bold" mb="8px">
-                        2,016
+                        {totalCatBlockedTweets}
                       </VuiTypography>
                       <VuiProgress value={60} color="info" sx={{ background: "#2D2E5F" }} />
                     </Grid>
@@ -258,7 +237,7 @@ function Dashboard() {
                         </VuiTypography>
                       </Stack>
                       <VuiTypography color="white" variant="lg" fontWeight="bold" mb="8px">
-                        5000
+                        {totalCatBlockedTweets + totalKwBlockedTweets}
                       </VuiTypography>
                       <VuiProgress value={60} color="info" sx={{ background: "#2D2E5F" }} />
                     </Grid>
