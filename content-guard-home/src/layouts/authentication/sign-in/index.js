@@ -1,21 +1,3 @@
-/*!
-
-=========================================================
-* Vision UI Free React - v1.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/vision-ui-free-react
-* Copyright 2021 Creative Tim (https://www.creative-tim.com/)
-* Licensed under MIT (https://github.com/creativetimofficial/vision-ui-free-react/blob/master LICENSE.md)
-
-* Design and Coded by Simmmple & Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-
 import { useState } from "react";
 
 // react-router-dom components
@@ -32,26 +14,66 @@ import { FaApple, FaFacebook, FaGoogle, FaTwitter } from "react-icons/fa";
 // Vision UI Dashboard React components
 import VuiBox from "components/VuiBox";
 import VuiTypography from "components/VuiTypography";
-import VuiInput from "components/VuiInput";
-import VuiButton from "components/VuiButton";
-import VuiSwitch from "components/VuiSwitch";
 import GradientBorder from "examples/GradientBorder";
-
-// Vision UI Dashboard assets
-import radialGradient from "assets/theme/functions/radialGradient";
-import rgba from "assets/theme/functions/rgba";
-import palette from "assets/theme/base/colors";
-import borders from "assets/theme/base/borders";
 
 // Authentication layout components
 import CoverLayout from "layouts/authentication/components/CoverLayout";
 
-// Images
-import bgSignIn from "assets/images/content-guard-images/guardian-signIn-last.png";
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { getAuth, TwitterAuthProvider, signInWithRedirect, getRedirectResult } from "firebase/auth";
+
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyD_V_S3qwS6VHmLa-XmjQD2eNTd-nPJER8",
+  authDomain: "contentguard-auth.firebaseapp.com",
+  projectId: "contentguard-auth",
+  storageBucket: "contentguard-auth.appspot.com",
+  messagingSenderId: "513949078031",
+  appId: "1:513949078031:web:9e1dad87ea4de0681e897a",
+  measurementId: "G-FBKT88CBPB"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+// Setup Twitter provider and authentication instance
+const provider = new TwitterAuthProvider();
+const auth = getAuth();
 
 function SignIn() {
   const [rememberMe, setRememberMe] = useState(true);
 
+  // Function to handle Twitter login
+  const handleTwitterLogin = () => {
+    signInWithRedirect(auth, provider);
+  };
+
+  // Handle redirect result when the user returns to the page
+  getRedirectResult(auth)
+    .then((result) => {
+      if (result) {
+        // This gives you the Twitter OAuth 1.0 Access Token and Secret
+        const credential = TwitterAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        const secret = credential.secret;
+
+        // The signed-in user's information
+        const user = result.user;
+        console.log(`User: ${user.displayName}, Token: ${token}, Secret: ${secret}`);
+      }
+    })
+    .catch((error) => {
+      // Handle Errors
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      const email = error.customData?.email;
+      const credential = TwitterAuthProvider.credentialFromError(error);
+      console.error(`Error [${errorCode}]: ${errorMessage}, Email: ${email}, Credential: ${credential}`);
+    });
+
+  // Function to toggle the "Remember Me" option
   const handleSetRememberMe = () => setRememberMe(!rememberMe);
 
   return (
@@ -59,12 +81,11 @@ function SignIn() {
       title="Welcome!"
       color="white"
       description="Use Twitter to login to your Content Guard Home page to see how we guard your content. In Content Guard Home Page you can see your blockers and blocker reports."
-      image={bgSignIn}
       premotto="GUARDING YOUR CONTENT FOR YOU:"
       motto="CONTENT GUARD"
       cardContent
     >
-      <GradientBorder borderRadius={borders.borderRadius.form} minWidth="100%" maxWidth="100%">
+      <GradientBorder borderRadius="form" minWidth="100%" maxWidth="100%">
         <VuiBox
           component="form"
           role="form"
@@ -86,38 +107,33 @@ function SignIn() {
             Sign In with Twitter:
           </VuiTypography>
           <Stack mb="25px" justifyContent="center" alignItems="center" direction="row" spacing={2}>
-          
             <GradientBorder borderRadius="xl">
-              <a href="#">
-                <IconButton
-                  transition="all .25s ease"
-                  justify="center"
-                  align="center"
-                  bg="rgb(19,21,54)"
-                  borderradius="15px"
-                  sx={({ palette: { secondary }, borders: { borderRadius } }) => ({
-                    borderRadius: borderRadius.xl,
-                    padding: "25px",
-                    backgroundColor: secondary.focus,
-                    "&:hover": {
-                      backgroundColor: rgba(secondary.focus, 0.9),
-                    },
+              <IconButton
+                transition="all .25s ease"
+                justify="center"
+                align="center"
+                bg="rgb(19,21,54)"
+                borderradius="15px"
+                sx={({ palette: { secondary }, borders: { borderRadius } }) => ({
+                  borderRadius: borderRadius.xl,
+                  padding: "25px",
+                  backgroundColor: secondary.focus,
+                  "&:hover": {
+                    backgroundColor: "rgba(secondary.focus, 0.9)",
+                  },
+                })}
+                onClick={handleTwitterLogin} // Trigger Twitter login
+              >
+                <Icon
+                  w="30px"
+                  h="30px"
+                  sx={({ palette: { white } }) => ({
+                    color: white.focus,
                   })}
-                >
-                  <Icon
-                    as={FaTwitter}
-                    w="30px"
-                    h="30px"
-                    sx={({ palette: { white } }) => ({
-                      color: white.focus,
-                    })}
-                  />
-                </IconButton>
-              </a>
+                />
+              </IconButton>
             </GradientBorder>
-          
           </Stack>
-          
         </VuiBox>
       </GradientBorder>
     </CoverLayout>

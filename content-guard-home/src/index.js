@@ -24,9 +24,20 @@ import App from "App";
 // Vision UI Dashboard React Context Provider
 import { VisionUIControllerProvider } from "context";
 
+/*auth.signInWithEmailAndPassword(email, password)
+  .then((userCredential) => {
+    // Signed in
+    const user = userCredential.user;
+    // ...
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    // ...
+  });*/
+
 const rootElement = document.getElementById('root');
 const root = createRoot(rootElement);
-
 
 root.render(<BrowserRouter>
   <VisionUIControllerProvider>
