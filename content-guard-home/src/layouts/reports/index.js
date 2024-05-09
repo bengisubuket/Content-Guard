@@ -28,7 +28,6 @@ import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 
 import Footer from "examples/Footer"; 
 
-// old Billing page components
 // new Report
 import ReportLines from "layouts/reports/components/ReportLines";
 
