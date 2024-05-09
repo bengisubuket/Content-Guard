@@ -47,6 +47,9 @@ const provider = new TwitterAuthProvider();
 const auth = getAuth();
 
 function SignIn() {
+  if (Cookies.get("user_data"))
+    window.location.href = "/dashboard";
+
   const [rememberMe, setRememberMe] = useState(true);
   const history = useHistory();
 

@@ -27,9 +27,13 @@ import { lineChartOptionsDashboard } from "layouts/dashboard/data/lineChartOptio
 
 import { fetchKwStats, fetchCatStats, fetchCategoryStats, fetchKeywordStats } from "services/stats_api";
 import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 
 function Dashboard() {
+  if (!Cookies.get("user_data"))
+    window.location.href = "/authentication/sign-in";
+
   const [totalKwBlockedTweets24h, setTotalKwBlockedTweets24h] = useState(0);
   const [totalCatBlockedTweets24h, setTotalCatBlockedTweets24h] = useState(0);
   const [totalKwBlockedTweets, setTotalKwBlockedTweets] = useState(0);

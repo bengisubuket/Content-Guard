@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 
 const data = [{
   name: "web pages",
-  url: ["http://localhost:3000/dashboard"]
+  url: ["http://localhost:3000/authentication/sign-in"]
 }];
 
 function ExtensionFrame () {
