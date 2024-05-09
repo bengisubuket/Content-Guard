@@ -116,7 +116,8 @@ function SignIn() {
 
           
         // Redirect to the dashboard
-        history.push("/dashboard");
+        window.location.href = "/dashboard";    
+        // history.push("/dashboard");
       }
     })
     .catch((error) => {

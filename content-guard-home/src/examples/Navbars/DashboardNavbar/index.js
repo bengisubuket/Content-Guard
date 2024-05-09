@@ -98,10 +98,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const handleLogout = () => {
     Cookies.remove("user_data");
     // direct to sign in page
-    window.location.href = "/authentication/sign-in";
-
-
-    
+    window.location.href = "/authentication/sign-in";    
   }
 
   return (
