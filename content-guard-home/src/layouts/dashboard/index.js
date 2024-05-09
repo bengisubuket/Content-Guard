@@ -119,7 +119,7 @@ function Dashboard() {
                     Number of Keywords Blocked
                   </VuiTypography>
                   <VuiBox display="flex" alignItems="center" mb="40px">
-                    <VuiTypography variant="button" color="success" fontWeight="bold">
+                    <VuiTypography variant="button" color="success" fontWeight="bold" key={Date.now()}>
                       {totalKwBlockedTweets} in total{" "}
                       <VuiTypography variant="button" color="text" fontWeight="regular">
                         last 24 hour
@@ -148,7 +148,7 @@ function Dashboard() {
                     Number of Categories Blocked
                   </VuiTypography>
                   <VuiBox display="flex" alignItems="center" mb="40px">
-                    <VuiTypography variant="button" color="success" fontWeight="bold">
+                    <VuiTypography variant="button" color="success" fontWeight="bold" key={Date.now()}>
                       {totalCatBlockedTweets} in total{" "}
                       <VuiTypography variant="button" color="text" fontWeight="regular">
                         last 24 hour
