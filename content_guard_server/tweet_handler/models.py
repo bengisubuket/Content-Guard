@@ -34,3 +34,13 @@ class Report(models.Model):
     categories_reported = models.JSONField(default=list)
     keywords_reported = models.JSONField(default=list)
     time_added = models.DateTimeField(auto_now_add=True)
+
+class User(models.Model):
+    token = models.CharField(max_length=255, null=True, blank=True)
+    secret = models.CharField(max_length=255, null=True, blank=True)
+    user_displayName = models.CharField(max_length=255, null=True, blank=True)
+    user_id = models.CharField(max_length=255, unique=True)
+    photo_url = models.URLField(null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    phoneNumber = models.CharField(max_length=255, null=True, blank=True)
+    userName = models.CharField(max_length=255, null=True, blank=True)

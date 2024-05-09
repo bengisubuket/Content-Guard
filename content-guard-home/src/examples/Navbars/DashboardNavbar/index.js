@@ -1,21 +1,3 @@
-/*!
-
-=========================================================
-* Vision UI Free React - v1.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/vision-ui-free-react
-* Copyright 2021 Creative Tim (https://www.creative-tim.com/)
-* Licensed under MIT (https://github.com/creativetimofficial/vision-ui-free-react/blob/master LICENSE.md)
-
-* Design and Coded by Simmmple & Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-
 import { useState, useEffect } from "react";
 
 // react-router components
@@ -38,7 +20,7 @@ import VuiInput from "components/VuiInput";
 
 // Vision UI Dashboard React example components
 import Breadcrumbs from "examples/Breadcrumbs";
-import NotificationItem from "examples/Items/NotificationItem";
+import Cookies from "js-cookie";
 
 // Custom styles for DashboardNavbar
 import {
@@ -57,13 +39,6 @@ import {
   setOpenConfigurator,
 } from "context";
 
-// Images
-import taylor from "assets/images/taylor-swift.jpeg";
-import kanye from "assets/images/kanye-west.jpeg";
-
-import logoSpotify from "assets/images/small-logos/logo-spotify.svg";
-import { ImEvil2 } from "react-icons/im";
-import { whitespace } from "stylis";
 
 function DashboardNavbar({ absolute, light, isMini }) {
   const [navbarType, setNavbarType] = useState();
@@ -116,30 +91,15 @@ function DashboardNavbar({ absolute, light, isMini }) {
       onClose={handleCloseMenu}
       sx={{ mt: 2 }}
     >
-      <NotificationItem
-        color="text"
-        image={
-          <ImEvil2 sx={{ color: 'white' }}>
-          </ImEvil2>
-        }
-        title={["", "Creating chaos successfully completed"]}
-        date="13 minutes ago"
-        onClick={handleCloseMenu}
-      />
-      <NotificationItem
-        image={<img src={taylor} alt="person" />}
-        title={["New message", "from Taylor Swift"]}
-        date="1 day"
-        onClick={handleCloseMenu}
-      />
-      <NotificationItem
-        image={<img src={kanye} alt="person" />}
-        title={["New message", "from Kanye West"]}
-        date="2 day"
-        onClick={handleCloseMenu}
-      />
     </Menu>
   );
+
+  //handle logout
+  const handleLogout = () => {
+    Cookies.remove("user_data");
+    // direct to sign in page
+    window.location.href = "/authentication/sign-in";    
+  }
 
   return (
     <AppBar
@@ -169,8 +129,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
               />
             </VuiBox>
             <VuiBox color={light ? "white" : "inherit"}>
-              <Link to="/authentication/sign-in">
-                <IconButton sx={navbarIconButton} size="small">
+              <IconButton sx={navbarIconButton} size="small" onClick={handleLogout}>
                   <VuiTypography
                     variant="button"
                     fontWeight="medium"
@@ -178,10 +137,9 @@ function DashboardNavbar({ absolute, light, isMini }) {
                   >
                     <LogoutIcon />
 
-                    Log out
+                    &nbsp;Log out
                   </VuiTypography>
                 </IconButton>
-              </Link>
               <IconButton
                 size="small"
                 color="inherit"
@@ -197,17 +155,6 @@ function DashboardNavbar({ absolute, light, isMini }) {
                 onClick={handleConfiguratorOpen}
               >
                 <Icon>settings</Icon>
-              </IconButton>
-              <IconButton
-                size="small"
-                color="inherit"
-                sx={navbarIconButton}
-                aria-controls="notification-menu"
-                aria-haspopup="true"
-                variant="contained"
-                onClick={handleOpenMenu}
-              >
-                <Icon className={light ? "text-white" : "text-dark"}>notifications</Icon>
               </IconButton>
               {renderMenu()}
             </VuiBox>

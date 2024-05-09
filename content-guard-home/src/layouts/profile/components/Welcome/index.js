@@ -1,28 +1,28 @@
-/*!
-
-=========================================================
-* Vision UI Free React - v1.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/vision-ui-free-react
-* Copyright 2021 Creative Tim (https://www.creative-tim.com/)
-* Licensed under MIT (https://github.com/creativetimofficial/vision-ui-free-react/blob/master LICENSE.md)
-
-* Design and Coded by Simmmple & Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-
 import React from "react";
 import { Card, Icon } from "@mui/material";
 import welcome from "assets/images/content-guard-images/guardian-welcome-profile.jpeg";
 import VuiTypography from "components/VuiTypography/index";
 import VuiBox from "components/VuiBox/index";
+import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 const Welcome = () => {
+  const [userData, setUserData] = useState({}); // [1]
+  //get user data from cookies
+  useEffect(() => {
+    const user = Cookies.get("user_data");
+    console.log("user", user);
+    if (user) {
+      setUserData(JSON.parse(user));
+      console.log("user data", userData);
+    }
+    else {
+      console.log("user data not found");
+    }
+
+  }, []);
+
+
   return (
     <Card
       sx={({ breakpoints }) => ({
@@ -40,8 +40,8 @@ const Welcome = () => {
           <VuiTypography color="white" variant="h3" fontWeight="bold" mb="3px">
             Welcome back!
           </VuiTypography>
-          <VuiTypography color="white" variant="button" fontWeight="regular">
-            Nice to see you, İlayda Zehra YILMAZ!
+          <VuiTypography color="white" variant="button" fontWeight="regular" key={userData}>
+            {userData.user_displayName}
           </VuiTypography>
         </VuiBox>
         <VuiBox justifySelf="flex-end">
@@ -70,9 +70,6 @@ const Welcome = () => {
             }}
           >
             Content Guard is guarding your content for you. Explore Content Guard Home.
-            <Icon sx={{ fontWeight: "bold", ml: "5px" }}>lock</Icon>
-            <Icon sx={{ fontWeight: "bold", ml: "5px" }}>arrow_forward</Icon>
-                   
           </VuiTypography>
         </VuiBox>
       </VuiBox>

@@ -5,8 +5,25 @@ import VuiBox from "components/VuiBox";
 import VuiTypography from "components/VuiTypography";
 
 import jellyfishboi from "assets/images/content-guard-images/jellyfish-guardian.png";
+import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 const WelcomeMark = () => {
+  const [userData, setUserData] = useState({}); // [1]
+  //get user data from cookies
+  useEffect(() => {
+    const user = Cookies.get("user_data");
+    console.log("user", user);
+    if (user) {
+      setUserData(JSON.parse(user));
+      console.log("user data", userData);
+    }
+    else {
+      console.log("user data not found");
+    }
+
+  }, []);
+
   return (
     <Card sx={() => ({
       height: "340px",
@@ -21,8 +38,8 @@ const WelcomeMark = () => {
           <VuiTypography color="text" variant="button" fontWeight="regular" mb="12px">
             Welcome back,
           </VuiTypography>
-          <VuiTypography color="white" variant="h3" fontWeight="bold" mb="18px">
-            İlayda Zehra YILMAZ
+          <VuiTypography color="white" variant="h3" fontWeight="bold" mb="18px" key={userData}>
+            {userData.user_displayName}
           </VuiTypography>
           <VuiTypography color="text" variant="h6" fontWeight="regular" mb="auto">
             Glad to see you again!
@@ -52,9 +69,6 @@ const WelcomeMark = () => {
           }}
         >
           Content Guard is guarding your content for you. Explore Content Guard Home.
-          <Icon sx={{ fontWeight: "bold", ml: "5px" }}>lock</Icon>
-          <Icon sx={{ fontWeight: "bold", ml: "5px" }}>arrow_forward</Icon>
-                   
         </VuiTypography>
       </VuiBox>
     </Card>

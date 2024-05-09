@@ -1,28 +1,7 @@
-/*!
-
-=========================================================
-* Vision UI Free React - v1.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/vision-ui-free-react
-* Copyright 2021 Creative Tim (https://www.creative-tim.com/)
-* Licensed under MIT (https://github.com/creativetimofficial/vision-ui-free-react/blob/master LICENSE.md)
-
-* Design and Coded by Simmmple & Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-
 import AppBar from "@mui/material/AppBar";
 // @mui material components
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
-// Images
 import girl from "assets/images/avatar10.png";
 // Vision UI Dashboard React base styles
 import breakpoints from "assets/theme/base/breakpoints";
@@ -30,15 +9,27 @@ import VuiAvatar from "components/VuiAvatar";
 // Vision UI Dashboard React components
 import VuiBox from "components/VuiBox";
 import VuiTypography from "components/VuiTypography";
-// Vision UI Dashboard React icons
-import { IoCube } from "react-icons/io5";
-import { IoDocument } from "react-icons/io5";
-import { IoBuild } from "react-icons/io5";
 // Vision UI Dashboard React example components
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 function Header() {
+  const [userData, setUserData] = useState({}); // [1]
+  //get user data from cookies
+  useEffect(() => {
+    const user = Cookies.get("user_data");
+    console.log("user", user);
+    if (user) {
+      setUserData(JSON.parse(user));
+      console.log("user data", userData);
+    }
+    else {
+      console.log("user data not found");
+    }
+
+  }, []);
+
   const [tabsOrientation, setTabsOrientation] = useState("horizontal");
   const [tabValue, setTabValue] = useState(0);
 
@@ -63,6 +54,7 @@ function Header() {
   }, [tabsOrientation]);
 
   const handleSetTabValue = (event, newValue) => setTabValue(newValue);
+  
 
   return (
     <VuiBox position="relative">
@@ -105,7 +97,8 @@ function Header() {
             })}
           >
             <VuiAvatar
-              src={girl}
+              key={userData}
+              src={userData && userData.photo_url ? userData.photo_url.replace("_normal", "") : ""}
               alt="profile-image"
               variant="rounded"
               size="xl"
@@ -126,11 +119,11 @@ function Header() {
                 },
               })}
             >
-              <VuiTypography variant="lg" color="white" fontWeight="bold">
-                  İlayda Zehra Yılmaz
+              <VuiTypography variant="lg" color="white" fontWeight="bold" key={userData}>
+                  {userData.user_displayName}
               </VuiTypography>
-              <VuiTypography variant="button" color="text" fontWeight="regular">
-                ilayda@contentguard.com
+              <VuiTypography variant="button" color="text" fontWeight="regular" key={userData}>
+                @{userData.userName}
               </VuiTypography>
             </VuiBox>
           </Grid>
