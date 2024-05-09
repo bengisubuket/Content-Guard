@@ -8,9 +8,6 @@ import Icon from "@mui/material/Icon";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 
-// Icons
-import { FaApple, FaFacebook, FaGoogle, FaTwitter } from "react-icons/fa";
-
 // Vision UI Dashboard React components
 import VuiBox from "components/VuiBox";
 import VuiTypography from "components/VuiTypography";
@@ -22,6 +19,8 @@ import CoverLayout from "layouts/authentication/components/CoverLayout";
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth, TwitterAuthProvider, signInWithRedirect, getRedirectResult } from "firebase/auth";
+import { createUser, getUser } from "services/auth_api";
+import Cookies from "js-cookie";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -50,6 +49,7 @@ function SignIn() {
     signInWithRedirect(auth, provider);
   };
 
+
   // Handle redirect result when the user returns to the page
   getRedirectResult(auth)
     .then((result) => {
@@ -60,8 +60,55 @@ function SignIn() {
         const secret = credential.secret;
 
         // The signed-in user's information
-        const user = result.user;
-        console.log(`User: ${user.displayName}, Token: ${token}, Secret: ${secret}`);
+        const user_displayName = result.user.displayName;
+        const photo_url = result.user.photoURL;
+        const uid = result.user.uid;
+        const email = result.user.email;
+        const phoneNumber = result.user.phoneNumber;
+        const userName = result.user.reloadUserInfo.screenName;
+
+        // console.log("email", email, "phoneNumber", phoneNumber, "userName", userName)
+
+        // console.log(result.user)
+        
+        
+        // get user data from the database
+        getUser(uid)
+          .then((data) => {
+            if (data.status === "error") {
+              // create a new user
+              createUser({
+                user_id: uid,
+                user_displayName: user_displayName,
+                photo_url: photo_url,
+                token: token,
+                secret: secret,
+                email: email,
+                phoneNumber: phoneNumber,
+                userName: userName
+              }).then((data) => {
+                // console log the new user data
+                console.log(data);
+                Cookies.set("user_data", JSON.stringify(data.user));
+              });
+
+            } else {
+              // console log the user data
+              console.log(data);
+              Cookies.set("user_data", JSON.stringify(data.user));
+            }
+
+            // use cookie to store the user data usign Cookies from 'js-cookie'
+            // console.log("user data", userData);
+            // Cookies.set("user_data", JSON.stringify(userData));
+
+
+          })
+          .catch((error) => {
+            console.error("Error fetching user data:", error);
+          })  
+
+          
       }
     })
     .catch((error) => {

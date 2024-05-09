@@ -1,7 +1,7 @@
 import logging
 from django.utils import timezone
 from django.http import JsonResponse
-from .models import Tweet, Keyword, Category, Report
+from .models import Tweet, Keyword, Category, Report, User
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -299,3 +299,43 @@ class ReportView(View):
                 'status': 'success',
                 'reports': reports_list
             })
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UserView(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            token = data.get('token')
+            secret = data.get('secret')
+            user_displayName = data.get('user_displayName')
+            user_id = data.get('user_id')
+            photo_url = data.get('photo_url')
+            email = data.get('email')
+            phoneNumber = data.get('phoneNumber')
+            userName = data.get('userName')
+
+            new_user = User(token=token, secret=secret, user_displayName=user_displayName, user_id=user_id, photo_url=photo_url, email=email, phoneNumber=phoneNumber, userName=userName)
+            new_user.save()
+            return JsonResponse({'status': 'success', 'message': 'New user saved.'}, status=201)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+    def get(self, request, user_id=None):
+        if user_id:
+            try:
+                user = User.objects.get(user_id=user_id)
+                user_data = {
+                    'token': user.token,
+                    'secret': user.secret,
+                    'user_displayName': user.user_displayName,
+                    'user_id': user.user_id,
+                    'photo_url': user.photo_url,
+                    'email': user.email,
+                    'phoneNumber': user.phoneNumber,
+                    'userName': user.userName
+                }
+                return JsonResponse({'status': 'success', 'user': user_data}, status=200)
+            except User.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+        else:
+            return JsonResponse({'status': 'error', 'message': 'User ID is required'}, status=400)
