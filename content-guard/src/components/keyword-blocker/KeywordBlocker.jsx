@@ -25,6 +25,7 @@ function KeywordBlockerComponent() {
     const [timerAction, setTimerAction] = useState('allow');
 
     const [kwExists, setKwExists] = useState(false);
+    const [emptyKw, setEmptyKw] = useState(false);
 
     const navigateBack = () => {
         navigate('/blockers');
@@ -61,6 +62,7 @@ function KeywordBlockerComponent() {
 
     function handleAddKeyword() {
         setKwExists(false);
+        setEmptyKw(false);
         if (keyword.trim() !== '') {
 
             let kwT = keyword.trim().toLowerCase();
@@ -102,6 +104,8 @@ function KeywordBlockerComponent() {
             setTimerDuration('00:00:00');
             setTimerAction('allow');
         }
+        else 
+            setEmptyKw(true);
     }
 
     const handleDeleteKeyword = (index) => {
@@ -149,6 +153,11 @@ function KeywordBlockerComponent() {
             {kwExists && (
                 <Row className='mb-3'>
                     <Col><Alert variant="danger">This keyword already exists.</Alert></Col>
+                </Row>
+            )}
+            {emptyKw && (
+                <Row className='mb-3'>
+                    <Col><Alert variant="danger">Empty keyword is not allowed.</Alert></Col>
                 </Row>
             )}
             <Row className='mb-3'>
