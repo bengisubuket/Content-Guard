@@ -204,13 +204,13 @@ function CategoryBlockerComponent() {
                                                     <Form.Label>Duration:</Form.Label>
                                                     <Row>
                                                         <Col>
-                                                            <Form.Control type="number" name="hours" value={timerDuration.hours} onChange={handleTimeChange} placeholder="HH" />
+                                                            <Form.Control type="number" name="hours" value={timerDuration.hours} onChange={handleTimeChange} placeholder="HH" min="0" max="99" />
                                                         </Col>
                                                         <Col>
-                                                            <Form.Control type="number" name="minutes" value={timerDuration.minutes} onChange={handleTimeChange} placeholder="MM" />
+                                                            <Form.Control type="number" name="minutes" value={timerDuration.minutes} onChange={handleTimeChange} placeholder="MM" min="0" max="59" />
                                                         </Col>
                                                         <Col>
-                                                            <Form.Control type="number" name="seconds" value={timerDuration.seconds} onChange={handleTimeChange} placeholder="SS" />
+                                                            <Form.Control type="number" name="seconds" value={timerDuration.seconds} onChange={handleTimeChange} placeholder="SS" min="0" max="59" />
                                                         </Col>
                                                     </Row>
                                                         </Form.Group>                                               

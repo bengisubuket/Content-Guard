@@ -178,13 +178,13 @@ function KeywordBlockerComponent() {
                                 <Form.Label>Duration:</Form.Label>
                                 <Row>
                                     <Col>
-                                        <Form.Control type="number" name="0" value={timerDuration.split(':')[0]} onChange={handleTimeChange} placeholder="HH" />
+                                        <Form.Control type="number" name="0" value={timerDuration.split(':')[0]} onChange={handleTimeChange} placeholder="HH" min="0" max="99" />
                                     </Col>
                                     <Col>
-                                        <Form.Control type="number" name="1" value={timerDuration.split(':')[1]} onChange={handleTimeChange} placeholder="MM" />
+                                        <Form.Control type="number" name="1" value={timerDuration.split(':')[1]} onChange={handleTimeChange} placeholder="MM" min="0" max="59" />
                                     </Col>
                                     <Col>
-                                        <Form.Control type="number" name="2" value={timerDuration.split(':')[2]} onChange={handleTimeChange} placeholder="SS" />
+                                        <Form.Control type="number" name="2" value={timerDuration.split(':')[2]} onChange={handleTimeChange} placeholder="SS" min="0" max="59" />
                                     </Col>
                                 </Row>
                             </Form.Group>
