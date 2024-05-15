@@ -115,15 +115,12 @@ function SignIn() {
           })
           .catch((error) => {
             console.error("Error fetching user data:", error);
-          }).finally(() => {
-            // Redirect to the dashboard
-            if (Cookies.get("user_data"))
-              window.location.href = "/dashboard";
-            else {
-              console.error("Cookie could not be set.");
-              alert("Cookie could not be set. Please try again.");
-            }
-          });
+          })  
+
+          
+        // Redirect to the dashboard
+        window.location.href = "/dashboard";    
+        // history.push("/dashboard");
       }
     })
     .catch((error) => {

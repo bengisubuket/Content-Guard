@@ -65,36 +65,24 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const data_kw = await fetchKwStats();
-        const data_cat = await fetchCatStats();
-  
-        if (data_kw && data_kw.status === 'success') {
-          setKeywordsData(data_kw);
-          setKeywordBlockedCountList(data_kw.total_blocked);
-          // Move calculation inside the async function after the state update
-          const totalKw24h = data_kw.total_blocked.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-          setTotalKwBlockedTweets24h(totalKw24h);
-        }
-  
-        if (data_cat && data_cat.status === 'success') {
-          setCategoriesData(data_cat);
-          setCategoryBlockedCountList(data_cat.total_blocked);
-          // Move calculation inside the async function after the state update
-          const totalCat24h = data_cat.total_blocked.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-          setTotalCatBlockedTweets24h(totalCat24h);
-        }
-  
-      } catch (error) {
-        console.error('Error loading data:', error);
+      const data_kw = await fetchKwStats();
+      const data_cat = await fetchCatStats();
+
+      if(data_kw && data_kw.status === 'success') {
+        setKeywordsData(data_kw);
+        setKeywordBlockedCountList(data_kw.total_blocked);
+        setTotalKwBlockedTweets24h(keywordBlockedCountList.reduce((accumulator, currentValue) => accumulator + currentValue, 0))
+
+      }
+      if(data_cat && data_cat.status === 'success') {
+        setCategoriesData(data_cat);
+        setCategoryBlockedCountList(data_cat.total_blocked);
+        setTotalCatBlockedTweets24h(categoryBlockedCountList.reduce((accumulator, currentValue) => accumulator + currentValue, 0))
       }
     };
-  
+
     fetchData();
   }, []);
-  
-  // Ensure this useEffect has the correct dependencies if the stats are supposed to update when certain conditions change
-  
 
   return (
     <DashboardLayout>
@@ -119,7 +107,7 @@ function Dashboard() {
                   <VuiTypography variant="lg" color="white" fontWeight="bold" mb="5px">
                     Number of Keywords Blocked
                   </VuiTypography>
-                  <VuiBox display="flex" alignItems="center" mb="40px" >
+                  <VuiBox display="flex" alignItems="center" mb="40px" key={Date.now()}>
                     <VuiTypography variant="button" color="success" fontWeight="bold" >
                       {totalKwBlockedTweets24h} in total{" "}
                       <VuiTypography variant="button" color="text" fontWeight="regular">
@@ -149,7 +137,7 @@ function Dashboard() {
                     Number of Categories Blocked
                   </VuiTypography>
                   <VuiBox display="flex" alignItems="center" mb="40px" >
-                    <VuiTypography variant="button" color="success" fontWeight="bold">
+                    <VuiTypography variant="button" color="success" fontWeight="bold" key={Date.now()}>
                       {totalCatBlockedTweets24h} in total{" "}
                       <VuiTypography variant="button" color="text" fontWeight="regular">
                         last 24 hour
