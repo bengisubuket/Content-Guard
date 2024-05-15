@@ -10,6 +10,7 @@ var closedTime;
 //create dictionary for each category which keeps blocked counts
 var blockedCategoryCount = {}
 var blockedKwCount = {}
+var uid = "3ZV6aeGHgMe5e3gIju5TskWkVk12"
 
 // ================================ Tweet handlings ================================================================================
 
@@ -43,7 +44,7 @@ function sendBlockedCounts(){
     fetch('http://localhost:8000/api/blockedCounts/', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({userId, tabId, blockedCategoryCount, blockedKwCount})
+        body: JSON.stringify({userId, tabId, blockedCategoryCount, blockedKwCount, uid})
     })
     .then(response => response.json())
     .then(data => {
@@ -129,12 +130,11 @@ function processNextInQueue() {
 }
 
 function processTweet(node, tweetText, tweetId) {
-    const userId = 492;
     const tabId = 79782103;
     fetch('http://localhost:8000/api/tweet/', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({userId, tabId, tweetText, tweetId})
+        body: JSON.stringify({tabId, tweetText, tweetId, uid})
     })
     .then(response => response.json())
     .then(data => {

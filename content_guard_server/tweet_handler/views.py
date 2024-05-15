@@ -33,12 +33,12 @@ class TweetView(View):
 
             # If tweet does not exist, process and categorize it
             tweet_text = data.get('tweetText', '')
-            user_id = data.get('userId')
+            user = User.objects.get(user_id=data.get('uid'))  # Fetch your user appropriately
             tab_id = data.get('tabId')
             category = self.categorize_tweet(tweet_text)
 
             # Save the new tweet
-            new_tweet = Tweet(user_id=user_id, tab_id=tab_id, tweet_id=tweet_id, category=category, tweet_text=tweet_text)
+            new_tweet = Tweet(user=user, tab_id=tab_id, tweet_id=tweet_id, category=category, tweet_text=tweet_text)
             new_tweet.save()
             return JsonResponse({
                 'status': 'success',
@@ -86,12 +86,13 @@ class KeywordCategoryView(View):
             data = json.loads(request.body)
             keyword_count_dic = data.get('blockedKwCount', {})
             category_count_dic = data.get('blockedCategoryCount', {})
+            user_id = data.get('uid')
 
             # Process keywords
-            self.process_keywords(keyword_count_dic)
+            self.process_keywords(keyword_count_dic, user_id)
 
             # Process categories
-            self.process_categories(category_count_dic)
+            self.process_categories(category_count_dic, user_id)
 
             return JsonResponse({'status': 'success', 'message': 'Blocked keyword and category counts updated.'}, status=200)
 
@@ -99,7 +100,7 @@ class KeywordCategoryView(View):
             print(f"Error processing request: {e}")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
-    def process_keywords(self, keyword_count_dic):
+    def process_keywords(self, keyword_count_dic, user_id):
         with transaction.atomic():
             for keyword, tweet_ids in keyword_count_dic.items():
                 keyword = keyword.lower()  # Normalize keyword
@@ -114,7 +115,9 @@ class KeywordCategoryView(View):
                 # Create a new Keyword instance only if there are new blocked tweets
                 number_of_blocked_tweets = len(new_tweet_ids)
                 if number_of_blocked_tweets > 0:
+                    user = User.objects.get(user_id=user_id)
                     Keyword.objects.create(
+                        user=user,
                         keyword=keyword,
                         tweet_ids=list(new_tweet_ids),
                         number_of_blocked_tweets=number_of_blocked_tweets,
@@ -124,7 +127,7 @@ class KeywordCategoryView(View):
                 else:
                     print(f"Keyword '{keyword}': No new blocked tweets to create.")
 
-    def process_categories(self, category_count_dic):
+    def process_categories(self, category_count_dic, user_id):
         with transaction.atomic():
             for category, tweet_ids in category_count_dic.items():
                 category = category.lower()  # Normalize category
@@ -139,7 +142,9 @@ class KeywordCategoryView(View):
                 # Create a new Category instance only if there are new blocked tweets
                 number_of_blocked_tweets = len(new_tweet_ids)
                 if number_of_blocked_tweets > 0:
+                    user = User.objects.get(user_id=user_id)
                     Category.objects.create(
+                        user=user,
                         name=category,
                         tweet_ids=list(new_tweet_ids),
                         number_of_blocked_tweets=number_of_blocked_tweets,
