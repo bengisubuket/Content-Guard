@@ -42,7 +42,7 @@ class Category(models.Model):
         return self.name
 
 class Report(models.Model):
-    user_id = models.CharField(max_length=255)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     report_id = models.CharField(max_length=255, unique=True)
     categories_reported = models.JSONField(default=list)
     keywords_reported = models.JSONField(default=list)

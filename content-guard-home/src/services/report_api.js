@@ -24,9 +24,9 @@ export const createReport = async (userId, reportId) => {
 };
 
 // New function to fetch all reports via GET
-export const getAllReports = async () => {
+export const getAllReports = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}`, {
+        const response = await fetch(`${API_URL}${userId}/`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -44,9 +44,9 @@ export const getAllReports = async () => {
     }
 };
 
-export const deleteReport = async (reportId) => {
+export const deleteReport = async (userId, reportId) => {
     try {
-        const response = await fetch(`${API_URL}${reportId}/delete/`, {
+        const response = await fetch(`${API_URL}${userId}/${reportId}/delete/`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -65,9 +65,9 @@ export const deleteReport = async (reportId) => {
     }
 };
 
-export const getReportById = async (reportId) => {
+export const getReportById = async (userId, reportId) => {
     try {
-        const response = await fetch(`${API_URL}${reportId}/`, {
+        const response = await fetch(`${API_URL}${userId}/${reportId}/`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'

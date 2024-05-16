@@ -25,7 +25,7 @@ import { IoShieldCheckmark } from "react-icons/io5";
 import LineChart from "examples/Charts/LineCharts/LineChart";
 import { lineChartOptionsDashboard } from "layouts/dashboard/data/lineChartOptions";
 
-import { fetchKwStats, fetchCatStats, fetchCategoryStats, fetchKeywordStats } from "services/stats_api";
+import { fetchKwStats24, fetchCatStats24, fetchCategoryStatsAll, fetchKeywordStatsAll } from "services/stats_api";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 
@@ -38,15 +38,16 @@ function Dashboard() {
   const [totalCatBlockedTweets24h, setTotalCatBlockedTweets24h] = useState(0);
   const [totalKwBlockedTweets, setTotalKwBlockedTweets] = useState(0);
   const [totalCatBlockedTweets, setTotalCatBlockedTweets] = useState(0);
+  const uid = "3ZV6aeGHgMe5e3gIju5TskWkVk12";
 
   useEffect(() => {
       const fetchData = async () => {
           try {
-              const keywords = await fetchKeywordStats();
+              const keywords = await fetchKeywordStatsAll(uid);
               const totalKw = keywords.reduce((acc, keyword) => acc + (keyword.total_blocked_tweets || 0), 0);
               setTotalKwBlockedTweets(totalKw);
 
-              const categories = await fetchCategoryStats();
+              const categories = await fetchCategoryStatsAll(uid);
               const totalCat = categories.reduce((acc, category) => acc + (category.total_blocked_tweets || 0), 0);
               setTotalCatBlockedTweets(totalCat);
 
@@ -65,8 +66,8 @@ function Dashboard() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data_kw = await fetchKwStats();
-      const data_cat = await fetchCatStats();
+      const data_kw = await fetchKwStats24(uid);
+      const data_cat = await fetchCatStats24(uid);
 
       if(data_kw && data_kw.status === 'success') {
         setKeywordsData(data_kw);

@@ -9,11 +9,12 @@ import { getReportById } from 'services/report_api';
 // Main report component
 const KeywordReport = ({ id }) => {
     const [blockedItems, setBlockedItems] = useState({});
+    const userId = "3ZV6aeGHgMe5e3gIju5TskWkVk12";
 
     // Fetch report data by ID when the component mounts or when `id` changes
     useEffect(() => {
         const fetchReport = async () => {
-            const data = await getReportById(id);
+            const data = await getReportById(userId, id);
             if (data && data.status === 'success') {
                 setBlockedItems(data.report);
             }

@@ -1,8 +1,8 @@
 const API_URL = "http://localhost:8000/api/stat/";
 
-export const fetchKeywordStats = async () => {
+export const fetchKeywordStatsAll = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}kw/`, {
+        const response = await fetch(`${API_URL}kw/${userId}/`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -20,9 +20,9 @@ export const fetchKeywordStats = async () => {
     }
 }
 
-export const fetchCategoryStats = async () => {
+export const fetchCategoryStatsAll = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}cat/`, {
+        const response = await fetch(`${API_URL}cat/${userId}/`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -40,9 +40,9 @@ export const fetchCategoryStats = async () => {
     }
 }
 
-export const fetchKwStats = async () => {
+export const fetchKwStats24 = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}kw/24hr/`, {
+        const response = await fetch(`${API_URL}kw/24hr/${userId}/`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -60,9 +60,9 @@ export const fetchKwStats = async () => {
     }
 }
 
-export const fetchCatStats = async () => {
+export const fetchCatStats24 = async (userId) => {
     try {
-        const response = await fetch(`${API_URL}cat/24hr/`, {
+        const response = await fetch(`${API_URL}cat/24hr/${userId}/`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'

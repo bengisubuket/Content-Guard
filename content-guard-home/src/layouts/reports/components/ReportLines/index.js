@@ -12,10 +12,10 @@ function ReportLines() {
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const userId = "22";
+    const userId = "3ZV6aeGHgMe5e3gIju5TskWkVk12";
 
     useEffect(() => {
-        getAllReports()
+        getAllReports(userId)
             .then(data => {
                 const formattedReports = data.reports.map(report => ({
                     ...report,
@@ -64,7 +64,7 @@ function ReportLines() {
 
 	const handleDeleteReport = (reportId) => {
         setLoading(true);
-        deleteReport(reportId)
+        deleteReport(userId, reportId)
             .then(response => {
                 if (response.status === 'success') {
                     setReports(prevReports => prevReports.filter(report => report.report_id !== `${reportId}`));

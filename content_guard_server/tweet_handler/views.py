@@ -153,32 +153,6 @@ class KeywordCategoryView(View):
                     print(f"Category '{category}': created with {number_of_blocked_tweets} newly blocked tweets.")
                 else:
                     print(f"Category '{category}': No new blocked tweets to create.")
-
-    def get(self, request):
-        # get all blocked keywords and categories
-        blocked_keywords = Keyword.objects.all()
-        blocked_categories = Category.objects.all()
-        blocked_keywords_list = []
-        blocked_categories_list = []
-        for keyword in blocked_keywords:
-            blocked_keywords_list.append({
-                'keyword': keyword.keyword,
-                'tweet_ids': keyword.tweet_ids,
-                'number_of_blocked_tweets': keyword.number_of_blocked_tweets,
-                'time_added': keyword.time_added
-            })
-        for category in blocked_categories:
-            blocked_categories_list.append({
-                'category': category.name,
-                'tweet_ids': category.tweet_ids,
-                'number_of_blocked_tweets': category.number_of_blocked_tweets,
-                'time_added': category.time_added
-            })
-        return JsonResponse({
-            'status': 'success',
-            'blockedKeywords': blocked_keywords_list,
-            'blockedCategories': blocked_categories_list
-        })
     
 logger = logging.getLogger(__name__)
 
@@ -194,9 +168,14 @@ class ReportView(View):
             print(f"Received user_id: {user_id}")
             print(f"Received report_id: {report_id}")
 
+            user = User.objects.get(user_id=user_id)  # Fetch your user appropriately
+
             # Retrieve all keywords and categories
-            keywords = Keyword.objects.all()
-            categories = Category.objects.all()
+            keywords = Keyword.objects.filter(user=user)
+            categories = Category.objects.filter(user=user)
+
+            print(f"Keywords: {keywords}")
+            print(f"Categories: {categories}")
 
             # Aggregate blocked tweet counts
             keyword_counts = {keyword.keyword: sum(len(kw.tweet_ids) for kw in keywords if kw.keyword == keyword.keyword) for keyword in keywords}
@@ -207,12 +186,13 @@ class ReportView(View):
 
             # Create a new Report object
             new_report = Report.objects.create(
-                user_id=user_id,
                 report_id=report_id,
                 keywords_reported=keyword_counts,
                 categories_reported=category_counts,
-                time_added=timezone.now()
+                time_added=timezone.now(),
+                user=user
             )
+
 
             #in response send data as well
             return JsonResponse({
@@ -227,9 +207,10 @@ class ReportView(View):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
         
-    def get(self, request):
-        # get all reports
-        reports = Report.objects.all()
+    def get(self, request, user_id):
+        # get all reports with user_id
+        user = User.objects.get(user_id=user_id) 
+        reports = Report.objects.filter(user=user)
         reports_list = []
         for report in reports:
             reports_list.append({
@@ -244,10 +225,11 @@ class ReportView(View):
             'reports': reports_list
         })
         
-    def delete(self, request, report_id):
+    def delete(self, request, report_id, user_id):
         try:
+            user = User.objects.get(user_id=user_id)  # Fetch your user appropriately
             # Retrieve the report by the given report_id
-            report = Report.objects.get(report_id=report_id)
+            report = Report.objects.get(report_id=report_id, user=user)
             report.delete()
 
             return JsonResponse({'status': 'success', 'message': 'Report deleted successfully.'}, status=200)
@@ -261,13 +243,14 @@ class ReportView(View):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     
-    def get(self, request, report_id=None):
+    def get(self, request, report_id=None, user_id=None):
         if report_id:
             try:
-                # Retrieve the specific report by the given report_id
-                report = Report.objects.get(report_id=report_id)
+                # Retrieve the specific report by the given report_id and user_id
+                user = User.objects.get(user_id=user_id)  # Fetch your user appropriately
+                report = Report.objects.get(report_id=report_id, user=user)
                 report_data = {
-                    'user_id': report.user_id,
+                    'user': report.user.user_id,
                     'report_id': report.report_id,
                     'keywords_reported': report.keywords_reported,
                     'categories_reported': report.categories_reported,
@@ -307,7 +290,7 @@ class ReportView(View):
             })
 
 class KwStatsView(View):
-    def get(self, request):
+    def get(self, request, user_id=None):
         try:
             # Get the current time
             now = timezone.now()
@@ -318,7 +301,8 @@ class KwStatsView(View):
             tweets_per_hour = defaultdict(int)
             
             # Query all keywords where time_added is within the last 24 hours
-            keywords_last_24_hours = Keyword.objects.filter(time_added__gte=last_24_hours).values('time_added', 'number_of_blocked_tweets')
+            user = User.objects.get(user_id=user_id)  # Fetch your user appropriately
+            keywords_last_24_hours = Keyword.objects.filter(time_added__gte=last_24_hours, user=user).values('time_added', 'number_of_blocked_tweets')
             
             # Populate the dictionary based on each tweet's hour of the day
             for entry in keywords_last_24_hours:
@@ -337,7 +321,7 @@ class KwStatsView(View):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 class CatStatsView(View):
-    def get(self, request):
+    def get(self, request, user_id=None):
         try:
             # Get the current time
             now = timezone.now()
@@ -348,7 +332,8 @@ class CatStatsView(View):
             tweets_per_hour = defaultdict(int)
             
             # Query all keywords where time_added is within the last 24 hours
-            keywords_last_24_hours = Category.objects.filter(time_added__gte=last_24_hours).values('time_added', 'number_of_blocked_tweets')
+            user = User.objects.get(user_id=user_id)  # Fetch your user appropriately
+            keywords_last_24_hours = Category.objects.filter(time_added__gte=last_24_hours, user=user).values('time_added', 'number_of_blocked_tweets')
             
             # Populate the dictionary based on each tweet's hour of the day
             for entry in keywords_last_24_hours:
@@ -367,9 +352,10 @@ class CatStatsView(View):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 class KeywordsGroupedBySecondView(View):
-    def get(self, request):
+    def get(self, request, user_id=None):
         # Fetch all keywords
-        keywords = Keyword.objects.all()
+        user = User.objects.get(user_id=user_id)  # Fetch your user appropriately
+        keywords = Keyword.objects.filter(user=user)
 
         # Normalize time_added to the nearest second
         for keyword in keywords:
@@ -397,9 +383,10 @@ class KeywordsGroupedBySecondView(View):
     
 
 class CategoryGroupedBySecondView(View):
-    def get(self, request):
+    def get(self, request, user_id=None):
         # Fetch all categories
-        categories = Category.objects.all()
+        user = User.objects.get(user_id=user_id)  # Fetch your user appropriately
+        categories = Category.objects.filter(user=user)
 
         # Normalize time_added to the nearest second
         for category in categories:
