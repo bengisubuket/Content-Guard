@@ -4,9 +4,11 @@
 
 **Software and Tools Needed**
 - **Git**: To clone the repository.
-- **Node.js**: For running the backend server.
-- **npm or Yarn**: For managing frontend and backend dependencies.
-- **Chrome Browser**: For loading the Chrome extension.
+- **Node.js v16.x**: For compiling the extension and running the frontend server.
+- **npm v8.x**: For managing frontend's and extension's dependencies.
+- **Any Chromium-based Browser**: For loading the extension.
+- **Python 3.x with Django**: For backend server.
+- **SQLite**: For the user database.
 
 #### Downloading from the Repository
 
@@ -15,11 +17,11 @@
 2. Navigate to the directory where you want to clone the project.
 3. Run the following command:
    ```bash
-   git clone https://github.com/username/project-repo.git
+   git clone https://github.com/bengisubuket/Content-Guard.git
    ```
 4. Navigate into the project directory:
    ```bash
-   cd project-repo
+   cd Content-Guard
    ```
 
 ### 2. Setting Up the Environment
@@ -29,70 +31,33 @@
 **Backend Dependencies**
 1. Navigate to the backend directory:
    ```bash
-   cd backend
+   cd content_guard_server
    ```
-2. Install the dependencies:
+2. Install the dependencies (install Django given that Python is installed):
    ```bash
-   npm install
-   ```
-   or
-   ```bash
-   yarn install
+   pip install Django
    ```
 
 **Frontend Dependencies**
 1. Navigate to the frontend directory:
    ```bash
-   cd frontend
+   cd ..
+   cd content-guard-home
    ```
 2. Install the dependencies:
    ```bash
    npm install
-   ```
-   or
-   ```bash
-   yarn install
    ```
 
 **Chrome Extension Dependencies**
 1. Navigate to the extension directory:
    ```bash
-   cd extension
+   cd ..
+   cd content-guard
    ```
 2. Install the dependencies:
    ```bash
    npm install
-   ```
-   or
-   ```bash
-   yarn install
-   ```
-
-#### Configuration Files
-
-**Setting Up Environment Variables**
-1. Create a `.env` file in the backend directory.
-2. Add necessary environment variables:
-   ```env
-   PORT=5000
-   DB_URL=mongodb://localhost:27017/mydatabase
-   ```
-
-**Configuring Backend Settings**
-1. Open `config.js` in the backend directory.
-2. Configure the settings as needed:
-   ```javascript
-   module.exports = {
-     port: process.env.PORT || 5000,
-     dbUrl: process.env.DB_URL,
-   };
-   ```
-
-**Configuring Frontend Settings**
-1. Open `config.js` in the frontend directory.
-2. Set the API endpoint:
-   ```javascript
-   export const API_ENDPOINT = 'http://localhost:5000/api';
    ```
 
 ### 3. Running the Backend Server
@@ -102,26 +67,45 @@
 **Running with Node.js**
 1. Navigate to the backend directory:
    ```bash
-   cd backend
+   cd content_guard_server
    ```
-2. Start the server:
+   
+2. Create and apply migrations:
    ```bash
-   npm start
+   python manage.py makemigrations tweet_handler
+   python manage.py migrate tweet_handler
    ```
-   or
+
+3. Start the server:
    ```bash
-   yarn start
+   python manage.py runserver
    ```
-3. The server should be running at `http://localhost:5000`.
+   
+4. The server should be running at `http://localhost:8000`.
 
 ### 4. Setting Up the Chrome Extension
+
+#### Compile the Extension
+
+1. Navigate to the extension directory
+```bash
+cd ..
+cd content-guard
+```
+
+2. Run npm to compile.
+```bash
+npm run build
+```
+
+3. Compiled extension should be in /content-guard/dist.
 
 #### Loading the Extension in Chrome
 
 **Loading Unpacked Extension**
 1. Open Chrome and navigate to `chrome://extensions/`.
 2. Enable "Developer mode" using the toggle in the upper right corner.
-3. Click "Load unpacked" and select the `extension` directory from the project.
+3. Click "Load unpacked" and select the `dist` directory created in the previous step from the project.
 
 #### Permissions and Settings
 
@@ -129,21 +113,32 @@
 1. Ensure the `manifest.json` file in the `extension` directory has the required permissions:
    ```json
    {
-     "name": "My Extension",
-     "version": "1.0",
-     "manifest_version": 2,
-     "permissions": [
-       "activeTab",
-       "storage"
-     ],
-     "background": {
-       "scripts": ["background.js"],
-       "persistent": false
-     },
-     "browser_action": {
-       "default_popup": "popup.html",
-       "default_icon": "icon.png"
-     }
+       "name": "ContentGuard",
+       "version": "0.0.1",
+       "description": "ContentGuard",
+       "permissions": ["storage", "unlimitedStorage", "tabs", "scripting", "activeTab", "fileSystem.write"],
+       "host_permissions": ["https://*.twitter.com/*"],
+       "background": {
+           "service_worker": "background.js"
+       },
+       "content_scripts": [{
+           "matches": ["https://*.twitter.com/*"],
+           "js": ["contentScript.js"]
+       }],
+       "action": {
+           "default_icon": {
+               "16": "guardian.png",
+               "24": "guardian.png",
+               "32": "guardian.png"
+           },
+           "default_title": "trying something",
+           "default_popup": "../index.html"
+       },
+       "web_accessible_resources": [{
+           "resources": ["userSettings.json"],
+           "matches": ["<all_urls>"]
+       }],
+       "manifest_version": 3
    }
    ```
 
@@ -152,7 +147,7 @@
 #### Accessing the Frontend
 
 **URL and Port Information**
-- The frontend application is usually accessible at `http://localhost:3000`.
+- The frontend application is accessible at `http://localhost:3000`.
 
 #### Navigating the User Interface
 
@@ -160,43 +155,35 @@
 - Upon logging in, you will be directed to the main dashboard where you can see an overview of your data and activities.
 
 **Key Features and Functionalities**
-- **Navigation Bar**: Access different sections like Dashboard, Analytics, Settings.
-- **Dashboard Widgets**: View summary statistics and recent activities.
+- **Navigation Bar**: Access different sections like Dashboard, Reports, Profile.
 
 #### Common User Actions
 
 **Logging In**
 1. Open the frontend application in your browser.
-2. Enter your credentials and click "Login".
+2. Use Twitter authentication to login.
 
 **Viewing Analytics**
-1. Navigate to the "Analytics" section from the navigation bar.
-2. View detailed reports and insights.
+1. Navigate to the "Reports" section from the navigation bar.
+2. View detailed reports and statistics.
 
 ### 6. Using the Services Provided by the Extension
 
-#### Overview of Services
-- The Chrome extension enhances your browser with additional tools and shortcuts for interacting with the application.
-
-#### How to Use Each Service
-1. Click on the extension icon in the browser toolbar.
-2. Use the popup interface to perform quick actions like creating new entries or viewing notifications.
+- ContentGuard enhances your Twitter experience with additional tools that supply better control over the content you see.
+- For a detailed demo, you can watch our usage demo at https://www.youtube.com/watch?v=-iHRPVs-4Ys.
 
 ### 7. Troubleshooting and FAQs
 
 #### Common Issues and Solutions
 
-**Issue: Server not starting**
-- **Solution**: Check if the necessary environment variables are set and the database is running.
-
-**Issue: Extension not loading**
-- **Solution**: Ensure that the extension directory is correctly selected and permissions in `manifest.json` are properly configured.
+**Issue: MacOS and (probably) Linux are not supported for running the servers.**
+- **Solution**: Use a Windows machine. Clients should work fine.
 
 ### 8. Contact and Support
 
-#### Contact Information
-- **Email**: support@project.com
-- **Phone**: +1-234-567-890
+#### Contact Information of Group Members
+- **Twitter**: https://twitter.com/contentguard21
+- **Github**: https://github.com/bengisubuket/Content-Guard
 
 #### Reporting Bugs and Requesting Features
-- To report bugs or request features, please visit our [GitHub Issues](https://github.com/username/project-repo/issues) page and create a new issue.
+- To report bugs or request features, please visit our [GitHub Issues](https://github.com/bengisubuket/Content-Guard/issues) page and create a new issue.
